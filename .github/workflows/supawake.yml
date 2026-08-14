@@ -33,18 +33,7 @@ jobs:
           for i in "${!urls[@]}"; do
             url="${urls[$i]}"
             key="${keys[$i]}"
-            # 提取项目 ID（子域名）
-            project_id=$(echo "$url" | sed -E 's#https?://([^.]*)\.supabase\.co.*#\1#')
-            status=$(curl -s -o /dev/null -w "%{http_code}" \
-              "${url}/rest/v1/" \
-              -H "apikey: ${key}" \
-              -H "Authorization: Bearer ${key}" \
-              --connect-timeout 10 \
-              --retry 2)
-            echo "${project_id}: HTTP ${status}"
-            if [ "$status" -ne 200 ]; then
-              echo "❌ Failed for ${project_id}"
-              exit 1
-            fi
+            echo "🔹 Instance $((i+1))"
+            curl -I "${url}/rest/v1/" -H "Authorization: Bearer ${key}" --fail --connect-timeout 10 --retry 2 --output /dev/null --write-out "HTTP %{http_code}\n" || { echo "❌ Failed"; exit 1; }
           done
           echo "✅ All done"

@@ -1,128 +1,87 @@
 <template>
-  <div class="auth-container">
-    <div class="cp-card auth-card">
-      <h2 class="auth-title">{{ isLogin ? '登录' : '注册' }}</h2>
-
-      <form @submit.prevent="handleSubmit" class="auth-form">
-        <div class="form-group">
-          <label for="email">邮箱</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            placeholder="请输入邮箱"
-            required
-            class="form-input"
-          />
+  <div class="auth-block">
+    <div class="term-block">
+      <div class="term-bar">
+        <span class="term-dot"></span>
+        <span class="term-dot"></span>
+        <span class="term-dot"></span>
+        <span style="margin-left:8px;opacity:0.5;">auth.{{ isLogin ? 'login' : 'register' }}.sh</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line" style="margin-bottom:20px;">
+          {{ isLogin ? './auth --login' : './auth --register' }}
         </div>
 
-        <div class="form-group">
-          <label for="password">密码</label>
-          <div class="password-input-wrapper">
-            <input
-              id="password"
-              v-model="password"
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="请输入密码（至少6位）"
-              required
-              minlength="6"
-              class="form-input"
-            />
-            <button
-              type="button"
-              class="password-toggle"
-              @click="showPassword = !showPassword"
-              :title="showPassword ? '隐藏密码' : '显示密码'"
-            >
-              <Icon :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'" />
-            </button>
+        <form @submit.prevent="handleSubmit">
+          <div class="field">
+            <label for="email">邮箱</label>
+            <input id="email" v-model="email" type="email" placeholder="user@example.com" required class="term-input" />
           </div>
-        </div>
 
-        <!-- 数据使用告知 -->
-        <div class="data-consent-info">
-          <Icon icon="mdi:info" />
-          <span>我们仅收集您的邮箱用于创建账号和登录验证，详细信息请参考</span>
-          <RouterLink to="/privacy" target="_blank">隐私政策</RouterLink>
-        </div>
+          <div class="field">
+            <label for="password">密码</label>
+            <div class="pw-wrap">
+              <input
+                id="password"
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="至少6位"
+                required
+                minlength="6"
+                class="term-input"
+              />
+              <button type="button" class="pw-toggle" @click="showPassword = !showPassword" :title="showPassword ? '隐藏' : '显示'">
+                <Icon :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'" />
+              </button>
+            </div>
+          </div>
 
-        <!-- 用户同意复选框（注册时显示） -->
-        <div v-if="!isLogin" class="terms-consent">
-          <label class="consent-label">
-            <input type="checkbox" v-model="agreeTerms" />
-            <span
-              >我已阅读并同意<a href="/terms" target="_blank">服务条款</a>和<a
-                href="/privacy"
-                target="_blank"
-                >隐私政策</a
-              ></span
-            >
-          </label>
-        </div>
+          <div class="consent-row" v-if="!isLogin">
+            <label class="consent-label">
+              <input type="checkbox" v-model="agreeTerms" />
+              <span>我已阅读并同意<a href="/terms" target="_blank">服务条款</a>和<a href="/privacy" target="_blank">隐私政策</a></span>
+            </label>
+          </div>
 
-        <button
-          type="submit"
-          class="btn-geek"
-          style="width:100%;font-size:var(--font-size-xs);padding:8px 24px;"
-          :disabled="loading || (!isLogin && !agreeTerms)"
-        >
-          {{ loading ? '处理中...' : isLogin ? '登录' : '注册' }}
-        </button>
-      </form>
+          <div class="consent-row" v-if="isLogin">
+            <label class="consent-label">
+              <input type="checkbox" v-model="rememberMe" />
+              <span>记住我（下次自动登录，有效期30天）</span>
+            </label>
+          </div>
 
-      <div v-if="error" class="error-message">
-        <Icon icon="mdi:alert-circle" />
-        {{ error }}
-      </div>
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAD9eupJAQYJfXjdp" data-action="turnstile-spin-v2"></div>
 
-      <div v-if="successMessage" class="success-message">
-        <Icon icon="mdi:check-circle" />
-        {{ successMessage }}
-      </div>
+          <div v-if="error" class="msg msg-error">
+            <Icon icon="mdi:alert-circle" /> {{ error }}
+          </div>
+          <div v-if="successMessage" class="msg msg-success">
+            <Icon icon="mdi:check-circle" /> {{ successMessage }}
+          </div>
 
-      <div class="auth-switch">
-        <span>{{ isLogin ? '还没有账号？' : '已有账号？' }}</span>
-        <button @click="toggleMode" class="switch-btn">
-          {{ isLogin ? '立即注册' : '去登录' }}
-        </button>
-      </div>
-
-      <div v-if="isLogin" class="forgot-password-link">
-        <RouterLink to="/reset-password" class="link-btn"> 忘记密码？ </RouterLink>
-      </div>
-
-      <!-- 第三方登录 -->
-      <div class="social-login-section">
-        <div class="divider">
-          <span>或使用第三方账号登录</span>
-        </div>
-        <div class="social-buttons">
-          <button
-            type="button"
-            class="social-btn google-btn"
-            @click="loginWithOAuth('google')"
-            :disabled="loading"
-          >
-            <Icon icon="mdi:google" :width="20" />
-            <span>Google</span>
+          <button type="submit" class="btn-geek" style="width:100%;margin-top:8px;" :disabled="loading || (!isLogin && !agreeTerms)">
+            {{ loading ? '处理中...' : isLogin ? '$ 登录' : '$ 注册' }}
           </button>
-          <button
-            type="button"
-            class="social-btn github-btn"
-            @click="loginWithOAuth('github')"
-            :disabled="loading"
-          >
-            <Icon icon="mdi:github" :width="20" />
-            <span>GitHub</span>
+        </form>
+
+        <div class="action-row">
+          <button class="link-like" @click="toggleMode">
+            {{ isLogin ? '注册' : '登录' }}
           </button>
-          <button
-            type="button"
-            class="social-btn microsoft-btn"
-            @click="loginWithOAuth('azure')"
-            :disabled="loading"
-          >
-            <Icon icon="mdi:microsoft" :width="20" />
-            <span>Microsoft</span>
+          <RouterLink v-if="isLogin" to="/reset-password" class="link-like">忘记密码</RouterLink>
+        </div>
+
+        <div class="divider"><span>第三方登录</span></div>
+
+        <div class="social-row">
+          <button type="button" class="social-btn" @click="loginWithOAuth('google')" :disabled="loading">
+            <Icon icon="mdi:google" /> Google
+          </button>
+          <button type="button" class="social-btn" @click="loginWithOAuth('github')" :disabled="loading">
+            <Icon icon="mdi:github" /> GitHub
+          </button>
+          <button type="button" class="social-btn" @click="loginWithOAuth('azure')" :disabled="loading">
+            <Icon icon="mdi:microsoft" /> Microsoft
           </button>
         </div>
       </div>
@@ -131,7 +90,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
+
+function renderTurnstile() {
+  nextTick(() => {
+    const fn = () => {
+      const el = document.querySelector('.cf-turnstile') as HTMLElement
+      if (!el) return
+      const t = (window as any).turnstile
+      if (t) { try { t.render(el) } catch {} }
+      else { setTimeout(fn, 200) }
+    }
+    fn()
+  })
+}
 import { supabase } from '@/supabase/client'
 import { Icon } from '@iconify/vue'
 
@@ -143,6 +115,24 @@ const loading = ref(false)
 const error = ref('')
 const successMessage = ref('')
 const agreeTerms = ref(false)
+const rememberMe = ref(true)
+
+const ERROR_MAP: Record<string, string> = {
+  'Invalid login credentials': '邮箱或密码错误',
+  'Email not confirmed': '邮箱未验证，请检查邮箱',
+  'User already registered': '该邮箱已注册，请直接登录',
+  'Signup requires a valid email': '请输入有效的邮箱地址',
+  'Password should be at least': '密码长度至少为6位',
+  'Invalid OTP': '验证码错误或已过期',
+}
+
+function mapError(err: any): string {
+  const msg = err?.message || ''
+  for (const [key, val] of Object.entries(ERROR_MAP)) {
+    if (msg.includes(key)) return val
+  }
+  return msg || '操作失败，请稍后重试'
+}
 
 const toggleMode = () => {
   isLogin.value = !isLogin.value
@@ -153,6 +143,19 @@ const toggleMode = () => {
   agreeTerms.value = false
 }
 
+const handleRememberMe = () => {
+  if (!rememberMe.value) {
+    const handler = () => { supabase.auth.signOut() }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }
+  return () => {}
+}
+
+onMounted(() => {
+  renderTurnstile()
+})
+
 const loginWithOAuth = async (provider: 'google' | 'github' | 'azure') => {
   loading.value = true
   error.value = ''
@@ -160,15 +163,27 @@ const loginWithOAuth = async (provider: 'google' | 'github' | 'azure') => {
     const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: siteUrl + '/auth/callback',
-      },
+      options: { redirectTo: siteUrl + '/auth/callback' },
     })
     if (oauthError) throw oauthError
   } catch (err: any) {
     console.error('OAuth 登录失败:', err)
-    error.value = err.message || '第三方登录失败，请稍后重试'
+    error.value = err.message || 'OAuth 登录失败'
     loading.value = false
+  }
+}
+
+const siteVerify = async (token: string): Promise<boolean> => {
+  try {
+    const r = await fetch('/turnstile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    const data = await r.json()
+    return data.success === true
+  } catch {
+    return import.meta.env.DEV
   }
 }
 
@@ -178,81 +193,78 @@ const handleSubmit = async () => {
   successMessage.value = ''
 
   try {
+    const turnstileToken = (window as any).turnstile?.getResponse()
+    if (!turnstileToken) {
+      error.value = '请完成人机验证'
+      loading.value = false
+      return
+    }
+    const valid = await siteVerify(turnstileToken)
+    if (!valid) {
+      error.value = '人机验证失败，请稍后重试'
+      ;(window as any).turnstile?.reset()
+      loading.value = false
+      return
+    }
+
     if (isLogin.value) {
-      // 登录
-      console.log('尝试登录:', { email: email.value })
+      const { data: rateLimited } = await supabase.rpc('fn_is_rate_limited', {
+        p_email: email.value,
+        p_ip: '',
+      })
+      if (rateLimited) {
+        error.value = '登录失败次数过多，请15分钟后再试'
+        loading.value = false
+        return
+      }
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.value,
         password: password.value,
       })
+      if (signInError) throw signInError
 
-      if (signInError) {
-        console.error('登录错误:', signInError)
-        throw signInError
-      }
+      await supabase.rpc('fn_record_login_attempt', {
+        p_email: email.value,
+        p_ip: '',
+        p_success: true,
+      })
 
-      console.log('登录成功:', data)
-
-      // 检查用户是否被封禁
       if (data.user) {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('banned')
-          .eq('id', data.user.id)
-          .single()
-
-        if (profileError) {
-          console.error('获取用户资料失败:', profileError)
-        } else if (profile?.banned) {
-          // 用户已被封禁，立即退出登录
+        if (!rememberMe.value) handleRememberMe()
+        const { data: profile } = await supabase
+          .from('profiles').select('banned, is_admin').eq('id', data.user.id).single()
+        if (profile?.banned) {
           await supabase.auth.signOut()
-          error.value = '您的账户已被封禁，无法登录。请联系管理员。'
+          error.value = '账户已被封禁'
           loading.value = false
           return
         }
       }
-
       successMessage.value = '登录成功！'
-
-      // 这里可以添加登录成功后的跳转逻辑
-      // 例如：router.push('/')
     } else {
-      // 注册
       if (!agreeTerms.value) {
-        error.value = '请先阅读并同意服务条款和隐私政策'
+        error.value = '请先同意服务条款和隐私政策'
         loading.value = false
         return
       }
-
-      console.log('尝试注册:', { email: email.value })
-
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.value,
         password: password.value,
       })
-
-      if (signUpError) {
-        console.error('注册错误:', signUpError)
-        throw signUpError
-      }
-
+      if (signUpError) throw signUpError
       if (data.user) {
-        console.log('注册成功:', data)
-        successMessage.value = '注册成功！请检查邮箱验证（如果开启了邮箱验证）'
+        successMessage.value = '注册成功！请检查邮箱验证'
       }
     }
   } catch (err: any) {
     console.error('操作失败:', err)
-
-    // 提供更友好的错误提示
-    if (err.message?.includes('Invalid login credentials')) {
-      error.value = '邮箱或密码错误，请检查后重试'
-    } else if (err.message?.includes('Email not confirmed')) {
-      error.value = '邮箱未验证，请先检查邮箱完成验证'
-    } else {
-      error.value = err.message || '操作失败，请稍后重试'
-    }
+    await supabase.rpc('fn_record_login_attempt', {
+      p_email: email.value,
+      p_ip: '',
+      p_success: false,
+    }).catch(() => {})
+    error.value = mapError(err)
   } finally {
     loading.value = false
   }
@@ -260,287 +272,166 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  padding: 2rem;
+.auth-block {
+  max-width: 520px;
+  margin: 0 auto;
 }
 
-.auth-card {
+.field {
+  margin-bottom: 14px;
+}
+.field label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+  margin-bottom: 6px;
+}
+.term-input {
   width: 100%;
-  max-width: 420px;
-}
-
-.auth-title {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: var(--color-text);
-  font-size: 1.75rem;
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  font-weight: 400;
-}
-
-.form-input {
-  padding: 0.75rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text);
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.form-input:focus {
+  color: var(--color-white);
   outline: none;
-  border-color: var(--color-primary);
-  background: rgba(255, 255, 255, 0.08);
+  transition: all 0.25s var(--ease-out-expo);
+  box-sizing: border-box;
 }
-
-.password-input-wrapper {
+.term-input:focus {
+  border-color: var(--color-border-hover);
+  background: rgba(255,255,255,0.06);
+}
+.pw-wrap {
   position: relative;
   display: flex;
   align-items: center;
 }
-
-.password-input-wrapper .form-input {
-  flex: 1;
-  padding-right: 2.5rem;
+.pw-wrap .term-input {
+  padding-right: 32px;
 }
-
-.password-toggle {
+.pw-toggle {
   position: absolute;
-  right: 0.75rem;
+  right: 8px;
   background: none;
   border: none;
-  color: var(--color-text-secondary);
+  color: var(--color-text-faint);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 4px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.3s ease;
+}
+.pw-toggle:hover {
+  color: var(--color-text-dim);
 }
 
-.password-toggle:hover {
-  color: var(--color-primary);
+.consent-row {
+  margin-bottom: 14px;
 }
-
-.error-message,
-.success-message {
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.error-message {
-  background: rgba(255, 71, 87, 0.1);
-  color: #ff5f57;
-  border: 1px solid rgba(255, 71, 87, 0.3);
-}
-
-.success-message {
-  background: rgba(46, 213, 115, 0.1);
-  color: var(--color-green);
-  border: 1px solid rgba(46, 213, 115, 0.3);
-}
-
-.auth-switch {
-  margin-top: 1.5rem;
-  text-align: center;
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
-}
-
-.switch-btn {
-  background: none;
-  border: none;
-  color: var(--color-primary);
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin-left: 0.5rem;
-  transition: color 0.3s ease;
-}
-
-.switch-btn:hover {
-  color: var(--color-primary-light);
-  text-decoration: underline;
-}
-
-.forgot-password-link {
-  margin-top: 1rem;
-  text-align: center;
-}
-
-.link-btn {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
-}
-
-.link-btn:hover {
-  color: var(--color-primary-light);
-  text-decoration: underline;
-}
-
-.data-consent-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: rgba(var(--color-primary-rgb), 0.08);
-  border-radius: var(--radius-sm);
-  border-left: 1px solid var(--color-primary);
-  font-size: 0.85rem;
-  color: var(--color-text);
-  margin-top: 0.5rem;
-}
-
-[data-theme='light'] .data-consent-info {
-  background: rgba(var(--color-primary-rgb), 0.05);
-}
-
-.data-consent-info a {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 400;
-  margin-left: 4px;
-}
-
-.data-consent-info a:hover {
-  color: var(--color-primary-light);
-  text-decoration: underline;
-}
-
-.terms-consent {
-  margin-top: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
 .consent-label {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.02);
-  transition: background 0.3s ease;
-}
-
-.consent-label:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.consent-label input[type='checkbox'] {
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
   cursor: pointer;
 }
-
 .consent-label a {
-  color: var(--color-primary);
+  color: var(--color-white);
   text-decoration: none;
-  font-weight: 400;
 }
-
 .consent-label a:hover {
-  color: var(--color-primary-light);
   text-decoration: underline;
 }
+.consent-label input {
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  cursor: pointer;
+}
 
-.social-login-section {
-  margin-top: 1.5rem;
+.msg {
+  font-size: var(--font-size-xs);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.msg-error {
+  color: #ff5f57;
+  border: 1px solid rgba(255,95,87,0.2);
+}
+.msg-success {
+  color: var(--color-green);
+  border: 1px solid rgba(120,220,160,0.2);
+}
+
+.action-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  margin-bottom: 18px;
+}
+.link-like {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+}
+.link-like:hover {
+  color: var(--color-white);
 }
 
 .divider {
   display: flex;
   align-items: center;
-  margin-bottom: 1.25rem;
-  color: var(--color-text-secondary);
-  font-size: 0.85rem;
+  gap: 12px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+  margin-bottom: 14px;
 }
-
 .divider::before,
 .divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-border);
 }
+.divider span { padding: 0; }
 
-.divider span {
-  padding: 0 1rem;
-}
-
-.social-buttons {
+.social-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  gap: 8px;
 }
-
 .social-btn {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 6px;
+  padding: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text);
-  font-size: 0.95rem;
-  font-weight: 400;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
 }
-
 .social-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
+  background: rgba(255,255,255,0.08);
+  border-color: var(--color-border-hover);
+  color: var(--color-white);
 }
-
 .social-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.google-btn:hover:not(:disabled) {
-  border-color: var(--color-blue);
-}
-
-.github-btn:hover:not(:disabled) {
-  border-color: rgba(255,255,255,0.3);
-}
-
-.microsoft-btn:hover:not(:disabled) {
-  border-color: var(--color-blue);
 }
 </style>

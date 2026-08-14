@@ -41,6 +41,14 @@ const projects = [
     link: '/project/english-listen',
     external: false,
   },
+  {
+    id: 4,
+    title: 'Lumine-For-Android',
+    description: 'enimul 引擎驱动的 Clash 风格 Android 代理，VPN/TUN 管道 + GFWlist 智能分流',
+    category: '网络',
+    link: '/lumine',
+    external: false,
+  },
 ]
 
 const filteredProjects = computed(() => {

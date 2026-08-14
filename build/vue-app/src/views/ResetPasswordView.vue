@@ -1,135 +1,122 @@
 <template>
-  <div class="reset-password-page">
-    <div class="container">
-      <div class="reset-card">
-        <!-- 第一步：请求重置 -->
-        <div v-if="step === 1" class="reset-step">
-          <div class="step-header">
-            <Icon icon="mdi:key" class="icon-large" />
-            <h2>重置密码</h2>
-            <p class="step-desc">输入你的邮箱，我们会发送重置密码链接</p>
-          </div>
+  <div style="max-width:520px; margin:0 auto;">
+    <div class="term-block">
+      <div class="term-bar">
+        <span class="term-dot"></span>
+        <span class="term-dot"></span>
+        <span class="term-dot"></span>
+        <span style="margin-left:8px;opacity:0.5;">auth.reset.sh</span>
+      </div>
+      <div class="term-body">
+        <template v-if="step === 1">
+          <div class="term-line" style="margin-bottom:20px;">./auth --send-code</div>
 
-          <form @submit.prevent="handleResetRequest" class="reset-form">
-            <div class="form-group">
-              <label for="email">邮箱地址</label>
-              <input
-                id="email"
-                v-model="email"
-                type="email"
-                placeholder="请输入注册时的邮箱"
-                required
-                class="form-input"
-              />
+          <form @submit.prevent="handleSendCode">
+            <div class="field">
+              <label for="email">邮箱</label>
+              <input id="email" v-model="email" type="email" placeholder="输入注册时的邮箱" required class="term-input" />
             </div>
 
-            <button type="submit" class="btn-geek" style="width:100%;font-size:var(--font-size-xs);" :disabled="loading">
-              {{ loading ? '发送中...' : '发送重置链接' }}
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAD9eupJAQYJfXjdp" data-action="turnstile-spin-v2"></div>
+
+            <div v-if="error" class="msg msg-error">
+              <Icon icon="mdi:alert-circle" /> {{ error }}
+            </div>
+            <div v-if="successMessage" class="msg msg-success">
+              <Icon icon="mdi:check-circle" /> {{ successMessage }}
+            </div>
+
+            <button type="submit" class="btn-geek" style="width:100%;" :disabled="loading">
+              {{ loading ? '发送中...' : '发送验证码' }}
             </button>
           </form>
 
-          <div v-if="error" class="error-message">
-            <Icon icon="mdi:alert-circle" />
-            {{ error }}
-          </div>
-
-          <div v-if="successMessage" class="success-message">
-            <Icon icon="mdi:check-circle" />
-            {{ successMessage }}
-          </div>
-
-          <div class="back-link">
-            <RouterLink to="/auth" class="link-btn">
-              <Icon icon="mdi:arrow-left" />
-              返回登录
+          <div style="margin-top:14px;">
+            <RouterLink to="/auth" class="link-like">
+              <Icon icon="mdi:arrow-left" /> 返回登录
             </RouterLink>
           </div>
-        </div>
+        </template>
 
-        <!-- 第二步：设置新密码 -->
-        <div v-else-if="step === 2" class="reset-step">
-          <div class="step-header">
-            <Icon icon="mdi:lock" class="icon-large" />
-            <h2>设置新密码</h2>
-            <p class="step-desc">请输入你的新密码（至少6位）</p>
-          </div>
+        <template v-else>
+          <div class="term-line" style="margin-bottom:20px;">./auth --verify-code</div>
 
-          <form @submit.prevent="handleUpdatePassword" class="reset-form">
-            <div class="form-group">
+          <form @submit.prevent="handleResetPassword">
+            <div class="field">
+              <label for="code">验证码</label>
+              <input id="code" v-model="code" type="text" placeholder="输入邮件中的验证码" required class="term-input" />
+            </div>
+
+            <div class="field">
               <label for="newPassword">新密码</label>
-              <div class="password-input-wrapper">
+              <div class="pw-wrap">
                 <input
                   id="newPassword"
                   v-model="newPassword"
                   :type="showNewPassword ? 'text' : 'password'"
-                  placeholder="请输入新密码"
+                  placeholder="至少6位"
                   required
                   minlength="6"
-                  class="form-input"
+                  class="term-input"
                 />
-                <button
-                  type="button"
-                  class="password-toggle"
-                  @click="showNewPassword = !showNewPassword"
-                  :title="showNewPassword ? '隐藏密码' : '显示密码'"
-                >
+                <button type="button" class="pw-toggle" @click="showNewPassword = !showNewPassword" :title="showNewPassword ? '隐藏' : '显示'">
                   <Icon :icon="showNewPassword ? 'mdi:eye-off' : 'mdi:eye'" />
                 </button>
               </div>
             </div>
 
-            <div class="form-group">
+            <div class="field">
               <label for="confirmPassword">确认密码</label>
-              <div class="password-input-wrapper">
+              <div class="pw-wrap">
                 <input
                   id="confirmPassword"
                   v-model="confirmPassword"
                   :type="showConfirmPassword ? 'text' : 'password'"
-                  placeholder="请再次输入新密码"
+                  placeholder="再次输入新密码"
                   required
                   minlength="6"
-                  class="form-input"
+                  class="term-input"
                 />
-                <button
-                  type="button"
-                  class="password-toggle"
-                  @click="showConfirmPassword = !showConfirmPassword"
-                  :title="showConfirmPassword ? '隐藏密码' : '显示密码'"
-                >
+                <button type="button" class="pw-toggle" @click="showConfirmPassword = !showConfirmPassword" :title="showConfirmPassword ? '隐藏' : '显示'">
                   <Icon :icon="showConfirmPassword ? 'mdi:eye-off' : 'mdi:eye'" />
                 </button>
               </div>
             </div>
 
-            <button type="submit" class="btn-geek" style="width:100%;font-size:var(--font-size-xs);" :disabled="loading">
-              {{ loading ? '更新中...' : '更新密码' }}
-            </button>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAD9eupJAQYJfXjdp" data-action="turnstile-spin-v2"></div>
+
+            <div v-if="error" class="msg msg-error">
+              <Icon icon="mdi:alert-circle" /> {{ error }}
+            </div>
+            <div v-if="successMessage" class="msg msg-success">
+              <Icon icon="mdi:check-circle" /> {{ successMessage }}
+            </div>
+
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="btn-geek" style="flex:1;" @click="step = 1">
+                返回
+              </button>
+              <button type="submit" class="btn-geek" style="flex:2;" :disabled="loading">
+                {{ loading ? '验证中...' : '重置密码' }}
+              </button>
+            </div>
           </form>
-
-          <div v-if="error" class="error-message">
-            <Icon icon="mdi:alert-circle" />
-            {{ error }}
-          </div>
-
-          <div v-if="successMessage" class="success-message">
-            <Icon icon="mdi:check-circle" />
-            {{ successMessage }}
-          </div>
-        </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/supabase/client'
 
 const router = useRouter()
-const step = ref(1) // 1: 请求重置, 2: 设置新密码
+const step = ref(1)
 const email = ref('')
+const code = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const showNewPassword = ref(false)
@@ -138,88 +125,128 @@ const loading = ref(false)
 const error = ref('')
 const successMessage = ref('')
 
-onMounted(() => {
-  // 检查 URL 中是否有 access_token（从重置邮件链接过来）
-  const urlParams = new URLSearchParams(window.location.search)
-  const accessToken = urlParams.get('access_token')
-
-  if (accessToken) {
-    // 有 token，直接进入设置新密码步骤
-    step.value = 2
-
-    // 设置会话
-    supabase.auth
-      .setSession({
-        access_token: accessToken,
-        refresh_token: urlParams.get('refresh_token') || '',
-      })
-      .then(({ error: sessionError }) => {
-        if (sessionError) {
-          console.error('设置会话失败:', sessionError)
-          error.value = '链接已过期或无效，请重新请求重置'
-          step.value = 1
-        }
-      })
+const siteVerify = async (token: string): Promise<boolean> => {
+  try {
+    const r = await fetch('/turnstile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    const data = await r.json()
+    return data.success === true
+  } catch {
+    return import.meta.env.DEV
   }
+}
+
+function renderTurnstile() {
+  nextTick(() => {
+    const fn = () => {
+      const el = document.querySelector('.cf-turnstile') as HTMLElement
+      if (!el) return
+      const t = (window as any).turnstile
+      if (t) { try { t.render(el) } catch {} }
+      else { setTimeout(fn, 200) }
+    }
+    fn()
+  })
+}
+
+onMounted(() => {
+  renderTurnstile()
 })
 
-// 第一步：请求重置密码
-const handleResetRequest = async () => {
+const handleSendCode = async () => {
+  let turnstileToken: string | undefined
+  try { turnstileToken = (window as any).turnstile?.getResponse() } catch {}
+  if (!turnstileToken) {
+    error.value = '请先完成人机验证'
+    return
+  }
+  const valid = await siteVerify(turnstileToken)
+  if (!valid) {
+    error.value = '人机验证失败，请稍后重试'
+    ;(window as any).turnstile?.reset()
+    return
+  }
+
   loading.value = true
   error.value = ''
   successMessage.value = ''
 
   try {
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.value, {
-      redirectTo: `${window.location.origin}/reset-password`,
+    const { error: sendError } = await supabase.auth.signInWithOtp({
+      email: email.value,
+      options: { shouldCreateUser: false },
     })
-
-    if (resetError) throw resetError
-
-    successMessage.value = '重置链接已发送到你的邮箱，请查收'
+    if (sendError) throw sendError
+    successMessage.value = '验证码已发送到你的邮箱'
+    setTimeout(() => { step.value = 2; renderTurnstile() }, 1000)
   } catch (err: any) {
-    console.error('重置请求失败:', err)
+    console.error('发送失败:', err)
     error.value = err.message || '发送失败，请稍后重试'
   } finally {
     loading.value = false
   }
 }
 
-// 第二步：更新密码
-const handleUpdatePassword = async () => {
+const handleResetPassword = async () => {
   loading.value = true
   error.value = ''
   successMessage.value = ''
 
-  // 验证密码
   if (newPassword.value !== confirmPassword.value) {
     error.value = '两次输入的密码不一致'
     loading.value = false
     return
   }
-
   if (newPassword.value.length < 6) {
     error.value = '密码长度至少为6位'
     loading.value = false
     return
   }
+  if (!code.value.trim()) {
+    error.value = '请输入验证码'
+    loading.value = false
+    return
+  }
+
+  let turnstileToken: string | undefined
+  try { turnstileToken = (window as any).turnstile?.getResponse() } catch {}
+  if (!turnstileToken) {
+    error.value = '请先完成人机验证'
+    loading.value = false
+    return
+  }
+  const valid = await siteVerify(turnstileToken)
+  if (!valid) {
+    error.value = '人机验证失败，请稍后重试'
+    loading.value = false
+    return
+  }
 
   try {
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email: email.value,
+      token: code.value.trim(),
+      type: 'email',
+    })
+    if (verifyError) throw verifyError
+
     const { error: updateError } = await supabase.auth.updateUser({
       password: newPassword.value,
     })
-
     if (updateError) throw updateError
 
-    successMessage.value = '密码更新成功！正在跳转...'
-
-    // 2秒后跳转到登录页面
-    setTimeout(() => {
-      router.push('/auth')
-    }, 2000)
+    successMessage.value = '密码重置成功！正在跳转...'
+    setTimeout(() => { router.push('/auth') }, 2000)
   } catch (err: any) {
-    console.error('更新密码失败:', err)
-    error.value = err.message || '更新失败，请稍后重试'
+    console.error('重置失败:', err)
+    if (err.message?.includes('OTP')) {
+      error.value = '验证码错误或已过期'
+    } else {
+      error.value = err.message || '重置失败，请稍后重试'
+    }
   } finally {
     loading.value = false
   }
@@ -227,155 +254,86 @@ const handleUpdatePassword = async () => {
 </script>
 
 <style scoped>
-.reset-password-page {
-  min-height: calc(100vh - 200px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
+.field {
+  margin-bottom: 14px;
 }
-
-.reset-card {
-  background: var(--color-bg-card);
-  border-radius: var(--radius-md);
-  padding: 2.5rem;
-  max-width: 480px;
-  width: 100%;
-}
-
-.reset-step {
-  display: flex;
-  flex-direction: column;
-}
-
-.step-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.icon-large {
-  font-size: 3.5rem;
-  color: var(--color-primary);
-  margin-bottom: 1rem;
+.field label {
   display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+  margin-bottom: 6px;
 }
-
-.step-header h2 {
-  margin: 0 0 0.5rem 0;
-  color: var(--color-text);
-  font-size: 1.75rem;
-}
-
-.step-desc {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: 0.95rem;
-}
-
-.reset-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  font-weight: 400;
-}
-
-.form-input {
-  padding: 0.75rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.term-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text);
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.form-input:focus {
+  color: var(--color-white);
   outline: none;
-  border-color: var(--color-primary);
-  background: rgba(255, 255, 255, 0.08);
+  transition: all 0.25s var(--ease-out-expo);
+  box-sizing: border-box;
 }
-
-.password-input-wrapper {
+.term-input:focus {
+  border-color: var(--color-border-hover);
+  background: rgba(255,255,255,0.06);
+}
+.pw-wrap {
   position: relative;
   display: flex;
   align-items: center;
 }
-
-.password-input-wrapper .form-input {
-  flex: 1;
-  padding-right: 2.5rem;
+.pw-wrap .term-input {
+  padding-right: 32px;
 }
-
-.password-toggle {
+.pw-toggle {
   position: absolute;
-  right: 0.75rem;
+  right: 8px;
   background: none;
   border: none;
-  color: var(--color-text-secondary);
+  color: var(--color-text-faint);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 4px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.3s ease;
+}
+.pw-toggle:hover {
+  color: var(--color-text-dim);
 }
 
-.password-toggle:hover {
-  color: var(--color-primary);
-}
-
-.error-message,
-.success-message {
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
+.msg {
+  font-size: var(--font-size-xs);
+  padding: 8px 12px;
   border-radius: var(--radius-sm);
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+  gap: 6px;
 }
-
-.error-message {
-  background: rgba(255, 71, 87, 0.1);
+.msg-error {
   color: #ff5f57;
-  border: 1px solid rgba(255, 71, 87, 0.3);
+  border: 1px solid rgba(255,95,87,0.2);
 }
-
-.success-message {
-  background: rgba(46, 213, 115, 0.1);
+.msg-success {
   color: var(--color-green);
-  border: 1px solid rgba(46, 213, 115, 0.3);
+  border: 1px solid rgba(120,220,160,0.2);
 }
 
-.back-link {
-  margin-top: 1.5rem;
-  text-align: center;
-}
-
-.link-btn {
-  color: var(--color-primary);
+.link-like {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+  cursor: pointer;
   text-decoration: none;
+  padding: 0;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
+  gap: 4px;
 }
-
-.link-btn:hover {
-  color: var(--color-primary-light);
-  text-decoration: underline;
+.link-like:hover {
+  color: var(--color-white);
 }
 </style>

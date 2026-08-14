@@ -21,3 +21,7 @@ supabase.exe
 
 # wrangler
 .wrangler/
+.dev.vars
+
+# WorkBuddy 本地工具数据
+.workbuddy/

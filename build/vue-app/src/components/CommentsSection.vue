@@ -31,6 +31,7 @@
         class="comment-input"
         :disabled="submitting"
       ></textarea>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAD9eupJAQYJfXjdp" data-action="turnstile-spin-v2"></div>
       <div class="form-actions">
         <span class="char-count">{{ newComment.length }}/500</span>
         <button
@@ -199,9 +200,34 @@ async function loadCurrentUserProfile() {
   }
 }
 
-// 提交评论
-async function handleSubmitComment() {
+const siteVerify = async (token: string): Promise<boolean> => {
+  try {
+    const r = await fetch('/turnstile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    const data = await r.json()
+    return data.success === true
+  } catch {
+    return false
+  }
+}
+
+const handleSubmitComment = async () => {
   if (!newComment.value.trim() || !currentUser.value) return
+
+  const turnstileToken = (window as any).turnstile?.getResponse()
+  if (!turnstileToken) {
+    alert('请完成人机验证')
+    return
+  }
+  const valid = await siteVerify(turnstileToken)
+  if (!valid) {
+    alert('人机验证失败，请稍后重试')
+    ;(window as any).turnstile?.reset()
+    return
+  }
 
   submitting.value = true
 

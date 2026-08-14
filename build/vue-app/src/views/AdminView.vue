@@ -8,7 +8,20 @@
       </h1>
     </section>
 
-    <div v-if="!isAdmin" class="mb-60" style="padding-left:40px;">
+    <div v-if="!adminChecked" class="mb-60" style="padding-left:40px;">
+      <div class="term-block">
+        <div class="term-bar">
+          <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+          <span style="margin-left:8px; opacity:0.5;">checking...</span>
+        </div>
+        <div class="term-body">
+          <div class="term-line">./sudo --verify</div>
+          <div class="skeleton" style="width:200px;height:16px;margin-top:12px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="!isAdmin" class="mb-60" style="padding-left:40px;">
       <div class="term-block">
         <div class="term-bar">
           <span class="term-dot"></span>
@@ -238,13 +251,19 @@ const tabs = [
   { key: 'comments', label: 'comments', icon: 'mdi:comment' },
 ]
 
-const isAdmin = computed(() => {
-  if (!authLoading.value && user.value) {
-    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL
-    return !!adminEmail && user.value.email?.toLowerCase() === adminEmail.toLowerCase()
+const isAdmin = ref(false)
+const adminChecked = ref(false)
+
+async function checkAdmin() {
+  if (!user.value) { adminChecked.value = true; return }
+  const { data, error } = await supabase.rpc('fn_is_admin')
+  if (error || !data) {
+    isAdmin.value = false
+  } else {
+    isAdmin.value = true
   }
-  return false
-})
+  adminChecked.value = true
+}
 
 const activeTab = ref('users')
 const loading = ref(true)
@@ -288,6 +307,7 @@ onMounted(async () => {
       setTimeout(() => { stop(); resolve() }, 5000)
     })
   }
+  await checkAdmin()
   if (!isAdmin.value) { loading.value = false; return }
   await loadData()
 })
