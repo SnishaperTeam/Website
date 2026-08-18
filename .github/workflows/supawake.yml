@@ -33,7 +33,18 @@ jobs:
           for i in "${!urls[@]}"; do
             url="${urls[$i]}"
             key="${keys[$i]}"
-            echo "🔹 Instance $((i+1))"
-            curl -I "${url}/rest/v1/" -H "Authorization: Bearer ${key}" --fail --connect-timeout 10 --retry 2 --output /dev/null --write-out "HTTP %{http_code}\n" || { echo "❌ Failed"; exit 1; }
+            project_id=$(echo "$url" | sed -E 's#https?://([^.]*)\.supabase\.co.*#\1#')
+            # 请求公开表 health（需确保该表存在且允许匿名读取）
+            status=$(curl -s -o /dev/null -w "%{http_code}" \
+              "${url}/rest/v1/health?limit=1" \
+              -H "apikey: ${key}" \
+              -H "Authorization: Bearer ${key}" \
+              --connect-timeout 10 \
+              --retry 2)
+            echo "${project_id}: HTTP ${status}"
+            if [ "$status" -ne 200 ]; then
+              echo "❌ Failed for ${project_id}"
+              exit 1
+            fi
           done
           echo "✅ All done"
