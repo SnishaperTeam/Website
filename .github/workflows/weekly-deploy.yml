@@ -1,0 +1,68 @@
+name: Weekly Build & Deploy to Cloudflare Pages
+
+on:
+  schedule:
+    - cron: '0 19 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-deploy
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (bun)
+        working-directory: build/vue-app
+        run: bun install --frozen-lockfile
+
+      - name: Create .env.local
+        working-directory: build/vue-app
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" > .env.local
+          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "VITE_ADMIN_EMAIL=${{ secrets.VITE_ADMIN_EMAIL }}" >> .env.local
+
+      - name: Build project
+        working-directory: build/vue-app
+        run: bun run build
+
+      - name: Verify build output
+        run: |
+          if [ -f "index.html" ]; then
+            echo "index.html found"
+          else
+            echo "index.html missing"
+            exit 1
+          fi
+          if [ -d "assets" ]; then
+            echo "assets directory found"
+          else
+            echo "assets directory missing"
+            exit 1
+          fi
+          echo "Build output verified"
+
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler@latest pages deploy . \
+            --project-name=dongzheyu-github-io \
+            --branch=main \
+            --commit-dirty=true
