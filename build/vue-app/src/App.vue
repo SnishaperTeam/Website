@@ -70,7 +70,7 @@ onMounted(() => useNoiseOverlay())
     </div>
     <div class="powered-by">
       <span class="text-faint">// 由</span>
-      <a href="https://dash.domain.digitalplat.org/signup?ref=TZRrkCdFjm" target="_blank" class="pw-link"><img src="/digitalplat.png" width="14" height="14" style="vertical-align:middle;" /> DigitalPlat Domains</a>
+      <a href="https://my.dnshe.com/go.php?code=pPuY9hh0Iw" target="_blank" class="pw-link"><img src="/dnshe.png" width="14" height="14" style="vertical-align:middle;" /> DNSHE</a>
       <span class="text-faint">、</span>
       <a href="https://www.cloudflare-cn.com/" target="_blank" class="pw-link"><Icon icon="simple-icons:cloudflare" width="14" /> Cloudflare</a>
       <span class="text-faint">、</span>
