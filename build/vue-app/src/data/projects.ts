@@ -98,6 +98,7 @@ export interface SoftwareProjectConfig {
   rootClass: string
   gradientClass: string
   versionTag: string
+  showStars?: boolean
   fallbackVersion: string
   title: string
   headline: string
@@ -283,7 +284,8 @@ export const lumineConfig: SoftwareProjectConfig = {
   id: 'lumine',
   rootClass: 'lumine-page',
   gradientClass: 'lumine-gradient',
-  versionTag: 'Android 原生应用 · F-Droid 已上架 · 44 Stars',
+  versionTag: 'Android 原生应用 · F-Droid 已上架',
+  showStars: true,
   fallbackVersion: '0.1.8',
   title: 'Lumine-For-Android',
   headline: 'Android 上的 Clash 风格代理',

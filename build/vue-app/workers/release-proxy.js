@@ -77,6 +77,39 @@ async function fetchReleases(repo, limit, env) {
   return { releases, rateLimit }
 }
 
+async function fetchRepoMeta(repo, env) {
+  const res = await fetch(`https://api.github.com/repos/${repo}`, {
+    headers: githubHeaders(env),
+  })
+
+  if (!res.ok) {
+    if (res.status === 404) throw new HttpError(404, `repository not found: ${repo}`)
+    if (res.status === 403 || res.status === 429) {
+      throw new HttpError(res.status, 'github api rate limit exceeded, set GITHUB_TOKEN env var to raise the limit')
+    }
+    throw new HttpError(res.status, `github api error: ${res.status}`)
+  }
+
+  const rateLimit = {
+    limit: res.headers.get('x-ratelimit-limit'),
+    remaining: res.headers.get('x-ratelimit-remaining'),
+    reset: res.headers.get('x-ratelimit-reset'),
+  }
+
+  const raw = await res.json()
+  return {
+    data: {
+      stars: raw.stargazers_count,
+      forks: raw.forks_count,
+      openIssues: raw.open_issues_count,
+      license: raw.license ? raw.license.spdx_id : null,
+      description: raw.description,
+      htmlUrl: raw.html_url,
+    },
+    rateLimit,
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
@@ -152,6 +185,10 @@ export default {
         const { releases, rateLimit: rl } = await fetchReleases(repo, limit, env)
         rateLimit = rl
         data = releases.filter((r) => !r.draft)
+      } else if (path === '/api/repo') {
+        const meta = await fetchRepoMeta(repo, env)
+        rateLimit = meta.rateLimit
+        data = meta.data
       } else {
         return json({ ok: false, error: 'not found' }, 404)
       }

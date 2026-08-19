@@ -88,6 +88,49 @@ export function useGithubReleases(repo: string, workerBase: string, limit = 8): 
   return { releases, loading, error, fetchReleases }
 }
 
+export interface RepoMeta {
+  stars: number
+  forks: number
+  openIssues: number
+  license: string | null
+  description: string | null
+  htmlUrl: string
+}
+
+export interface GithubRepoState {
+  repoMeta: Ref<RepoMeta | null>
+  loading: Ref<boolean>
+  error: Ref<string | null>
+  fetchRepoMeta: () => Promise<void>
+}
+
+export function useGithubRepo(repo: string, workerBase: string): GithubRepoState {
+  const repoMeta = ref<RepoMeta | null>(null)
+  const loading = ref(true)
+  const error = ref<string | null>(null)
+
+  const fetchRepoMeta = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await fetch(`${workerBase}/api/repo?repo=${encodeURIComponent(repo)}`, {
+        headers: { Accept: 'application/json' },
+      })
+      const json = await res.json()
+      if (!json.ok) throw new Error(json.error || `HTTP ${res.status}`)
+      repoMeta.value = json.data
+    } catch (e) {
+      error.value = (e as Error).message
+    } finally {
+      loading.value = false
+    }
+  }
+
+  onMounted(fetchRepoMeta)
+
+  return { repoMeta, loading, error, fetchRepoMeta }
+}
+
 export function officialReleases(releases: Release[] | null, count = 3): Release[] {
   if (!releases) return []
   return releases.filter((r) => !r.prerelease && !r.draft).slice(0, count)

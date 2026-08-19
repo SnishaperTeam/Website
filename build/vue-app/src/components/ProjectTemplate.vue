@@ -4,6 +4,7 @@ import { Icon } from '@iconify/vue'
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
 import {
   useGithubReleases,
+  useGithubRepo,
   officialReleases,
   versionNumber,
   findAsset,
@@ -19,6 +20,8 @@ const { releases, loading: releasesLoading, error: releasesError } = useGithubRe
   props.config.workerBase,
   8,
 )
+
+const { repoMeta } = useGithubRepo(props.config.repo, props.config.workerBase)
 
 const latest = computed(() => officialReleases(releases.value, 1)[0] || null)
 const changelogReleases = computed(() => officialReleases(releases.value, 3))
@@ -108,7 +111,9 @@ onUnmounted(() => {
     <section class="page-head snip-section">
       <div class="flex items-center gap-8 mb-20">
         <span class="pulse-dot"></span>
-        <span class="text-faint" style="font-size:var(--font-size-xs);">v{{ currentVersion }} {{ config.versionTag }}</span>
+        <span class="text-faint" style="font-size:var(--font-size-xs);">
+          v{{ currentVersion }} {{ config.versionTag }}<template v-if="config.showStars && repoMeta"> · {{ repoMeta.stars }} Stars</template>
+        </span>
       </div>
       <div style="display:flex;align-items:flex-start;gap:60px;flex-wrap:wrap;">
         <div style="flex:1;min-width:300px;">
