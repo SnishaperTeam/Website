@@ -1,0 +1,1 @@
+import{N as e,c as t,h as n,x as r}from"./iconify-BpyDa_jq.js";import{n as i,r as a}from"./projects-D5CtqmPq.js";var o=n({__name:`SniShaperView`,setup(n){return(n,o)=>(r(),t(a,{config:e(i)},null,8,[`config`]))}});export{o as default};

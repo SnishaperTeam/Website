@@ -87,9 +87,9 @@ const { visible: valVisible } = useStaggeredFade(values.length, 100)
         </div>
         <div class="term-body flex flex-col gap-8">
           <div class="term-line">cat contacts.cfg</div>
-          <div class="term-line-out">email:   <a href="mailto:dongzheyu@outlook.com" style="color:var(--color-white);">dongzheyu@outlook.com</a></div>
+          <div class="term-line-out">email:   <a href="mailto:youmao2023@outlook.com" style="color:var(--color-white);">youmao2023@outlook.com</a></div>
           <div class="term-line-out">github:  <a href="https://github.com/dongzheyu" target="_blank" style="color:var(--color-white);">github.com/dongzheyu</a></div>
-          <div class="term-line-out">bilibili: <a href="https://space.bilibili.com/3546730880567808" target="_blank" style="color:var(--color-white);">JetCPP</a></div>
+          <div class="term-line-out">bilibili: <a href="https://space.bilibili.com/3546730880567808" target="_blank" style="color:var(--color-white);">dongle</a></div>
           <div class="term-line">exit 0</div>
         </div>
       </div>
