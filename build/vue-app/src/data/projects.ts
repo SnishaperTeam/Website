@@ -132,7 +132,7 @@ export const snishaperConfig: SoftwareProjectConfig = {
   id: 'snishaper',
   rootClass: 'snishaper-page',
   gradientClass: 'snip-gradient',
-  versionTag: 'Windows 原生应用',
+  versionTag: '三端跨平台应用',
   fallbackVersion: '1.28',
   title: 'SniShaper',
   headline: '专为复杂网络环境设计',
