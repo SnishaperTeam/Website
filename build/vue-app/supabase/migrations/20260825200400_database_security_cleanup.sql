@@ -59,9 +59,39 @@ $$;
 
 revoke all on function public.fn_is_rate_limited(text, text) from public;
 
+create or replace function public.fn_record_login_attempt(p_email text, p_ip text, p_success boolean)
+returns void
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  if (select auth.uid()) is null then
+    raise exception 'authentication required';
+  end if;
+
+  if lower(trim(p_email)) <> lower(coalesce((select auth.jwt() ->> 'email'), '')) then
+    raise exception 'email does not match authenticated user';
+  end if;
+
+  insert into public.login_attempts (email, ip_address, success)
+  values (lower(trim(p_email)), left(coalesce(p_ip, ''), 128), p_success);
+end;
+$$;
+
 revoke all on function public.fn_record_login_attempt(text, text, boolean) from public;
-grant execute on function public.fn_record_login_attempt(text, text, boolean) to service_role;
-alter function public.fn_record_login_attempt(text, text, boolean) set search_path = public;
+grant execute on function public.fn_record_login_attempt(text, text, boolean) to authenticated, service_role;
+
+drop policy if exists "service can insert login_attempts" on public.login_attempts;
+drop policy if exists "Authenticated users can insert own login attempts" on public.login_attempts;
+create policy "Authenticated users can insert own login attempts"
+on public.login_attempts for insert
+to authenticated
+with check (email = lower(coalesce((select auth.jwt() ->> 'email'), '')));
+create policy "Service can insert login attempts"
+on public.login_attempts for insert
+to service_role
+with check (true);
 
 create or replace function public.handle_new_user()
 returns trigger
