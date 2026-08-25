@@ -10,7 +10,6 @@ const props = defineProps<{
   content: string
 }>()
 
-// 生成 slug（中文支持）
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -19,24 +18,34 @@ function slugify(text: string): string {
     .replace(/--+/g, '-')
 }
 
-// 初始化 markdown-it
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, char => {
+    switch (char) {
+      case '&': return '&amp;'
+      case '<': return '&lt;'
+      case '>': return '&gt;'
+      case '"': return '&quot;'
+      case "'": return '&#39;'
+      default: return char
+    }
+  })
+}
+
 const md = new MarkdownIt({
-  html: true,
+  html: false,
   linkify: true,
   typographer: true,
   breaks: true,
 })
 
-// 为标题添加 id 和锚点链接
 md.renderer.rules.heading_open = (tokens, idx) => {
   const token = tokens[idx]
   const nextToken = tokens[idx + 1]
   const text = nextToken.children?.reduce((acc: string, t: any) => acc + t.content, '') || ''
-  const id = slugify(text)
+  const id = slugify(text) || `heading-${idx}`
   return `<h${token.tagLevel} id="${id}"><a class="header-anchor" href="#${id}" aria-hidden="true"></a>`
 }
 
-// 自定义代码块渲染，添加复制按钮
 const defaultRender =
   md.renderer.rules.fence ||
   function (tokens, idx, options, env, self) {
@@ -46,15 +55,10 @@ const defaultRender =
 md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   const token = tokens[idx]
   const code = token.content
-  const lang = token.info.trim()
-
-  // 生成唯一ID
-  const codeId = `code-${Math.random().toString(36).substr(2, 9)}`
-
-  // 原始代码块HTML
+  const lang = escapeHtml(token.info.trim())
+  const codeId = `code-${Math.random().toString(36).slice(2, 11)}`
   const originalHtml = defaultRender(tokens, idx, options, env, self)
 
-  // 包裹在带有复制按钮的容器中
   return `
     <div class="code-block-wrapper">
       ${lang ? `<div class="code-lang-badge">${lang}</div>` : ''}
@@ -70,12 +74,8 @@ md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   `
 }
 
-// 渲染 Markdown
-const renderedHtml = computed(() => {
-  return md.render(props.content)
-})
+const renderedHtml = computed(() => md.render(props.content))
 
-// 挂载后添加复制功能
 onMounted(() => {
   ;(window as any).copyCode = async (elementId: string) => {
     const codeElement = document.getElementById(elementId)?.querySelector('code')

@@ -4,11 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 
 const SITE_URL = 'https://jetcpp.dpdns.org'
 
-// Supabase 配置
 const supabaseUrl = process.env.VITE_SUPABASE_URL
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY
 
-// 静态博客文章（本地 .md 文件）
 const staticPosts = [
   {
     title: 'C++完全入门指南：从Hello World到结构体',
@@ -33,7 +31,6 @@ const staticPosts = [
   }
 ]
 
-// 从 Supabase 获取用户文章
 async function fetchUserPosts() {
   if (!supabaseUrl || !supabaseKey) {
     console.warn('Supabase 环境变量未设置，跳过用户文章')
@@ -70,7 +67,7 @@ async function fetchUserPosts() {
 }
 
 function escapeXml(str) {
-  return str
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -78,21 +75,31 @@ function escapeXml(str) {
     .replace(/'/g, '&apos;')
 }
 
+function escapeCdata(str) {
+  return String(str).replace(/]]>/g, ']]]]><![CDATA[>')
+}
+
+function safeSlug(slug) {
+  return encodeURIComponent(String(slug).trim())
+}
+
 function generateRSS(userPosts) {
   const buildDate = new Date().toUTCString()
-  
-  // 合并：用户文章在前，静态文章在后
   const allPosts = [...userPosts, ...staticPosts]
 
-  const items = allPosts.map(post => `
+  const items = allPosts.map(post => {
+    const slug = safeSlug(post.slug)
+    const link = `${SITE_URL}/blog/${slug}`
+    return `
     <item>
-      <title><![CDATA[${escapeXml(post.title)}]]></title>
-      <link>${SITE_URL}/blog/${post.slug}</link>
-      <description><![CDATA[${escapeXml(post.excerpt)}]]></description>
+      <title><![CDATA[${escapeCdata(post.title)}]]></title>
+      <link>${escapeXml(link)}</link>
+      <description><![CDATA[${escapeCdata(post.excerpt)}]]></description>
       <pubDate>${new Date(post.date).toUTCString()}</pubDate>
       <category>${escapeXml(post.category)}</category>
-      <guid isPermaLink="false">${SITE_URL}/blog/${post.slug}</guid>
-    </item>`).join('')
+      <guid isPermaLink="false">${escapeXml(link)}</guid>
+    </item>`
+  }).join('')
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
@@ -123,7 +130,6 @@ async function main() {
 
 main().catch(err => {
   console.error('生成 RSS 失败:', err)
-  // 降级：只生成静态文章
   generateRSS([])
   process.exit(0)
 })

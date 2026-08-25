@@ -1,53 +1,85 @@
-// Supabase Edge Function: delete-user
-// 用于安全地删除用户及其所有相关数据
-// @ts-nocheck - Deno runtime types
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const allowedOrigin = Deno.env.get('SITE_URL') || 'https://jetcpp.dpdns.org'
 const corsHeaders = {
   'Access-Control-Allow-Origin': allowedOrigin,
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
+  Vary: 'Origin',
 }
 
-Deno.serve(async (req) => {
-  // 处理 CORS 预检请求
+const jsonHeaders = {
+  ...corsHeaders,
+  'Content-Type': 'application/json',
+}
+
+function response(body: Record<string, unknown>, status: number) {
+  return new Response(JSON.stringify(body), { status, headers: jsonHeaders })
+}
+
+Deno.serve(async req => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { status: 204, headers: corsHeaders })
+  }
+
+  if (req.method !== 'POST') {
+    return response({ error: 'Method not allowed' }, 405)
+  }
+
+  const authHeader = req.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return response({ error: 'Authentication required' }, 401)
+  }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || Deno.env.get('PROJECT_URL')
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SERVICE_ROLE_KEY')
+
+  if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
+    console.error('Missing Supabase function environment variables')
+    return response({ error: 'Server configuration error' }, 500)
   }
 
   try {
-    // 验证请求方法
-    if (req.method !== 'POST') {
-      return new Response(
-        JSON.stringify({ error: 'Method not allowed' }),
-        { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: authHeader,
+        },
+      },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+
+    const {
+      data: { user: requester },
+      error: userError,
+    } = await supabaseUser.auth.getUser()
+
+    if (userError || !requester) {
+      return response({ error: 'Invalid or expired authentication token' }, 401)
     }
 
-    // 获取请求体
-    const { userId } = await req.json()
-
-    if (!userId) {
-      return new Response(
-        JSON.stringify({ error: 'User ID is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    const { data: isAdmin, error: adminError } = await supabaseUser.rpc('fn_is_admin')
+    if (adminError || isAdmin !== true) {
+      return response({ error: 'Administrator privileges required' }, 403)
     }
 
-    // 从环境变量获取 Supabase 配置
-    const supabaseUrl = Deno.env.get('PROJECT_URL')
-    const supabaseServiceKey = Deno.env.get('SERVICE_ROLE_KEY')
+    const body = await req.json()
+    const userId = typeof body?.userId === 'string' ? body.userId.trim() : ''
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Missing environment variables')
-      return new Response(
-        JSON.stringify({ error: 'Server configuration error' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    if (!uuidPattern.test(userId)) {
+      return response({ error: 'Invalid user ID' }, 400)
     }
 
-    // 创建管理员客户端
+    if (userId === requester.id) {
+      return response({ error: 'Administrators cannot delete their own account from this endpoint' }, 400)
+    }
+
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
@@ -55,78 +87,45 @@ Deno.serve(async (req) => {
       },
     })
 
-    console.log(`开始删除用户: ${userId}`)
-
-    // 1. 删除用户的所有文章
-    console.log('删除用户文章...')
     const { error: postsError } = await supabaseAdmin
       .from('user_posts')
       .delete()
       .eq('author_id', userId)
 
     if (postsError) {
-      console.error('删除文章失败:', postsError)
-      throw new Error(`Failed to delete posts: ${postsError.message}`)
+      console.error('Failed to delete user posts:', postsError)
+      return response({ error: 'Failed to delete user posts' }, 500)
     }
 
-    // 2. 删除用户的所有评论
-    console.log('删除用户评论...')
     const { error: commentsError } = await supabaseAdmin
       .from('comments')
       .delete()
       .eq('user_id', userId)
 
     if (commentsError) {
-      console.error('删除评论失败:', commentsError)
-      throw new Error(`Failed to delete comments: ${commentsError.message}`)
+      console.error('Failed to delete user comments:', commentsError)
+      return response({ error: 'Failed to delete user comments' }, 500)
     }
 
-    // 3. 删除用户的资料
-    console.log('删除用户资料...')
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .delete()
       .eq('id', userId)
 
     if (profileError) {
-      console.error('删除资料失败:', profileError)
-      throw new Error(`Failed to delete profile: ${profileError.message}`)
+      console.error('Failed to delete user profile:', profileError)
+      return response({ error: 'Failed to delete user profile' }, 500)
     }
 
-    // 4. 删除认证账户
-    console.log('删除认证账户...')
     const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId)
-
     if (authError) {
-      console.error('删除认证账户失败:', authError)
-      throw new Error(`Failed to delete auth user: ${authError.message}`)
+      console.error('Failed to delete auth user:', authError)
+      return response({ error: 'Failed to delete authentication account' }, 500)
     }
 
-    console.log(`用户 ${userId} 删除成功`)
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'User deleted successfully',
-        userId 
-      }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
-
+    return response({ success: true, userId }, 200)
   } catch (error) {
-    console.error('删除用户时出错:', error)
-    
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error' 
-      }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+    console.error('Unexpected delete-user error:', error)
+    return response({ error: 'Internal server error' }, 500)
   }
 })
