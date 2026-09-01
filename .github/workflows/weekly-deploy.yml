@@ -39,20 +39,21 @@ jobs:
 
       - name: Build project
         working-directory: build/vue-app
-        run: bun run build
+        run: bun run build   # 默认输出到 build/vue-app/dist
 
+      # ---------- 关键修正开始 ----------
       - name: Verify build output
         run: |
-          if [ -f "index.html" ]; then
-            echo "index.html found"
+          if [ -f "build/vue-app/dist/index.html" ]; then
+            echo "✅ index.html found"
           else
-            echo "index.html missing"
+            echo "❌ index.html missing"
             exit 1
           fi
-          if [ -d "assets" ]; then
-            echo "assets directory found"
+          if [ -d "build/vue-app/dist/assets" ]; then
+            echo "✅ assets directory found"
           else
-            echo "assets directory missing"
+            echo "❌ assets directory missing"
             exit 1
           fi
           echo "Build output verified"
@@ -62,7 +63,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          npx wrangler@latest pages deploy . \
+          npx wrangler@latest pages deploy build/vue-app/dist \
             --project-name=dongzheyu-github-io \
             --branch=main \
             --commit-dirty=true
