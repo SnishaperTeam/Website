@@ -23,7 +23,7 @@
 import { ref } from 'vue'
 import { Icon } from '@iconify/vue'
 
-const feedUrl = 'https://jetcpp.dpdns.org/feed.xml'
+const feedUrl = 'https://jetcpp.ccwu.cc/feed.xml'
 const isCopied = ref(false)
 
 const selectUrl = (event: Event) => {

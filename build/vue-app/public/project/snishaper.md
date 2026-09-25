@@ -319,7 +319,7 @@ wails dev
 ## 致谢与声明
 
 ### 官方网站
-- **官方网站**: [https://jetcpp.dpdns.org/](https://jetcpp.dpdns.org/)
+- **官方网站**: [https://jetcpp.ccwu.cc/](https://jetcpp.ccwu.cc/)
 
 ### 合作者与贡献者
 - **合作者 & 网页开发者**: JetCPP
@@ -343,4 +343,4 @@ wails dev
 
 *让网络连接更稳定、更安全！*
 
-**官方网站**: [https://jetcpp.dpdns.org/](https://jetcpp.dpdns.org/) | **合作者 & 网页开发者**: JetCPP
+**官方网站**: [https://jetcpp.ccwu.cc/](https://jetcpp.ccwu.cc/) | **合作者 & 网页开发者**: JetCPP

@@ -2,40 +2,40 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>JetCPP Team 博客</title>
-    <link>https://jetcpp.dpdns.org</link>
+    <link>https://jetcpp.ccwu.cc</link>
     <description>代码重塑世界 · 创新驱动未来 - JetCPP Team 技术博客</description>
     <language>zh-CN</language>
     <lastBuildDate>Sun, 23 Aug 2026 07:14:17 GMT</lastBuildDate>
-    <atom:link href="https://jetcpp.dpdns.org/feed.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="https://jetcpp.ccwu.cc/feed.xml" rel="self" type="application/rss+xml"/>
     <image>
-      <url>https://jetcpp.dpdns.org/logo.png</url>
+      <url>https://jetcpp.ccwu.cc/logo.png</url>
       <title>JetCPP Team</title>
-      <link>https://jetcpp.dpdns.org</link>
+      <link>https://jetcpp.ccwu.cc</link>
     </image>
     
     <item>
       <title><![CDATA[C++完全入门指南：从Hello World到结构体]]></title>
-      <link>https://jetcpp.dpdns.org/blog/cpp-guide</link>
+      <link>https://jetcpp.ccwu.cc/blog/cpp-guide</link>
       <description><![CDATA[这是一篇详细的C++入门指南，从最基础的Hello World程序开始，逐步讲解变量、数据类型、控制流、函数、指针到结构体等核心概念。]]></description>
       <pubDate>Thu, 24 Dec 2026 00:00:00 GMT</pubDate>
       <category>编程教程</category>
-      <guid isPermaLink="false">https://jetcpp.dpdns.org/blog/cpp-guide</guid>
+      <guid isPermaLink="false">https://jetcpp.ccwu.cc/blog/cpp-guide</guid>
     </item>
     <item>
       <title><![CDATA[C# 从入门到精通（零基础到进阶）]]></title>
-      <link>https://jetcpp.dpdns.org/blog/csharp-guide</link>
+      <link>https://jetcpp.ccwu.cc/blog/csharp-guide</link>
       <description><![CDATA[一份全面的C#学习指南，涵盖从基础语法到高级特性的完整知识体系。]]></description>
       <pubDate>Wed, 04 Mar 2026 00:00:00 GMT</pubDate>
       <category>编程教程</category>
-      <guid isPermaLink="false">https://jetcpp.dpdns.org/blog/csharp-guide</guid>
+      <guid isPermaLink="false">https://jetcpp.ccwu.cc/blog/csharp-guide</guid>
     </item>
     <item>
       <title><![CDATA[XAML 从入门到精通（零基础到进阶）]]></title>
-      <link>https://jetcpp.dpdns.org/blog/xaml-guide</link>
+      <link>https://jetcpp.ccwu.cc/blog/xaml-guide</link>
       <description><![CDATA[WPF界面开发完全指南，从XAML基础语法到MVVM架构模式。]]></description>
       <pubDate>Wed, 04 Mar 2026 00:00:00 GMT</pubDate>
       <category>编程教程</category>
-      <guid isPermaLink="false">https://jetcpp.dpdns.org/blog/xaml-guide</guid>
+      <guid isPermaLink="false">https://jetcpp.ccwu.cc/blog/xaml-guide</guid>
     </item>
   </channel>
 </rss>
