@@ -2357,24 +2357,24 @@ The landing page consists of the following main sections:
 
 ## 声明 / Statement
 
-### 关于 JetCPP Team 参与维护 SniShaper 项目的声明
+### 关于 SnishaperTeam 参与维护 SniShaper 项目的声明
 
-**发布方：** JetCPP Team  
+**发布方：** SnishaperTeam  
 **日期：** 2026年5月5日
 
-近期，SniShaper 项目在社区中引发了一定的关注与争议。鉴于项目原开发者曾宣布退出，**JetCPP Team 正式宣布介入，目前将与 SniShaper Team 共同维护 SniShaper 项目**。
+近期，SniShaper 项目在社区中引发了一定的关注与争议。鉴于项目原开发者曾宣布退出，**SnishaperTeam 正式宣布介入，目前将与 SniShaper Team 共同维护 SniShaper 项目**。
 
-作为新加入的维护团队，JetCPP Team 特此作出以下说明：
+作为新加入的维护团队，SnishaperTeam 特此作出以下说明：
 
 #### 一、立场与身份澄清
 
-**JetCPP Team 与此前 SniShaper 项目发生的所有历史争议、社群摩擦及相关事件均无任何关系。**
+**SnishaperTeam 与此前 SniShaper 项目发生的所有历史争议、社群摩擦及相关事件均无任何关系。**
 
 我们介入的初衷纯粹是认可 SniShaper 项目的技术价值，希望能为社区用户提供一个稳定、持续更新的工具。我们未参与过往的任何争论，也不对过往的任何言论和行为负责。
 
 #### 二、维护目标与承诺
 
-从即日起，JetCPP Team 将与 SniShaper Team 共同致力于项目的健康发展。我们的核心目标如下：
+从即日起，SnishaperTeam 将与 SniShaper Team 共同致力于项目的健康发展。我们的核心目标如下：
 
 - **专注技术本身**：将精力完全投入到代码的重构、优化与核心功能的稳定性上
 - **建立良性社区**：倡导理性、友好的技术交流环境，拒绝情绪化的攻击与无意义的争端
@@ -2382,28 +2382,28 @@ The landing page consists of the following main sections:
 
 我们呼吁广大社区用户保持理性，共同维护良好的开源交流氛围。
 
-**JetCPP Team**
+**SnishaperTeam**
 
 ---
 
-### Statement on JetCPP Team's Participation in Maintaining SniShaper
+### Statement on SnishaperTeam's Participation in Maintaining SniShaper
 
-**Published by:** JetCPP Team  
+**Published by:** SnishaperTeam  
 **Date:** May 5, 2026
 
-Recently, the SniShaper project has attracted attention and controversy in the community. Given that the original developer announced their withdrawal, **JetCPP Team officially announces its intervention and will currently maintain the SniShaper project together with the SniShaper Team**.
+Recently, the SniShaper project has attracted attention and controversy in the community. Given that the original developer announced their withdrawal, **SnishaperTeam officially announces its intervention and will currently maintain the SniShaper project together with the SniShaper Team**.
 
-As a newly joined maintenance team, JetCPP Team hereby makes the following statement:
+As a newly joined maintenance team, SnishaperTeam hereby makes the following statement:
 
 #### 1. Clarification of Position and Identity
 
-**JetCPP Team has nothing to do with any historical controversies, community frictions, or related incidents that occurred with the previous SniShaper project.**
+**SnishaperTeam has nothing to do with any historical controversies, community frictions, or related incidents that occurred with the previous SniShaper project.**
 
 Our intervention is purely to recognize the technical value of the SniShaper project and to provide a stable, continuously updated tool for community users. We have not participated in any past controversies and are not responsible for any past remarks or actions.
 
 #### 2. Maintenance Goals and Commitments
 
-From now on, JetCPP Team will work with the SniShaper Team on the healthy development of the project. Our core goals are:
+From now on, SnishaperTeam will work with the SniShaper Team on the healthy development of the project. Our core goals are:
 
 - **Focus on technology**: Devote all energy to code refactoring, optimization, and core function stability
 - **Build a healthy community**: Advocate a rational and friendly technical communication environment
@@ -2411,7 +2411,7 @@ From now on, JetCPP Team will work with the SniShaper Team on the healthy develo
 
 We call on community users to remain rational and jointly maintain a good open-source communication atmosphere.
 
-**JetCPP Team**
+**SnishaperTeam**
 
 ---
 

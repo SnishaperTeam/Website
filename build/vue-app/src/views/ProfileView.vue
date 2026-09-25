@@ -179,7 +179,7 @@
               <span style="margin-left:8px;opacity:0.5;">console.sh</span>
             </div>
             <div class="term-body" style="min-height:280px;">
-              <div class="term-line">JetCPP Console v1.0</div>
+              <div class="term-line">SnishaperTeam Console v1.0</div>
               <div class="term-line" style="color:var(--color-text-dim);">Type 'help' for available commands</div>
               <div v-for="(line, i) in terminalLog" :key="i" class="term-line" :style="line.error ? 'color:#ff5f57;' : ''">{{ line.text }}</div>
               <div class="term-input-line">

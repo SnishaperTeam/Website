@@ -20,7 +20,7 @@ onMounted(() => useNoiseOverlay())
 <template>
   <nav class="geek-nav">
     <RouterLink to="/" class="geek-nav-brand">
-      <span>&#x25a0;</span> JetCPP
+      <span>&#x25a0;</span> SnishaperTeam
     </RouterLink>
     <ul class="geek-nav-links">
       <li><RouterLink to="/">[首页]</RouterLink></li>
@@ -59,7 +59,7 @@ onMounted(() => useNoiseOverlay())
   <footer class="geek-footer">
     <div class="footer-row">
       <span>
-        <span class="text-faint">// 2026</span> JetCPP &mdash; 代码重塑世界
+        <span class="text-faint">// 2026</span> SnishaperTeam &mdash; 代码重塑世界
       </span>
       <span class="flex gap-16">
         <RouterLink to="/privacy">隐私</RouterLink>

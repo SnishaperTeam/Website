@@ -104,15 +104,15 @@ function generateRSS(userPosts) {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>JetCPP Team 博客</title>
+    <title>SnishaperTeam 博客</title>
     <link>${SITE_URL}</link>
-    <description>代码重塑世界 · 创新驱动未来 - JetCPP Team 技术博客</description>
+    <description>代码重塑世界 · 创新驱动未来 - SnishaperTeam 技术博客</description>
     <language>zh-CN</language>
     <lastBuildDate>${buildDate}</lastBuildDate>
     <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>
     <image>
       <url>${SITE_URL}/logo.png</url>
-      <title>JetCPP Team</title>
+      <title>SnishaperTeam</title>
       <link>${SITE_URL}</link>
     </image>
     ${items}

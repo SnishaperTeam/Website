@@ -21,7 +21,7 @@ const { visible } = useStaggeredFade(items.length, 100)
 
     <section class="mb-40" style="padding-left:40px;">
       <p style="line-height:1.8; color:var(--color-text); max-width:75ch;">
-        欢迎使用 JetCPP Website（以下简称"服务"）。在您使用本服务前，请仔细阅读并理解本条款。继续使用即表示您同意接受本条款的所有内容。
+        欢迎使用 SnishaperTeam Website（以下简称"服务"）。在您使用本服务前，请仔细阅读并理解本条款。继续使用即表示您同意接受本条款的所有内容。
       </p>
     </section>
 
@@ -31,7 +31,7 @@ const { visible } = useStaggeredFade(items.length, 100)
       >
         <template v-if="i === 0">
           <h2 class="formal-h2">一、服务说明</h2>
-          <p>JetCPP Website 提供以下内容服务：</p>
+          <p>SnishaperTeam Website 提供以下内容服务：</p>
           <ul>
             <li>技术博客文章的发布与阅读</li>
             <li>项目作品的展示与分享</li>

@@ -886,7 +886,7 @@
           <div class="pt-8 border-t border-snip-gray text-center text-xs text-snip-muted">
             <p class="mb-2">SniShaper 专为恢复网络访问自由而设计。请遵守当地法律法规，合理使用。</p>
             <p>
-              合作者 | 贡献者 | 网页开发者: JetCPP
+              合作者 | 贡献者 | 网页开发者: SnishaperTeam
             </p>
             <p class="mt-2 opacity-30" style="font-size: 10px;">原作者因不可抗拒原因无法展出</p>
           </div>

@@ -88,7 +88,7 @@ onMounted(async () => {
           <span class="typewriter-cursor" :class="{ done }"></span>
         </h1>
         <p class="subtitle" style="transform: translateX(28px);">
-          // JetCPP &mdash; 系统软件、工具链与创意工程<br>
+          // SnishaperTeam &mdash; 系统软件、工具链与创意工程<br>
           // since 2021. 构建可编译的一切。
         </p>
         <div class="flex gap-12 mt-40">
@@ -110,7 +110,7 @@ onMounted(async () => {
           <text x="16" y="50" fill="rgba(120,220,160,0.7)" font-size="11" font-family="monospace">$</text>
           <text x="28" y="50" fill="rgba(255,255,255,0.6)" font-size="11" font-family="monospace">neofetch</text>
 
-          <text x="16" y="70" fill="rgba(255,255,255,0.35)" font-size="10" font-family="monospace">OS:       JetCPP Linux x86_64</text>
+          <text x="16" y="70" fill="rgba(255,255,255,0.35)" font-size="10" font-family="monospace">OS:       SnishaperTeam Linux x86_64</text>
           <text x="16" y="86" fill="rgba(255,255,255,0.35)" font-size="10" font-family="monospace">Kernel:   custom 6.8.0</text>
           <text x="16" y="102" fill="rgba(255,255,255,0.35)" font-size="10" font-family="monospace">Shell:    zsh 5.9</text>
           <text x="16" y="118" fill="rgba(255,255,255,0.35)" font-size="10" font-family="monospace">Uptime:   {{ uptime || '--' }} days</text>

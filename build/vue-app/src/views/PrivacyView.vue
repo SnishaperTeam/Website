@@ -21,7 +21,7 @@ const { visible } = useStaggeredFade(items.length, 100)
 
     <section class="mb-40" style="padding-left:40px;">
       <p style="line-height:1.8; color:var(--color-text); max-width:75ch;">
-        JetCPP Website（以下简称"我们"）尊重和保护用户的隐私权。本隐私政策说明我们如何收集、使用、存储和保护您的个人信息。请您在使用我们的服务前仔细阅读本隐私政策。
+        SnishaperTeam Website（以下简称"我们"）尊重和保护用户的隐私权。本隐私政策说明我们如何收集、使用、存储和保护您的个人信息。请您在使用我们的服务前仔细阅读本隐私政策。
       </p>
     </section>
 
@@ -146,7 +146,7 @@ const { visible } = useStaggeredFade(items.length, 100)
           <ul>
             <li><strong>GitHub</strong>：<a href="https://github.com/dongzheyu" target="_blank" class="formal-link">github.com/dongzheyu</a></li>
             <li><strong>Gitee</strong>：<a href="https://gitee.com/jetcpp" target="_blank" class="formal-link">gitee.com/jetcpp</a></li>
-            <li><strong>哔哩哔哩</strong>：<a href="https://space.bilibili.com/3546730880567808" target="_blank" class="formal-link">JetCPP</a></li>
+            <li><strong>哔哩哔哩</strong>：<a href="https://space.bilibili.com/3546730880567808" target="_blank" class="formal-link">SnishaperTeam</a></li>
           </ul>
           <p>我们会在收到您的请求后 7 个工作日内予以回复。</p>
         </template>

@@ -467,4 +467,4 @@
 
 **规范版本**: v1.0  
 **最后更新**: 2026-02-16  
-**维护者**: JetCPP Studio
+**维护者**: SnishaperTeam Studio

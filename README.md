@@ -1,8 +1,8 @@
-# JetCPP
+# SnishaperTeam
 
 [![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?style=flat&logo=vuedotjs&logoColor=white)](https://vuejs.org/) [![TypeScript](https://img.shields.io/badge/语言-TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Vite](https://img.shields.io/badge/构建-Vite%208-646CFF?style=flat&logo=vite&logoColor=white)](https://vite.dev/) [![Bun](https://img.shields.io/badge/运行时-Bun-000?style=flat&logo=bun&logoColor=white)](https://bun.sh/) [![Supabase](https://img.shields.io/badge/后端-Supabase-3FCF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.com/) [![Cloudflare Pages](https://img.shields.io/badge/部署-Cloudflare%20Pages-F38020?style=flat&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com/) [![License](https://img.shields.io/badge/许可证-MIT-blue?style=flat&logo=open-source-initiative)](LICENSE) [![GitHub last commit](https://img.shields.io/github/last-commit/SnishaperTeam/Website?style=flat&logo=git&label=最后提交)](https://github.com/SnishaperTeam/Website/commits/main) [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/SnishaperTeam/Website/weekly-deploy.yml?style=flat&logo=githubactions&label=部署流水线)](https://github.com/SnishaperTeam/Website/actions)
 
-**JetCPP** 是 **SnishaperTeam** 组织的官方网站与软件发布入口，站点地址为 <https://jetcpp.ccwu.cc>。
+本仓库是 **[SnishaperTeam](https://github.com/SnishaperTeam)** 组织的官方网站与软件发布入口，站点地址为 <https://jetcpp.ccwu.cc>。
 
 站点承载三条主线：开源项目的版本发布与下载、编程技术博客、用户内容系统。全站采用终端窗口风格的单色设计系统，不依赖任何 UI 组件库。
 

@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "JetCPP's Blog"
+  name: "SnishaperTeam's Blog"
   text: "技术分享与思考"
   tagline: "探索编程世界，记录学习历程"
   actions:

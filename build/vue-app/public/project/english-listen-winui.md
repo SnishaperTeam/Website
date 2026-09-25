@@ -180,7 +180,7 @@ C++ NativeBackend 通过 C API (`extern "C"`) 导出，C# 端通过 `NativeMetho
 - 快捷键支持
 
 ### 许可证
-MIT 许可证 - 版权所有 (c) 2026 JetCPP
+MIT 许可证 - 版权所有 (c) 2026 SnishaperTeam
 
 ---
 

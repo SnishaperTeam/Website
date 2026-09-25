@@ -1,4 +1,4 @@
-# JetCPP网站开发Wiki
+# SnishaperTeam网站开发Wiki
 
 ## 目录
 1. [项目结构](#项目结构)
@@ -13,7 +13,7 @@
 ## 项目结构
 
 ```
-D:\WEB\JetCPPWebsite\build\vue-app\
+D:\WEB\SnishaperTeamWebsite\build\vue-app\
 ├── src\
 │   ├── App.vue              # 主应用组件（包含导航栏、页脚）
 │   ├── main.ts              # 应用入口
@@ -62,7 +62,7 @@ D:\WEB\JetCPPWebsite\build\vue-app\
 <template>
   <div class="home">
     <!-- 修改这里的内容 -->
-    <h1>欢迎来到JetCPP Studio</h1>
+    <h1>欢迎来到SnishaperTeam Studio</h1>
     <p>这里是修改后的内容...</p>
   </div>
 </template>

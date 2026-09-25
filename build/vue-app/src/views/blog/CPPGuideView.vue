@@ -6,7 +6,7 @@
           <header class="mb-4">
             <h1 class="fw-bold">C++完全入门指南：从Hello World到结构体</h1>
             <div class="text-muted mb-3">
-              <time datetime="2026-12-24">2026-12-24</time> · 作者：JetCPP Team
+              <time datetime="2026-12-24">2026-12-24</time> · 作者：SnishaperTeam
             </div>
           </header>
           

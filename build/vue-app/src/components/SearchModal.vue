@@ -191,7 +191,7 @@ const staticData = [
   {
     id: 'static-7',
     title: '关于我们',
-    description: '了解JetCPP的故事和技术背景',
+    description: '了解SnishaperTeam的故事和技术背景',
     category: '团队动态',
     icon: 'mdi:account-group',
     color: '#4cc9f0',

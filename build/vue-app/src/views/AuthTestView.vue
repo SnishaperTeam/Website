@@ -45,7 +45,7 @@ import { useTypewriter } from '@/composables/useTypewriter'
 import AuthForm from '@/components/AuthForm.vue'
 import { useAuth } from '@/composables/useAuth'
 
-const { display, cursor, done } = useTypewriter('JetCPP 统一认证', 55)
+const { display, cursor, done } = useTypewriter('SnishaperTeam 统一认证', 55)
 const { user, isAuthenticated, signOut } = useAuth()
 
 const handleSignOut = async () => {

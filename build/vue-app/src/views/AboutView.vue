@@ -7,7 +7,7 @@ import { useStaggeredFade } from '@/composables/useStaggeredFade'
 const { display, cursor, done } = useTypewriter('关于这个组织。', 55)
 
 const members = [
-  { name: 'JetCPP 团队', role: '系统软件 / 工具链', icon: 'mdi:code-braces' },
+  { name: 'SnishaperTeam', role: '系统软件 / 工具链', icon: 'mdi:code-braces' },
   { name: '开源社区', role: '工程共同体', icon: 'mdi:account-group-outline' },
 ]
 const { visible: memVisible } = useStaggeredFade(members.length, 120)

@@ -1,7 +1,7 @@
 {
-  "name": "jetcpp-website",
+  "name": "snishaperteam-website",
   "version": "1.0.0",
-  "description": "JetCPP Website",
+  "description": "SnishaperTeam Website",
   "main": "index.js",
   "type": "module",
   "scripts": {
