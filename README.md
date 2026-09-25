@@ -1,105 +1,67 @@
-# JetCPP Studio
+# JetCPP
 
-[![Vue 3](https://img.shields.io/badge/Vue_3-4FC08D?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
-[![Bun](https://img.shields.io/badge/Bun-000?logo=bun&logoColor=white)](https://bun.sh/)
-[![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
-[![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://www.cloudflare-cn.com/)
-[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/dongzheyu/jetcpp-website/pulls)
+[![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?style=flat&logo=vuedotjs&logoColor=white)](https://vuejs.org/) [![TypeScript](https://img.shields.io/badge/语言-TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Vite](https://img.shields.io/badge/构建-Vite%208-646CFF?style=flat&logo=vite&logoColor=white)](https://vite.dev/) [![Bun](https://img.shields.io/badge/运行时-Bun-000?style=flat&logo=bun&logoColor=white)](https://bun.sh/) [![Supabase](https://img.shields.io/badge/后端-Supabase-3FCF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.com/) [![Cloudflare Pages](https://img.shields.io/badge/部署-Cloudflare%20Pages-F38020?style=flat&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com/) [![License](https://img.shields.io/badge/许可证-MIT-blue?style=flat&logo=open-source-initiative)](LICENSE) [![GitHub last commit](https://img.shields.io/github/last-commit/SnishaperTeam/Website?style=flat&logo=git&label=最后提交)](https://github.com/SnishaperTeam/Website/commits/main) [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/SnishaperTeam/Website/weekly-deploy.yml?style=flat&logo=githubactions&label=部署流水线)](https://github.com/SnishaperTeam/Website/actions)
 
-JetCPP 工作室官方网站。代码重塑世界。
+**JetCPP** 是 **SnishaperTeam** 组织的官方网站与软件发布入口，站点地址为 <https://jetcpp.ccwu.cc>。
 
-个人作品集、技术博客与心理健康测评工具整合于一体，采用极客终端风格 UI 设计。
+站点承载三条主线：开源项目的版本发布与下载、编程技术博客、用户内容系统。全站采用终端窗口风格的单色设计系统，不依赖任何 UI 组件库。
+
+本仓库是网站的唯一源码仓库，前端基于 **Vue 3 + TypeScript + Vite** 构建，后端能力由 **Supabase** 提供，部署于 **Cloudflare Pages**。
+
+> 组织旗下产品的源码与发布信息请参见 [SnishaperTeam](https://github.com/SnishaperTeam) 组织主页。
 
 ---
 
-## 目录
+## 特性
 
-- [特色](#特色)
-- [快速开始](#快速开始)
-- [技术栈](#技术栈)
-- [项目结构](#项目结构)
-- [路由系统](#路由系统)
-- [设计系统](#设计系统)
-- [心理测评](#心理测评)
-- [组件库](#组件库)
-- [数据库](#数据库)
-- [部署](#部署)
-- [脚本工具](#脚本工具)
-- [许可](#许可)
+- **软件发布与下载**：项目详情与产品落地页直接展示版本号、更新日志与分平台下载入口，版本信息运行时从 GitHub Releases 拉取，不在构建期静态嵌入。
+- **边缘代理**：自建 Cloudflare Worker（`workers/release-proxy.js`）代理 GitHub Releases API，将响应裁剪为精简结构后再返回前端，附带跨域与缓存策略。
+- **技术博客**：内置 C++、C#、XAML 三篇长篇教程；登录用户可在站内撰写、编辑、发布文章，列表按分类与标签聚合。
+- **用户内容系统**：基于 Supabase Auth，支持邮箱密码与 Google、GitHub、Microsoft 三方 OAuth；提供独立用户主页、收藏与内容管理。
+- **行级安全**：所有业务表启用 RLS 策略，用户只能读写自身数据；账户注销由 Edge Function 完成数据清理并校验调用方身份。
+- **人机校验**：注册、登录与评论流程接入 Cloudflare Turnstile，服务端由 Edge Function 二次校验。
+- **终端风格设计系统**：纯 CSS 自定义属性驱动，含终端窗口框架、等宽字体排版、运行时注入的噪点纹理与统一指数缓出的过渡曲线。
+- **自动构建与部署**：三平台 CI 构建校验，周度自动部署至 Cloudflare Pages，Supabase 实例定时保活。
 
 ---
-
-## 特色
-
-### 个人作品集
-
-以终端卡片网格展示项目，支持分类筛选（Web 开发、游戏开发、嵌入式等）。每个项目独立详情页，包含技术栈标签、项目描述、外部链接。
-
-### 技术博客
-
-支持 Markdown 渲染的文章系统，覆盖 C++、Rust、Web 全栈等技术领域。内置阅读进度指示器、标签分类、RSS 订阅。
-
-### 心理测评工具
-
-20 余种标准化心理自评量表，纯前端匿名测评，数据不上传服务器：
-
-- **情绪障碍**：PHQ-9（抑郁）、GAD-7（焦虑）、MDQ（双相）、PHQ-15（躯体化）
-- **神经发育**：ASRS（ADHD）、RAADS-14（自闭特质）
-- **强迫与创伤**：OCI-R（强迫症）、PCL-5（PTSD）
-- **饮食与成瘾**：EAT-26（进食障碍）、AUDIT（酒精使用）、DAST-10（药物滥用）
-- **人格类型**：MBTI 职业性格测试
-- **其他**：SPIN（社交恐惧）、SDS（季节性情感障碍）、GBQ（赌博行为）、GDT（游戏障碍）
-
-每份测评提供即时分数、维度分析、结果解读与专业求助建议。
-
-### 用户系统
-
-基于 Supabase Auth，支持邮箱密码登录及 Google、GitHub、Microsoft 第三方 OAuth。登录后可保存测评历史、收藏内容。
-
-### 极客 UI
-
-全站终端风格设计：
-
-- 黑色背景 + 等宽字体主调
-- 终端窗口框架组件（红/黄/绿三色圆点标题栏）
-- `$` 命令行提示符前缀
-- 等宽进度条、ASCII 风格装饰元素
-- 纯 CSS 设计系统，无 UI 框架依赖
 
 ## 快速开始
 
 ### 环境要求
 
 | 工具 | 版本要求 | 用途 |
-|------|----------|------|
-| [Bun](https://bun.sh/) | ≥ 1.2 | 包管理 / 运行时 / 构建 |
-| [Supabase](https://supabase.com/) | 免费 tier | 数据库 / 鉴权 / 存储 |
+| --- | --- | --- |
+| [Bun](https://bun.sh/) | ≥ 1.2 | 包管理、脚本执行与构建 |
+| [Supabase](https://supabase.com/) | 免费实例即可 | 数据库、鉴权、对象存储 |
 
-### 克隆并安装
+### 克隆与安装
 
 ```bash
-git clone https://github.com/dongzheyu/jetcpp-website.git
-cd jetcpp-website
+git clone https://github.com/SnishaperTeam/Website.git
+cd Website/build/vue-app
 bun install
 ```
 
 ### 环境变量
 
-创建 `.env.local`：
+将 `build/vue-app/.env.example` 复制为 `.env.local` 并填写：
 
 ```env
 # Supabase 项目配置（必填）
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key>
 
-# 管理员邮箱（用于后台权限判断）
+# 管理员邮箱（用于后台权限判定）
 VITE_ADMIN_EMAIL=admin@example.com
+
+# Cloudflare Turnstile（可选）
+VITE_TURNSTILE_SITEKEY=<turnstile-sitekey>
+
+# 站点地址（用于 OAuth 回调重定向）
+VITE_SITE_URL=https://jetcpp.ccwu.cc
 ```
 
-参考 `.env.example` 获取完整变量列表。
+`VITE_SUPABASE_URL` 与 `VITE_SUPABASE_ANON_KEY` 为必填项，取值见 Supabase 控制台的 API 设置页。`.env.local` 已被 `.gitignore` 忽略，不会进入版本库。
 
 ### 启动开发服务器
 
@@ -107,7 +69,7 @@ VITE_ADMIN_EMAIL=admin@example.com
 bun run dev
 ```
 
-默认监听 `http://localhost:5173`。支持 HMR 热更新。
+开发服务器默认监听 `http://localhost:5174`，支持热更新。
 
 ### 构建生产版本
 
@@ -115,349 +77,227 @@ bun run dev
 bun run build
 ```
 
-产物输出到 `dist/` 目录。可使用 `bun run preview` 本地预览。
+构建流程为：生成 RSS → Vite 构建 → 将 `dist/` 同步到仓库根目录。可使用 `bun run preview` 本地预览。
+
+### 可用脚本
+
+| 命令 | 作用 |
+| --- | --- |
+| `bun run dev` | 启动开发服务器 |
+| `bun run build` | 生成 RSS → Vite 构建 → 同步产物到仓库根 |
+| `bun run preview` | 本地预览构建结果 |
+| `bun run generate-rss` | 单独生成 `feed.xml` |
+| `bun run add-project` | 交互式新增项目页 |
+| `bun run add-blog` | 交互式新增博客文章 |
+
+---
 
 ## 技术栈
 
-### 前端
+| 层次 | 技术 | 说明 |
+| --- | --- | --- |
+| 框架 | Vue 3 | Composition API + `<script setup>` |
+| 语言 | TypeScript | 全量类型标注，含接口与工具函数 |
+| 路由 | Vue Router 4 | 20 余条路由，详情页与工具页按需懒加载 |
+| 构建 | Vite 8 | ESM 开发服务器，Rolldown 生产构建 |
+| 图标 | Iconify | MDI 与 Simple Icons 两套集合，按需加载 |
+| 渲染 | markdown-it | 博客与文档内容渲染 |
+| 样式 | 原生 CSS | 自定义属性驱动，叠加 Bootstrap 5.3 栅格 |
+| 后端 | Supabase | Auth、PostgreSQL、Storage、Edge Functions |
+| 边缘计算 | Cloudflare Workers | Releases API 代理与结构裁剪 |
+| 部署 | Cloudflare Pages | 全球 CDN，项目名 `jetcpppages` |
+| 运行时 | Bun | 包管理、脚本执行与构建驱动 |
 
-| 技术 | 用途 |
-|------|------|
-| Vue 3 (Composition API) | 渐进式 UI 框架，`<script setup>` 语法 |
-| TypeScript | 类型安全，接口定义与类型推导 |
-| Vue Router 4 | 声明式路由，嵌套布局，导航守卫 |
-| Vite 8 | ESM 开发服务器，极速 HMR，Rolldown 构建 |
-| Iconify | 按需图标加载（MDI + Simple Icons 两套集合） |
-| markdown-it | 博客文章 Markdown 渲染 |
-| CSS Custom Properties | 全局设计系统变量，运行时主题定制 |
+动画与交互逻辑封装为独立组合式函数：打字机（`useTypewriter`）、视差倾斜（`useParallaxTilt`）、逐个淡入（`useStaggeredFade`）、噪点覆盖层（`useNoiseOverlay`）、Release 拉取（`useGithubRelease`）。
 
-### 后端
-
-| 技术 | 用途 |
-|------|------|
-| Supabase Auth | 邮箱 + OAuth 登录，Session 管理 |
-| Supabase PostgreSQL | 用户表、测评记录、收藏、评论 |
-| RLS (Row Level Security) | 行级安全策略，数据权限控制 |
-
-### DevOps
-
-| 工具 | 用途 |
-|------|------|
-| Bun | 包管理器、JS 运行时、脚本执行 |
-| Cloudflare Pages | 静态部署，全球 CDN |
-| GitHub Actions | CI/CD 自动构建与部署 |
-| Wrangler | Cloudflare Pages 部署 CLI |
+---
 
 ## 项目结构
 
 ```
-├── public/                  # 静态资源（图标、favicon）
-├── scripts/                 # 自动化脚本
-│   ├── add-content.js       # 交互式添加项目/博客
-│   ├── clean-public.js      # 构建前清理
-│   ├── deploy.js            # Cloudflare 部署
-│   └── generate-rss.js      # RSS 生成
-├── src/
-│   ├── assets/
-│   │   └── base.css         # 设计系统变量与全局样式（650+ 行）
-│   ├── components/
-│   │   ├── AuthForm.vue           # 登录/注册表单
-│   │   ├── CommentsSection.vue    # 评论组件
-│   │   ├── FavoritesList.vue      # 收藏列表
-│   │   ├── HistoryList.vue        # 历史记录
-│   │   ├── MarkdownRenderer.vue   # Markdown 渲染
-│   │   ├── ReadingProgress.vue    # 阅读进度条
-│   │   ├── RssSubscribe.vue       # RSS 订阅
-│   │   ├── SearchModal.vue        # 搜索弹窗
-│   │   ├── TagCloud.vue           # 标签云
-│   │   ├── TestHistoryChart.vue   # 测评历史图表
-│   │   └── TestTemplate.vue       # 测评通用模板
-│   ├── composables/
-│   │   ├── useAuth.ts        # 鉴权逻辑
-│   │   ├── useNoiseOverlay.ts# 噪点覆盖层
-│   │   └── useStore.ts       # 收藏/历史/进度状态
-│   ├── router/
-│   │   └── index.ts          # 路由配置（30+ 路由）
-│   ├── supabase/
-│   │   └── client.ts         # Supabase 客户端单例
-│   ├── utils/
-│   │   └── helpers.ts        # 通用工具函数
-│   ├── views/
-│   │   ├── HomeView.vue      # 首页
-│   │   ├── AboutView.vue     # 关于页
-│   │   ├── ProjectsView.vue  # 项目列表
-│   │   ├── BlogView.vue      # 博客列表
-│   │   ├── TestsView.vue     # 测评中心
-│   │   ├── AdminView.vue     # 管理后台
-│   │   ├── ProfileView.vue   # 个人主页
-│   │   ├── PrivacyView.vue   # 隐私政策
-│   │   ├── TermsView.vue     # 服务条款
-│   │   ├── EmergencyView.vue # 危机求助
-│   │   ├── blog/             # 博客文章页
-│   │   ├── project/          # 项目详情页
-│   │   └── *View.vue         # 各测评页面
-│   ├── App.vue               # 根组件（导航 + 页脚）
-│   └── main.ts               # 入口文件
-├── database-setup.sql        # 数据库初始化
-├── database-oauth-setup.sql  # OAuth 用户支持
-├── database-fulltext-search.sql # 全文搜索
-├── vite.config.ts            # Vite 配置
-├── tsconfig.json             # TypeScript 配置
-├── wrangler.toml             # Cloudflare 配置
-└── package.json              # 依赖与脚本
+.
+├── build/vue-app/                # Vue 应用源码（构建主体）
+│   ├── src/
+│   │   ├── assets/               # 设计系统与全局样式
+│   │   ├── components/           # 可复用组件
+│   │   ├── composables/          # 组合式函数
+│   │   ├── data/                 # 项目数据定义
+│   │   ├── router/               # 路由配置
+│   │   ├── supabase/             # Supabase 客户端单例
+│   │   └── views/                # 页面视图
+│   ├── scripts/
+│   │   ├── deploy.js             # 将 dist 同步到仓库根目录
+│   │   └── generate-rss.js       # 生成 feed.xml
+│   ├── public/                   # 静态资源与静态页面
+│   ├── supabase/                 # 数据库迁移与 Edge Functions
+│   ├── docs/                     # 项目文档（架构、设计、验收）
+│   ├── wrangler.toml             # Pages 项目配置
+│   └── vite.config.ts            # 构建配置（别名 @ → src，端口 5174）
+├── functions/
+│   └── turnstile.ts              # Turnstile 服务端校验
+├── workers/
+│   └── release-proxy.js          # GitHub Releases 代理 Worker
+├── .github/workflows/            # 三个自动化工作流
+├── CNAME                         # 自定义域名声明
+├── _redirects                    # SPA 路由回退规则
+├── wrangler.jsonc                # Pages 构建输出目录与兼容配置
+├── index.html                    # 构建产物（由 deploy.js 写入）
+├── assets/ blog/ project/ fonts/ # 构建产物（由 deploy.js 写入）
+└── *.sql                         # 数据库初始化脚本
 ```
 
-## 路由系统
+源码集中在 `build/vue-app/`，仓库根目录存放构建产物。执行 `bun run build` 时，`scripts/deploy.js` 会把 `dist/` 的内容同步到仓库根，因此根目录的 `index.html`、`assets/` 等文件均为生成物，不应手工编辑。
 
-所有路由定义在 `src/router/index.ts`：
+---
+
+## 路由表
 
 | 路径 | 页面 | 说明 |
-|------|------|------|
-| `/` | HomeView | 首页 |
-| `/projects` | ProjectsView | 项目列表 |
-| `/project/:id` | ProjectDetailView | 项目详情 |
-| `/blog` | BlogView | 博客列表 |
-| `/blog/:id` | BlogPostView | 博客文章 |
-| `/tests` | TestsView | 测评中心 |
-| `/tests/:id` | 各测评视图 | 具体测评 |
-| `/about` | AboutView | 关于 |
-| `/auth` | AuthTestView | 登录/注册 |
-| `/profile` | ProfileView | 个人主页 |
+| --- | --- | --- |
+| `/` | HomeView | 首页，含实时 GitHub 数据面板 |
+| `/projects` | ProjectsView | 项目列表与分类筛选 |
+| `/project/:slug` | ProjectDetailView | 通用项目详情 |
+| `/snishaper` | SniShaperView | SniShaper 产品落地页 |
+| `/lumine` | LumineView | Lumine 产品落地页 |
+| `/blog` | BlogView | 博客列表与标签筛选 |
+| `/blog/:slug` | BlogPostView | 文章正文 |
+| `/blog/new`、`/blog/edit/:id` | PostEditorView | 文章撰写与编辑 |
+| `/auth`、`/auth/callback`、`/reset-password` | 鉴权页 | 登录、OAuth 回调、密码重置 |
+| `/user/:userId` | ProfileView | 用户主页 |
 | `/admin` | AdminView | 管理后台 |
-| `/emergency` | EmergencyView | 危机求助 |
-| `/privacy` | PrivacyView | 隐私 |
-| `/terms` | TermsView | 条款 |
-| `/:catchAll(.*)` | NotFoundView | 404 |
+| `/about`、`/privacy`、`/terms` | 静态页 | 关于、隐私、条款 |
+| `/:pathMatch(.*)*` | NotFoundView | 404 |
 
-## 设计系统
-
-定义在 `src/assets/base.css`，所有可复用变量：
-
-### 颜色
-
-```css
---color-bg: #0a0a0a;           /* 主背景 */
---color-bg-soft: #111;         /* 次级背景 */
---color-text: #e0e0e0;         /* 主文字 */
---color-text-secondary: #888;  /* 次要文字 */
---color-border: rgba(255,255,255,0.1);  /* 边框 */
-```
-
-### 间距与圆角
-
-```css
---radius-sm: 2px;   /* 小圆角（按钮、输入框） */
---radius-md: 4px;   /* 中圆角（卡片） */
---space-xs: 4px;    /* 极小间距 */
---space-sm: 8px;    /* 小间距 */
---space-md: 16px;   /* 中间距 */
---space-lg: 24px;   /* 大间距 */
---space-xl: 32px;   /* 极大间距 */
-```
-
-### 字体
-
-```css
---font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
---font-sans: 'Inter', system-ui, sans-serif;
---font-size-xs: 0.85rem;  /* 小号 */
---font-size-sm: 0.95rem;  /* 中号 */
---font-size-base: 1rem;   /* 标准 */
-```
-
-### 动画
-
-```css
---ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-```
-
-## 心理测评
-
-### 架构
-
-所有测评页面分为两类：
-
-**Group A — 通用模板（12 页）**
-
-共用 `TestTemplate` 组件，仅传入题目数据、选项列表、计算结果函数和配置参数。模板自动处理：
-
-- 进度保存与恢复（localStorage）
-- 阅读进度条
-- 收藏功能
-- 答案回顾
-- 维度分析（多子量表）
-- 结果解读与建议
-- 历史记录入库
-
-**Group B — 独立页面（4 页）**
-
-因数据结构或交互特殊，各自独立实现（EatingView、OcdView、SubstanceView、MbtiView）。布局风格已统一为终端窗口样式。
-
-### 测评列表
-
-| 测评 | ID | 题数 | 选项 |
-|------|----|------|------|
-| 抑郁症 (PHQ-9) | `phq9` | 9 | 0–3 四级 |
-| 焦虑症 (GAD-7) | `gad7` | 7 | 0–3 四级 |
-| 强迫症 (OCI-R) | `oci-r` | 18 | 0–4 五级 |
-| 进食障碍 (EAT-26) | `eat-26` | 26 | 0–3 四级 |
-| ADHD (ASRS) | `asrs` | 18 | 0–4 五级 |
-| 双相情感障碍 (MDQ) | `mdq` | 13 | 0–3 四级 |
-| 边缘型人格 (BPDSI) | `bpdsi` | 15 | 0–4 五级 |
-| PTSD (PCL-5) | `pcl5` | 20 | 0–4 五级 |
-| 恐惧症 (SPIN) | `spin` | 22 | 0–4 五级 |
-| 自闭特质 (RAADS-14) | `raads14` | 14 | 0–3 四级 |
-| 赌博障碍 (GBQ) | `gbq` | 10 | 0–3 四级 |
-| 游戏障碍 (GDT) | `gdt` | 10 | 0–3 四级 |
-| 躯体化 (PHQ-15) | `phq15` | 15 | 0–2 三级 |
-| 季节性情感障碍 (SDS) | `sds` | 8 | 0–3 四级 |
-| 物质使用障碍 (AUDIT+DAST) | `audit-dast` | 6 | 变长 |
-| MBTI 人格测试 | `mbti` | 60 | 二选一 |
-
-## 组件库
-
-### 通用组件
-
-| 组件 | 用途 |
-|------|------|
-| `TestTemplate` | 测评通用外壳（进度、问答、结果、分析） |
-| `AuthForm` | 登录/注册/密码重置表单 |
-| `CommentsSection` | 文章评论列表与发布 |
-| `ReadingProgress` | 阅读进度指示条 |
-| `MarkdownRenderer` | Markdown → HTML 渲染 |
-| `SearchModal` | 全局搜索弹窗 |
-| `TagCloud` | 分类标签云 |
-| `RssSubscribe` | RSS 订阅按钮 |
-| `HistoryList` | 用户历史记录 |
-| `FavoritesList` | 用户收藏列表 |
-| `TestHistoryChart` | 测评历史柱状图 |
-
-### CSS 类名约定
-
-```
-.card-geek    — 终端风格卡片
-.btn-geek     — 终端风格按钮
-.term-window  — 终端窗口框架
-.term-bar     — 窗口标题栏
-.term-body    — 窗口内容区
-.term-cmd     — 命令提示行
-.q-block      — 问题块
-.opt          — 选项按钮
-.r-card       — 结果卡片
-.prog-bar     — 进度条
-```
-
-## 数据库
-
-### 表结构
-
-```sql
--- 用户资料
-profiles (id, username, avatar_url, bio, created_at)
-
--- 测评历史
-test_history (id, user_id, test_id, test_title, score, max_score, level, answers, created_at)
-
--- 收藏
-favorites (id, user_id, item_id, item_type, created_at)
-
--- 博客评论
-comments (id, post_id, user_id, content, created_at)
-
--- 博客文章
-posts (id, title, slug, content, category, tags, author, created_at)
-
--- 项目
-projects (id, title, description, category, tech_stack, url, created_at)
-```
-
-所有表均启用 Supabase RLS 策略，用户仅能读写自己的数据。
-
-### SQL 文件
-
-| 文件 | 说明 |
-|------|------|
-| `database-setup.sql` | 完整建表 + RLS 策略 |
-| `database-oauth-setup.sql` | OAuth 回调自动创建 profile |
-| `database-fulltext-search.sql` | PostgreSQL 全文搜索索引 |
+---
 
 ## 部署
 
-### Cloudflare Pages
+站点托管于 Cloudflare Pages，项目名 `jetcpppages`，构建输出目录由 `wrangler.jsonc` 的 `pages_build_output_dir` 指定为 `build/vue-app/dist`。
 
-项目配置了 GitHub Actions 自动部署。推送 `main` 分支触发：
+### 自动部署
 
-```yaml
-# .github/workflows/deploy.yml
-- bun install
-- bun run build
-- bun run deploy  # wrangler pages publish
+`Weekly Build & Deploy` 工作流每周日 19:00（UTC）自动执行，流程为：安装依赖 → 注入环境变量 → `bun run build` → 校验产物 → 部署。
+
+```bash
+npx wrangler@latest pages deploy build/vue-app/dist \
+  --project-name=jetcpppages \
+  --branch=main
 ```
 
-### Secrets 配置
-
-在 GitHub 仓库 Settings → Secrets and variables → Actions 中添加：
-
-| Secret | 说明 |
-|--------|------|
-| `VITE_SUPABASE_URL` | Supabase 项目 URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase 匿名密钥 |
-| `VITE_ADMIN_EMAIL` | 管理员邮箱 |
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API 令牌 |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 账户 ID |
+该工作流亦支持通过 `workflow_dispatch` 手动触发。
 
 ### 手动部署
 
 ```bash
-# 构建
+cd build/vue-app
+bun install
 bun run build
-
-# 部署到 Cloudflare Pages
-npx wrangler pages deploy dist --project-name jetcpp-website
+npx wrangler pages deploy dist --project-name jetcpppages
 ```
 
-## 脚本工具
+### 所需 Secrets
 
-项目提供 `scripts/` 目录下的自动化脚本：
+在仓库的 Settings → Secrets and variables → Actions 中配置：
 
-### 添加内容
+| Secret | 说明 |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase 项目地址 |
+| `VITE_SUPABASE_ANON_KEY` | Supabase 匿名密钥 |
+| `VITE_ADMIN_EMAIL` | 管理员邮箱 |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API 令牌 |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 账户 ID |
+| `SUPABASE_URLS` | 保活任务使用的实例地址列表 |
+| `SUPABASE_KEYS` | 与上一项一一对应的密钥列表 |
 
-```bash
-# 交互式创建新项目页面
-bun run add-project
+### 自定义域名
 
-# 交互式创建新博客文章
-bun run add-blog
-```
-
-自动完成：Vue 组件生成 → 路由注册 → 列表页条目插入。
-
-### RSS 生成
-
-```bash
-bun run generate-rss
-```
-
-扫描博客文章，生成 `public/rss.xml`。
-
-### 构建前清理
-
-```bash
-bun scripts/clean-public.js
-```
-
-构建前清理 `public/` 中的旧资源。
-
-## 许可
-
-MIT &copy; 2026 JetCPP Studio
-
-本软件按"原样"提供，不提供任何明示或暗示的保证。作者不对因使用本软件而产生的任何损害承担责任。
-
-**作者**: [dongzheyu](https://github.com/dongzheyu)
+`CNAME` 文件声明 `jetcpp.ccwu.cc` 与 `www.jetcpp.ccwu.cc`。SPA 的深层路由由 `_redirects` 统一回退到 `index.html`。
 
 ---
 
-<p align="center">
-  <sub>由 <a href="https://dash.domain.digitalplat.org/signup?ref=TZRrkCdFjm">DigitalPlat Domains</a>、<a href="https://www.cloudflare-cn.com/">Cloudflare</a>、<a href="https://vuejs.org/">Vue</a>、<a href="https://bun.sh/">Bun</a>、<a href="https://github.com/">GitHub</a> 强力驱动</sub>
-</p>
+## 持续集成
+
+| 工作流 | 触发方式 | 职责 |
+| --- | --- | --- |
+| `build-and-test.yml` | `push` / `pull_request` 至 `main` | 在 Ubuntu、Windows、macOS 三平台执行构建，验证产物完整性并上传归档 |
+| `weekly-deploy.yml` | 每周日 19:00（UTC）、手动 | 构建并部署至 Cloudflare Pages |
+| `supawake.yml` | 每日 23:30（UTC）、手动 | 定时请求 Supabase 实例，避免免费实例因空闲被暂停 |
+
+---
+
+## 数据库
+
+数据层由 Supabase PostgreSQL 承载，所有业务表启用 RLS（行级安全），用户只能读写自身数据。
+
+| 表 | 用途 |
+| --- | --- |
+| `profiles` | 用户资料（昵称、头像、简介） |
+| `user_posts` | 用户发布的博客文章 |
+| `user_favorites` | 收藏记录 |
+| `comments` | 文章评论 |
+| `tags` | 标签聚合 |
+| `login_attempts` | 登录尝试记录（安全审计） |
+| `user_login_logs` | 登录日志（安全审计） |
+| `health` | 保活探针 |
+
+Storage 使用 `avatars` 桶存放用户头像。Edge Function `delete-user` 负责账户注销时的数据清理，并在函数内校验调用方身份。
+
+数据库变更以迁移文件形式维护于 `build/vue-app/supabase/migrations/`，仓库根目录的初始化脚本用于全新环境的建表与授权。
+
+---
+
+## 设计系统
+
+全站设计变量集中定义在 `build/vue-app/src/assets/base.css`，不使用任何 UI 组件库。
+
+```css
+--color-bg: #0a0a0a;                  /* 主背景 */
+--color-bg-soft: #111;                /* 次级背景 */
+--color-text: #e0e0e0;                /* 主文字 */
+--color-text-secondary: #888;         /* 次要文字 */
+--color-border: rgba(255,255,255,.1); /* 描边 */
+--radius-sm: 2px;                     /* 小圆角 */
+--radius-md: 4px;                     /* 中圆角 */
+--ease-out-expo: cubic-bezier(.16,1,.3,1);  /* 统一缓动 */
+```
+
+视觉语言由三部分构成：终端窗口框架（`.term-window` / `.term-bar` / `.term-body`）、等宽字体排版与 `$` 命令提示符、覆盖全站的噪点纹理（由 `useNoiseOverlay` 在运行时注入）。过渡曲线统一使用指数缓出，页面切换采用位移加淡入。
+
+---
+
+## 致谢
+
+本站点的基础设施与工具支持来自以下项目与平台：
+
+- [DNSHE](https://my.dnshe.com/go.php?code=pPuY9hh0Iw) — 域名服务
+- [Cloudflare](https://www.cloudflare-cn.com/) — Pages 托管、Workers 边缘计算与 Turnstile 人机校验
+- [Supabase](https://supabase.com/) — 数据库、鉴权与对象存储
+- [Vue](https://vuejs.org/) / [Vite](https://vite.dev/) — 前端框架与构建工具
+- [Bun](https://bun.sh/) — 包管理器与运行时
+- [Iconify](https://iconify.design/) — 图标集合
+
+---
+
+## 项目活跃度与贡献者
+
+### 活跃度徽章
+
+[![GitHub contributors](https://img.shields.io/github/contributors/SnishaperTeam/Website?style=flat&label=总贡献者)](https://github.com/SnishaperTeam/Website/graphs/contributors)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/SnishaperTeam/Website?style=flat&label=月均提交)](https://github.com/SnishaperTeam/Website/graphs/contributors)
+[![GitHub last commit](https://img.shields.io/github/last-commit/SnishaperTeam/Website?style=flat&label=最近提交)](https://github.com/SnishaperTeam/Website/commits/main)
+
+### 贡献者图谱
+
+<div align="center">
+<a href="https://github.com/SnishaperTeam/Website/graphs/contributors" target="_blank">
+<img src="https://contrib.rocks/image?repo=SnishaperTeam/Website" alt="Contributors" />
+</a>
+</div>
+
+---
+
+## 许可
+
+[MIT License](LICENSE)。
+
+**维护者**：[SnishaperTeam](https://github.com/SnishaperTeam)
