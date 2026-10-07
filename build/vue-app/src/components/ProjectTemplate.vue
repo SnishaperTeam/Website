@@ -8,8 +8,10 @@ import {
   officialReleases,
   versionNumber,
   findAsset,
+  groupAssets,
   ghProxyUrl,
   formatDate,
+  formatSize,
 } from '@/composables/useGithubRelease'
 import type { SoftwareProjectConfig, DownloadButton } from '@/data/projects'
 
@@ -39,6 +41,42 @@ const versionInfoText = computed(() =>
     ? `${latest.value.tagName} · ${formatDate(latest.value.publishedAt)} 上架 · 四架构齐备`
     : `${props.config.fallbackVersion} · 2026-07-10 上架 · 四架构齐备`,
 )
+
+// Grouped straight off the release payload: whatever the pipeline attached
+// is what the modal lists, so a new architecture or artifact appears without
+// touching this component. Falls back to the configured cards only when the
+// release carries no assets at all (API blocked / offline).
+const assetGroups = computed(() => groupAssets(latest.value?.assets))
+
+interface RenderedAssetLink {
+  key: string
+  name: string
+  size: string
+  url: string
+}
+
+interface RenderedAssetGroup {
+  key: string
+  icon: string
+  title: string
+  links: RenderedAssetLink[]
+}
+
+const renderedGroups = computed<RenderedAssetGroup[]>(() =>
+  assetGroups.value.map((group) => ({
+    key: group.key,
+    icon: group.icon,
+    title: `${group.title} (${group.assets.length})`,
+    links: group.assets.map((asset) => ({
+      key: asset.name,
+      name: asset.name,
+      size: formatSize(asset.size),
+      url: ghProxyUrl(asset.browserDownloadUrl),
+    })),
+  })),
+)
+
+const useAssetGroups = computed(() => renderedGroups.value.length > 0)
 
 const showModal = ref(false)
 const mobileMenuOpen = ref(false)
@@ -356,24 +394,64 @@ onUnmounted(() => {
           <button class="btn-geek" style="padding:4px 12px;" @click="toggleModal"><Icon icon="mdi:close" width="16" /></button>
         </div>
         <div class="snip-modal-scroll">
-          <div v-for="(card, ci) in config.downloadCards" :key="ci" class="card-geek" style="padding:20px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <Icon :icon="card.icon" width="24" style="color:var(--color-white);" />
-              <span style="font-size:var(--font-size-base);font-weight:500;">{{ card.title }}</span>
+          <template v-if="useAssetGroups">
+            <div v-for="group in renderedGroups" :key="group.key" class="card-geek" style="padding:20px;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                <Icon :icon="group.icon" width="24" style="color:var(--color-white);" />
+                <span style="font-size:var(--font-size-base);font-weight:500;">{{ group.title }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:var(--font-size-sm);">
+                <a
+                  v-for="link in group.links"
+                  :key="link.key"
+                  :href="link.url"
+                  target="_blank"
+                  class="btn-geek"
+                  style="justify-content:space-between;"
+                >
+                  <span style="display:flex;align-items:center;gap:8px;min-width:0;">
+                    <Icon icon="mdi:download" width="16" />
+                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ link.name }}</span>
+                  </span>
+                  <span style="color:var(--color-text-dim);flex-shrink:0;margin-left:12px;">{{ link.size }}</span>
+                </a>
+              </div>
             </div>
-            <div v-if="card.buttons && card.buttons.length" style="display:flex;flex-direction:column;gap:8px;font-size:var(--font-size-sm);">
-              <a
-                v-for="(btn, bi) in card.buttons" :key="bi"
-                :href="buttonUrl(btn)" target="_blank" class="btn-geek" style="justify-content:center;"
-              >
-                <Icon :icon="btn.icon" width="16" /> {{ btn.label }}
-              </a>
-            </div>
+            <div style="font-size:var(--font-size-xs);color:var(--color-text-dim);">{{ versionInfoText }}</div>
+          </template>
+          <template v-else>
             <div
-              v-if="card.versionInfo"
-              style="font-size:var(--font-size-xs);color:var(--color-text-dim);"
-            >{{ versionInfoText }}</div>
-          </div>
+              v-if="releasesError"
+              class="card-geek"
+              style="padding:16px;margin-bottom:12px;border-color:rgba(234,179,8,0.35);"
+            >
+              <div style="display:flex;align-items:center;gap:10px;font-size:var(--font-size-sm);color:#eab308;">
+                <Icon icon="mdi:alert-circle-outline" width="18" />
+                <span>实时版本信息暂时不可用，下面是备用下载入口。</span>
+              </div>
+              <div style="margin-top:6px;font-size:var(--font-size-xs);color:var(--color-text-dim);word-break:break-all;">
+                {{ releasesError }}
+              </div>
+            </div>
+            <div v-for="(card, ci) in config.downloadCards" :key="ci" class="card-geek" style="padding:20px;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                <Icon :icon="card.icon" width="24" style="color:var(--color-white);" />
+                <span style="font-size:var(--font-size-base);font-weight:500;">{{ card.title }}</span>
+              </div>
+              <div v-if="card.buttons && card.buttons.length" style="display:flex;flex-direction:column;gap:8px;font-size:var(--font-size-sm);">
+                <a
+                  v-for="(btn, bi) in card.buttons" :key="bi"
+                  :href="buttonUrl(btn)" target="_blank" class="btn-geek" style="justify-content:center;"
+                >
+                  <Icon :icon="btn.icon" width="16" /> {{ btn.label }}
+                </a>
+              </div>
+              <div
+                v-if="card.versionInfo"
+                style="font-size:var(--font-size-xs);color:var(--color-text-dim);"
+              >{{ versionInfoText }}</div>
+            </div>
+          </template>
           <div v-if="config.extraLinks && config.extraLinks.length" style="display:flex;flex-direction:column;gap:8px;font-size:var(--font-size-sm);">
             <a
               v-for="(link, li) in config.extraLinks" :key="li"

@@ -169,7 +169,6 @@ export default {
 
     try {
       const cached = await caches.default.match(cacheKey)
-      if (cached) return cached
 
       let data = null
       let rateLimit = null
@@ -179,7 +178,7 @@ export default {
         const { releases, rateLimit: rl } = await fetchReleases(repo, 10, env)
         rateLimit = rl
         const found = releases.find((r) => !r.draft && (includePrerelease || !r.prerelease))
-        data = found ? mapRelease(found) : null
+        data = found || null
       } else if (path === '/api/releases') {
         const limit = clampInt(url.searchParams.get('limit'), 10, 1, 30)
         const { releases, rateLimit: rl } = await fetchReleases(repo, limit, env)
@@ -208,6 +207,16 @@ export default {
       ctx.waitUntil(caches.default.put(cacheKey, response.clone()))
       return response
     } catch (e) {
+      // Upstream failure (most often GitHub's anonymous 60 req/h rate limit,
+      // which hits as soon as GITHUB_TOKEN is not configured) must not blank
+      // the site: serve the last good payload as stale instead of an error
+      // the page turns into a hard fallback.
+      if (cached) {
+        const staleHeaders = new Headers(cached.headers)
+        staleHeaders.set('X-Stale', 'true')
+        if (e instanceof HttpError) staleHeaders.set('X-Stale-Reason', e.message)
+        return new Response(cached.body, { status: 200, headers: staleHeaders })
+      }
       if (e instanceof HttpError) return json({ ok: false, error: e.message }, e.status)
       return json({ ok: false, error: 'internal error' }, 500)
     }
