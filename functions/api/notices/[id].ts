@@ -26,7 +26,7 @@ export const onRequestGet = async (context: any): Promise<Response> => {
 export const onRequestPatch = async (context: any): Promise<Response> => {
   const request = context.request as Request
   const env = context.env as StoreEnv
-  const denied = requireAdmin(request, env)
+  const denied = await requireAdmin(request, env)
   if (denied) return denied
   const id = String(context.params?.id || '')
   let body: unknown
@@ -61,7 +61,7 @@ export const onRequestPatch = async (context: any): Promise<Response> => {
 export const onRequestDelete = async (context: any): Promise<Response> => {
   const request = context.request as Request
   const env = context.env as StoreEnv
-  const denied = requireAdmin(request, env)
+  const denied = await requireAdmin(request, env)
   if (denied) return denied
   const id = String(context.params?.id || '')
   try {

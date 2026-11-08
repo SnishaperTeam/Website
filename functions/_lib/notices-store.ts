@@ -23,10 +23,14 @@ export interface NoticeDocument {
 export interface StoreEnv {
   GITHUB_NOTICE_TOKEN?: string
   NOTICE_ADMIN_TOKEN?: string
+  NOTICE_ADMIN_EMAIL?: string
+  NOTICE_ADMIN_PASSWORD?: string
   NOTICE_REPO?: string
   NOTICE_FILE?: string
   NOTICE_BRANCH?: string
 }
+
+export const SESSION_TTL_MS = 12 * 60 * 60 * 1000
 
 export const CACHE_KEY = 'https://notices.jetcpp.ccwu.cc/api/notices'
 export const CACHE_TTL = 60
@@ -200,7 +204,92 @@ export async function writeDocument(
   return payload.content?.sha ?? null
 }
 
-export function requireAdmin(request: Request, env: StoreEnv): Response | null {
+export function timingSafeEq(a: string, b: string): boolean {
+  const left = new TextEncoder().encode(a)
+  const right = new TextEncoder().encode(b)
+  if (left.length !== right.length) return false
+  let diff = 0
+  for (let i = 0; i < left.length; i++) diff |= left[i] ^ right[i]
+  return diff === 0
+}
+
+function bytesToHex(buffer: ArrayBuffer): string {
+  return [...new Uint8Array(buffer)].map((byte) => byte.toString(16).padStart(2, '0')).join('')
+}
+
+function b64url(text: string): string {
+  return btoa(text).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+}
+
+function fromB64url(text: string): string {
+  return atob(text.replace(/-/g, '+').replace(/_/g, '/'))
+}
+
+async function hmac(secret: string, data: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data))
+  return bytesToHex(signature)
+}
+
+export async function createSessionToken(secret: string): Promise<{ token: string; expires_at: string }> {
+  const expiry = Date.now() + SESSION_TTL_MS
+  const signature = await hmac(secret, `notice-session.${expiry}`)
+  return {
+    token: `${b64url(String(expiry))}.${signature}`,
+    expires_at: new Date(expiry).toISOString(),
+  }
+}
+
+export async function verifySessionToken(token: string, secret: string): Promise<boolean> {
+  const dot = token.indexOf('.')
+  if (dot <= 0 || dot === token.length - 1) return false
+  let expiry = 0
+  try {
+    expiry = Number(fromB64url(token.slice(0, dot)))
+  } catch {
+    return false
+  }
+  if (!Number.isFinite(expiry) || expiry <= Date.now()) return false
+  const signature = await hmac(secret, `notice-session.${expiry}`)
+  return timingSafeEq(token.slice(dot + 1), signature)
+}
+
+const loginAttempts = new Map<string, { fails: number; lockedUntil: number }>()
+
+export function loginGate(ip: string): Response | null {
+  const state = loginAttempts.get(ip)
+  if (state && state.lockedUntil > Date.now()) {
+    const retryAfter = Math.ceil((state.lockedUntil - Date.now()) / 1000)
+    return jsonResponse(
+      { ok: false, error: 'too_many_attempts', retry_after: retryAfter },
+      429,
+      { 'Retry-After': String(retryAfter) },
+    )
+  }
+  return null
+}
+
+export function recordLoginFailure(ip: string): void {
+  const state = loginAttempts.get(ip) || { fails: 0, lockedUntil: 0 }
+  state.fails += 1
+  if (state.fails >= 5) {
+    state.lockedUntil = Date.now() + 60 * 1000
+    state.fails = 0
+  }
+  loginAttempts.set(ip, state)
+}
+
+export function recordLoginSuccess(ip: string): void {
+  loginAttempts.delete(ip)
+}
+
+export async function requireAdmin(request: Request, env: StoreEnv): Promise<Response | null> {
   const expected = (env.NOTICE_ADMIN_TOKEN || '').trim()
   if (!expected) {
     return jsonResponse({ ok: false, error: 'admin_token_not_configured' }, 503)
@@ -208,10 +297,17 @@ export function requireAdmin(request: Request, env: StoreEnv): Response | null {
   const header = request.headers.get('Authorization') || ''
   const bearer = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : ''
   const alternate = (request.headers.get('X-Admin-Token') || '').trim()
-  if (bearer !== expected && alternate !== expected) {
+  const credential = bearer || alternate
+  if (!credential) {
     return jsonResponse({ ok: false, error: 'unauthorized' }, 401)
   }
-  return null
+  if (timingSafeEq(credential, expected)) {
+    return null
+  }
+  if (await verifySessionToken(credential, expected)) {
+    return null
+  }
+  return jsonResponse({ ok: false, error: 'unauthorized' }, 401)
 }
 
 export function jsonResponse(data: unknown, status = 200, extra: Record<string, string> = {}): Response {
