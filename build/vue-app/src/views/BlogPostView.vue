@@ -2,9 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRoute } from 'vue-router'
-import { supabase } from '@/supabase/client'
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
-import CommentsSection from '@/components/CommentsSection.vue'
 
 const route = useRoute()
 const loading = ref(true)
@@ -20,14 +18,6 @@ async function loadPost() {
   loading.value = true
   try {
     const slug = route.params.slug as string
-    const { data: userPost } = await supabase
-      .from('user_posts').select('*').eq('slug', slug).maybeSingle()
-    if (userPost) {
-      postTitle.value = userPost.title
-      postDate.value = new Date(userPost.created_at).toLocaleDateString('zh-CN')
-      postContent.value = userPost.content
-      return
-    }
     const response = await fetch(`/blog/${slug}.md`)
     if (!response.ok) throw new Error('not found')
     const content = await response.text()
@@ -65,7 +55,6 @@ function parseFrontMatter(content: string) {
         <Icon icon="mdi:calendar" width="14" /> {{ postDate }}
       </span>
       <MarkdownRenderer :content="postContent" />
-      <CommentsSection :post-slug="route.params.slug as string" class="mt-60" />
       <footer class="mt-40" style="padding-top:24px; border-top:1px solid var(--color-border);">
         <RouterLink to="/blog" class="btn-geek" style="font-size:var(--font-size-xs);">
           <Icon icon="mdi:arrow-left" width="14" /> 返回博客

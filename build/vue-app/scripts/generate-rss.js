@@ -1,11 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { createClient } from '@supabase/supabase-js'
 
 const SITE_URL = 'https://jetcpp.ccwu.cc'
-
-const supabaseUrl = process.env.VITE_SUPABASE_URL
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY
 
 const staticPosts = [
   {
@@ -31,41 +27,6 @@ const staticPosts = [
   }
 ]
 
-async function fetchUserPosts() {
-  if (!supabaseUrl || !supabaseKey) {
-    console.warn('Supabase 环境变量未设置，跳过用户文章')
-    return []
-  }
-
-  try {
-    const supabase = createClient(supabaseUrl, supabaseKey)
-    const { data, error } = await supabase
-      .from('user_posts')
-      .select('title, slug, excerpt, content, category, color, created_at')
-      .eq('published', true)
-      .order('created_at', { ascending: false })
-      .limit(50)
-
-    if (error) {
-      console.error('Supabase 查询错误:', error.message)
-      return []
-    }
-
-    console.log(`从 Supabase 获取到 ${(data || []).length} 篇用户文章`)
-
-    return (data || []).map(post => ({
-      title: post.title,
-      slug: post.slug,
-      excerpt: post.excerpt || (post.content ? post.content.substring(0, 200).replace(/[#*`\n]/g, ' ').trim() + '...' : ''),
-      date: new Date(post.created_at).toISOString(),
-      category: post.category || '个人文章'
-    }))
-  } catch (err) {
-    console.error('获取用户文章失败:', err.message)
-    return []
-  }
-}
-
 function escapeXml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -83,9 +44,9 @@ function safeSlug(slug) {
   return encodeURIComponent(String(slug).trim())
 }
 
-function generateRSS(userPosts) {
+function generateRSS(posts) {
   const buildDate = new Date().toUTCString()
-  const allPosts = [...userPosts, ...staticPosts]
+  const allPosts = [...posts]
 
   const items = allPosts.map(post => {
     const slug = safeSlug(post.slug)
@@ -120,16 +81,7 @@ function generateRSS(userPosts) {
 </rss>`
 
   fs.writeFileSync(path.join(process.cwd(), 'public', 'feed.xml'), rss)
-  console.log(`RSS feed generated: ${allPosts.length} posts (${userPosts.length} user + ${staticPosts.length} static)`)
+  console.log(`RSS feed generated: ${allPosts.length} posts`)
 }
 
-async function main() {
-  const userPosts = await fetchUserPosts()
-  generateRSS(userPosts)
-}
-
-main().catch(err => {
-  console.error('生成 RSS 失败:', err)
-  generateRSS([])
-  process.exit(0)
-})
+generateRSS(staticPosts)

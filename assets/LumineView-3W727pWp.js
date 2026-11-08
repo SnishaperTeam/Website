@@ -1,0 +1,1 @@
+import{N as e,S as t,c as n,h as r}from"./iconify-DzhTdMz8.js";import{r as i,t as a}from"./projects-Ce1xRKgz.js";var o=r({__name:`LumineView`,setup(r){return(r,o)=>(t(),n(i,{config:e(a)},null,8,[`config`]))}});export{o as default};

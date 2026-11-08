@@ -21,7 +21,7 @@
             <button
               class="fav-btn"
               :class="{ 'fav-on': isFavorite(testId) }"
-              @click="toggleFavorite({ id: testId, title: testTitle, type: 'test' })"
+              @click="toggleFavorite({ id: testId, title: testTitle, description: subtitle, icon: 'mdi:clipboard-check-outline', color: '#FFB347', type: 'test' })"
               :title="isFavorite(testId) ? '取消收藏' : '收藏此测试'"
             >
               <Icon :icon="isFavorite(testId) ? 'mdi:heart' : 'mdi:heart-outline'" />
@@ -165,9 +165,6 @@
           <div class="r-actions">
             <button class="btn-geek" @click="resetTest">重新测试</button>
             <RouterLink to="/tests" class="btn-geek">查看其他测试</RouterLink>
-            <RouterLink to="/profile?tab=history" class="btn-geek">
-              <Icon icon="mdi:history" /> 历史记录
-            </RouterLink>
           </div>
         </div>
       </div>

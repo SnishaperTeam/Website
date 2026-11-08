@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
-import CommentsSection from '@/components/CommentsSection.vue'
 import { Icon } from '@iconify/vue'
 
 const route = useRoute()
@@ -46,7 +45,6 @@ async function loadProject() {
     <article v-else-if="projectContent" class="page-head">
       <h1 style="font-size:var(--font-size-xl); font-weight:400; color:rgba(255,255,255,0.85); margin-bottom:40px;">{{ projectTitle }}</h1>
       <MarkdownRenderer :content="projectContent" />
-      <CommentsSection :post-slug="route.params.slug as string" class="mt-60" />
       <footer class="mt-40" style="padding-top:24px; border-top:1px solid var(--color-border);">
         <RouterLink to="/projects" class="btn-geek" style="font-size:var(--font-size-xs);">
           <Icon icon="mdi:arrow-left" width="14" /> 返回项目

@@ -105,8 +105,8 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase } from '@/supabase/client'
 import { useTags } from '@/composables/useStore'
+import { staticPosts } from '@/data/posts'
 import { Icon } from '@iconify/vue'
 
 const router = useRouter()
@@ -247,116 +247,31 @@ const clearSearchHistory = () => {
   localStorage.removeItem(HISTORY_KEY)
 }
 
-// 从内容中提取匹配片段（带高亮）
-const extractSnippet = (
-  content: string,
-  q: string,
-  maxLen = 150,
-): { html: string; matchInContent: boolean } => {
-  if (!content || !q) return { html: '', matchInContent: false }
+const blogEntries = staticPosts.map((post) => ({
+  id: post.id,
+  title: post.title,
+  description: post.excerpt,
+  category: post.category,
+  icon: 'mdi:newspaper-variant',
+  color: '#f48c06',
+  path: post.link,
+  keywords: post.tags.join(' '),
+}))
 
-  const lowerContent = content.toLowerCase()
+const searchEntries = [...staticData.map((item) => ({ ...item, keywords: '' })), ...blogEntries]
+
+const searchStatic = (q: string) => {
   const lowerQ = q.toLowerCase()
-  const idx = lowerContent.indexOf(lowerQ)
-
-  if (idx === -1) return { html: '', matchInContent: false }
-
-  // 提取匹配位置前后的上下文
-  const start = Math.max(0, idx - 40)
-  const end = Math.min(content.length, idx + q.length + maxLen)
-  let snippet = content.slice(start, end)
-
-  // 添加省略号
-  if (start > 0) snippet = '...' + snippet
-  if (end < content.length) snippet += '...'
-
-  // 高亮关键词：用正则替换所有匹配项（不区分大小写）
-  const escapedQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const highlighted = snippet.replace(new RegExp(`(${escapedQ})`, 'gi'), '<mark>$1</mark>')
-
-  return { html: highlighted, matchInContent: true }
-}
-
-// 从 Supabase 全文搜索博客文章
-const searchFromSupabase = async (q: string) => {
-  try {
-    isLoading.value = true
-
-    let dynamicResults: any[] = []
-
-    // 优先尝试 RPC 全文搜索
-    try {
-      const { data: rpcResults, error: rpcError } = await supabase.rpc('search_posts', {
-        search_query: q,
-      })
-
-      if (!rpcError && rpcResults) {
-        dynamicResults = rpcResults.map((post: any) => ({
-          id: `user-${post.id}`,
-          title: post.title,
-          description: post.excerpt || '',
-          snippet: post.content_snippet || '',
-          matchInContent: !!post.content_snippet,
-          category: post.category || '技术分享',
-          icon: 'mdi:newspaper-variant',
-          color: post.color || '#FF6B6B',
-          path: `/blog/${post.slug}`,
-        }))
-      }
-    } catch {
-      // RPC 不可用，继续使用 fallback
-    }
-
-    // RPC 失败时 fallback 到 ilike 查询
-    if (dynamicResults.length === 0) {
-      const { data: userPosts } = await supabase
-        .from('user_posts')
-        .select('id, title, excerpt, content, category, slug, color')
-        .eq('published', true)
-        .or(`title.ilike.%${q}%,content.ilike.%${q}%,excerpt.ilike.%${q}%`)
-        .limit(20)
-
-      dynamicResults = (userPosts || []).map((post) => {
-        const snippet = extractSnippet(post.content || '', q)
-        const description =
-          post.excerpt || (post.content ? post.content.substring(0, 120) + '...' : '')
-        return {
-          id: `user-${post.id}`,
-          title: post.title,
-          description,
-          snippet: snippet.html,
-          matchInContent: snippet.matchInContent,
-          category: post.category || '技术分享',
-          icon: 'mdi:newspaper-variant',
-          color: post.color || '#FF6B6B',
-          path: `/blog/${post.slug}`,
-        }
-      })
-    }
-
-    // 静态数据在标题/描述/分类中匹配
-    const lowerQ = q.toLowerCase()
-    const staticResults = staticData
-      .filter(
-        (item) =>
-          item.title.toLowerCase().includes(lowerQ) ||
-          item.description.toLowerCase().includes(lowerQ) ||
-          item.category.toLowerCase().includes(lowerQ),
-      )
-      .map((item) => ({
-        ...item,
-        snippet: '',
-        matchInContent: false,
-      }))
-
-    // 合并结果：动态文章在前（通常更相关），静态在后
-    searchResults.value = [...dynamicResults, ...staticResults].slice(0, 20)
-  } catch (e) {
-    console.error('搜索失败:', e)
-    searchResults.value = []
-  } finally {
-    isLoading.value = false
-  }
+  searchResults.value = searchEntries
+    .filter((item) => !selectedCategory.value || item.category === selectedCategory.value)
+    .filter(
+      (item) =>
+        item.title.toLowerCase().includes(lowerQ) ||
+        item.description.toLowerCase().includes(lowerQ) ||
+        item.category.toLowerCase().includes(lowerQ) ||
+        item.keywords.toLowerCase().includes(lowerQ),
+    )
+    .slice(0, 20)
 }
 
 const hotTags = ['SniShaper', '英语听写', 'MBTI', 'C++', '心理测试']
@@ -383,17 +298,10 @@ const performSearch = () => {
     return
   }
 
-  // 分类筛选（有分类但无搜索词时，在静态数据中按分类筛选）
-  if (selectedCategory.value && !q) {
-    searchResults.value = staticData
-      .filter((item) => item.category === selectedCategory.value)
-      .map((item) => ({ ...item, snippet: '', matchInContent: false }))
-    return
-  }
-
   isLoading.value = true
   debounceTimer = setTimeout(() => {
-    searchFromSupabase(q)
+    searchStatic(q)
+    isLoading.value = false
   }, 300)
 }
 

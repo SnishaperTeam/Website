@@ -31,21 +31,6 @@ const router = createRouter({
       component: () => import('../views/BlogPostView.vue'),
     },
     {
-      path: '/blog/new',
-      name: 'new-post',
-      component: () => import('../views/PostEditorView.vue'),
-    },
-    {
-      path: '/blog/edit/:id',
-      name: 'edit-post',
-      component: () => import('../views/PostEditorView.vue'),
-    },
-    {
-      path: '/admin',
-      name: 'admin',
-      component: () => import('../views/AdminView.vue'),
-    },
-    {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue'),
@@ -86,24 +71,9 @@ const router = createRouter({
       component: () => import('../views/TestPageView.vue'),
     },
     {
-      path: '/auth',
-      name: 'auth',
-      component: () => import('../views/AuthTestView.vue'),
-    },
-    {
-      path: '/auth/callback',
-      name: 'auth-callback',
-      component: () => import('../views/AuthCallbackView.vue'),
-    },
-    {
-      path: '/reset-password',
-      name: 'reset-password',
-      component: () => import('../views/ResetPasswordView.vue'),
-    },
-    {
-      path: '/user/:userId',
-      name: 'profile',
-      component: () => import('../views/ProfileView.vue'),
+      path: '/favorites',
+      name: 'favorites',
+      component: () => import('../views/FavoritesView.vue'),
     },
     {
       path: '/privacy',

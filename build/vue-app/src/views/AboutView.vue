@@ -12,7 +12,7 @@ const members = [
 ]
 const { visible: memVisible } = useStaggeredFade(members.length, 120)
 
-const skills = ['C++', 'Rust', 'Vue 3', 'TypeScript', 'WinUI 3', 'Supabase', 'Vite', 'Git']
+const skills = ['C++', 'Rust', 'Vue 3', 'TypeScript', 'WinUI 3', 'Qt 6', 'Vite', 'Git']
 const { visible: skVisible } = useStaggeredFade(skills.length, 70)
 
 const values = [
