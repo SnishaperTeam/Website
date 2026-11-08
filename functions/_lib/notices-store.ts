@@ -31,7 +31,7 @@ export interface StoreEnv {
 export const CACHE_KEY = 'https://notices.jetcpp.ccwu.cc/api/notices'
 export const CACHE_TTL = 60
 
-const DEFAULT_REPO = 'dongzheyu/dongzheyu.github.io'
+const DEFAULT_REPO = 'SnishaperTeam/Website'
 const DEFAULT_FILE = 'build/vue-app/notices/notices.json'
 const DEFAULT_BRANCH = 'main'
 const LEVELS = ['info', 'important', 'critical']
