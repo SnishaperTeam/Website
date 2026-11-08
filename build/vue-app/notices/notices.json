@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "updated_at": "2026-11-08T11:15:25.666Z",
+  "version": 2,
+  "updated_at": "2026-11-08T11:59:11.325Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -13,6 +13,14 @@
       "level": "info",
       "published_at": "2026-11-08T11:00:00Z",
       "pinned": true
+    },
+    {
+      "id": "auth-check",
+      "title": "auth-check",
+      "body": "temporary",
+      "level": "info",
+      "published_at": "2026-11-08T11:59:11.052Z",
+      "pinned": false
     }
   ]
 }
