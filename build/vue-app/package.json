@@ -16,23 +16,23 @@
   },
   "dependencies": {
     "@iconify-json/mdi": "^1.2.3",
-    "@iconify-json/simple-icons": "^1.2.91",
-    "@iconify/vue": "^4.3.0",
-    "@supabase/supabase-js": "^2.105.1",
+    "@iconify-json/simple-icons": "^1.2.101",
+    "@iconify/vue": "^5.0.5",
+    "@supabase/supabase-js": "^2.119.0",
     "bootstrap": "^5.3.8",
-    "markdown-it": "^14.1.1",
-    "vue": "^3.2.0",
-    "vue-router": "^4.0.0"
+    "markdown-it": "^15.0.3",
+    "vue": "^3.5.45",
+    "vue-router": "^5.4.0"
   },
   "devDependencies": {
-    "@tsconfig/node22": "^22.0.5",
-    "@types/markdown-it": "^14.1.2",
-    "@types/node": "^25.6.0",
-    "@vitejs/plugin-vue": "^6.0.3",
-    "@vue/tsconfig": "^0.8.1",
-    "esbuild": "^0.28.0",
-    "prettier": "^3.9.4",
-    "vite": "^8.0.10",
-    "tsx": "^4"
+    "@tsconfig/node22": "^22.0.6",
+    "@types/markdown-it": "^14.2.0",
+    "@types/node": "^26.6.6",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vue/tsconfig": "^0.9.1",
+    "esbuild": "^0.28.2",
+    "prettier": "^3.9.10",
+    "vite": "^8.3.6",
+    "tsx": "^4.23.15"
   }
 }
