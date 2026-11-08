@@ -65,18 +65,18 @@
             <div class="q-head">
               <span class="q-num">{{ index + 1 }}</span>
               <span class="q-text">{{ q.text }}</span>
-              <span v-if="q.dimension" class="q-tag">{{ q.dimension }}</span>
+              <span v-if="q.dimension" class="q-tag">{{ dimensionLabel(q) }}</span>
             </div>
             <div class="q-opts">
               <button
-                v-for="opt in options"
+                v-for="opt in q.options ?? options"
                 :key="opt.value"
                 type="button"
                 class="opt"
-                :class="{ 'opt-on': answers[q.id] === opt.value }"
+                :class="{ 'opt-on': answers[q.id] === opt.value, 'opt-plain': !!q.options }"
                 @click="selectAnswer(q.id, opt.value)"
               >
-                <span class="opt-score">{{ opt.value }}</span>
+                <span v-if="!q.options" class="opt-score">{{ opt.value }}</span>
                 {{ opt.label }}
               </button>
             </div>
@@ -104,12 +104,35 @@
 
           <div class="r-card">
             <div class="r-score-wrap">
-              <div class="r-score">{{ totalScore }}</div>
-              <div class="r-max">/ {{ maxScore }}</div>
+              <div v-if="badge" class="r-badge">{{ badge }}</div>
+              <template v-else>
+                <div class="r-score">{{ totalScore }}</div>
+                <div class="r-max">/ {{ maxScore }}</div>
+              </template>
             </div>
             <div class="r-body">
               <div class="r-level">{{ result?.level }}</div>
               <p class="r-desc">{{ result?.description }}</p>
+            </div>
+          </div>
+
+          <div v-if="bars.length" class="bars-section">
+            <div class="sec-head">维度倾向</div>
+            <div class="bar-list">
+              <div v-for="bar in bars" :key="bar.key" class="bar-row">
+                <div class="bar-head">
+                  <span class="bar-pole" :class="{ 'bar-on': bar.leftDominant }">{{ bar.left }}</span>
+                  <span class="bar-name">{{ bar.label }}</span>
+                  <span class="bar-pole" :class="{ 'bar-on': !bar.leftDominant }">{{ bar.right }}</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill" :style="{ width: bar.leftPercent + '%' }"></div>
+                  <div class="bar-mid"></div>
+                </div>
+                <div class="bar-pct">
+                  {{ bar.leftPercent }}% · {{ 100 - bar.leftPercent }}%
+                </div>
+              </div>
             </div>
           </div>
 
@@ -138,17 +161,30 @@
             </div>
           </div>
 
-          <div class="detail-section">
+          <div v-if="result?.analysis || (result?.suggestions && result.suggestions.length)" class="detail-section">
             <div class="sec-head">详细分析</div>
             <div class="detail-cols">
-              <div class="detail-block">
-                <div class="detail-block-title">测试说明</div>
-                <p class="detail-text">{{ result?.analysis }}</p>
+              <div v-if="result?.analysis" class="detail-block">
+                <div class="detail-block-title">{{ analysisTitle }}</div>
+                <p class="detail-text">{{ result.analysis }}</p>
               </div>
-              <div class="detail-block">
+              <div v-if="result?.suggestions && result.suggestions.length" class="detail-block">
                 <div class="detail-block-title">建议行动</div>
                 <ul class="detail-list">
-                  <li v-for="s in result?.suggestions" :key="s">{{ s }}</li>
+                  <li v-for="s in result.suggestions" :key="s">{{ s }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="sections.length" class="detail-section">
+            <div class="sec-head">深度解读</div>
+            <div class="sections-grid">
+              <div v-for="sec in sections" :key="sec.title" class="detail-block">
+                <div class="detail-block-title">{{ sec.title }}</div>
+                <p v-if="sec.text" class="detail-text">{{ sec.text }}</p>
+                <ul v-if="sec.items && sec.items.length" class="detail-list">
+                  <li v-for="item in sec.items" :key="item">{{ item }}</li>
                 </ul>
               </div>
             </div>
@@ -177,6 +213,7 @@ import { ref, computed, onMounted, type PropType } from 'vue'
 import { RouterLink } from 'vue-router'
 import ReadingProgress from '@/components/ReadingProgress.vue'
 import { Icon } from '@iconify/vue'
+import type { ResultBar, ResultSection } from '@/data/tests'
 import { useFavorites, useHistory, useTestProgress } from '@/composables/useStore'
 
 interface Question {
@@ -222,6 +259,20 @@ const props = defineProps({
   disclaimer: { type: String, required: true },
   dimensions: { type: Array as PropType<Dimension[]>, default: () => [] },
   showAnswerReview: { type: Boolean, default: false },
+  analysisTitle: { type: String, default: '测试说明' },
+  dimensionLabels: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
+  getBadge: {
+    type: Function as PropType<(answers: Record<number, number>) => string>,
+    default: undefined,
+  },
+  getBars: {
+    type: Function as PropType<(answers: Record<number, number>) => ResultBar[]>,
+    default: undefined,
+  },
+  getSections: {
+    type: Function as PropType<(answers: Record<number, number>) => ResultSection[]>,
+    default: undefined,
+  },
 })
 
 const answers = ref<Record<number, number>>({})
@@ -246,10 +297,21 @@ const totalScore = computed(() =>
   props.questions.reduce((sum, q) => sum + (answers.value[q.id] ?? 0), 0),
 )
 
-const maxScore = computed(() => {
-  const maxOptionValue = Math.max(...props.options.map((o) => o.value))
-  return props.questions.length * maxOptionValue
-})
+const maxScore = computed(() =>
+  props.questions.reduce((sum, q) => {
+    const opts = q.options?.length ? q.options : props.options
+    return sum + Math.max(...opts.map((o) => o.value), 0)
+  }, 0),
+)
+
+const badge = computed(() => (props.getBadge ? props.getBadge(answers.value) : ''))
+const bars = computed(() => (props.getBars ? props.getBars(answers.value) : []))
+const sections = computed(() => (props.getSections ? props.getSections(answers.value) : []))
+
+const dimensionLabel = (q: { dimension?: string }) => {
+  if (!q.dimension) return ''
+  return props.dimensionLabels[q.dimension] ?? q.dimension
+}
 
 const selectAnswer = (questionId: number, value: number) => {
   answers.value[questionId] = value
@@ -559,6 +621,17 @@ defineExpose({ totalScore, answers })
   font-size: 1.1rem;
 }
 
+.opt-plain {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  padding: 0.7rem 0.9rem;
+  min-width: 160px;
+  line-height: 1.5;
+  text-align: left;
+}
+
 .submit-line {
   display: flex;
   align-items: center;
@@ -604,6 +677,93 @@ defineExpose({ totalScore, answers })
 .r-max {
   font-size: 1.2rem;
   color: var(--color-text-secondary);
+}
+
+.r-badge {
+  font-size: 2.6rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+.bars-section {
+  margin-bottom: 1.5rem;
+}
+
+.bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem 0.75rem;
+  align-items: center;
+}
+
+.bar-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.bar-pole {
+  color: var(--color-text-faint);
+  transition: color 0.2s;
+}
+
+.bar-pole.bar-on {
+  color: var(--color-text);
+}
+
+.bar-name {
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin: 0 auto;
+}
+
+.bar-track {
+  position: relative;
+  height: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  grid-column: 1;
+}
+
+.bar-fill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.5);
+  transition: width 0.5s var(--ease-out-expo);
+}
+
+.bar-mid {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--color-border);
+}
+
+.bar-pct {
+  grid-column: 2;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+}
+
+.sections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
 }
 
 .r-body {

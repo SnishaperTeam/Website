@@ -8,6 +8,7 @@ export interface Question {
   category?: string
   dim?: string
   hint?: string
+  options?: Option[]
 }
 
 export interface Option {
@@ -31,6 +32,22 @@ export interface Result {
   suggestions: string[]
 }
 
+export interface ResultBar {
+  key: string
+  left: string
+  right: string
+  label: string
+  leftPercent: number
+  leftDominant: boolean
+  dominantPercent: number
+}
+
+export interface ResultSection {
+  title: string
+  items?: string[]
+  text?: string
+}
+
 export interface TestConfig {
   title: string
   subtitle: string
@@ -42,9 +59,14 @@ export interface TestConfig {
   options: Option[]
   disclaimerTitle?: string
   disclaimer: string
+  analysisTitle?: string
+  dimensionLabels?: Record<string, string>
   showAnswerReview?: boolean
   calculateResult: (answers: Record<number, number>) => Result
   getDimensions?: (answers: Record<number, number>) => Dimension[]
+  getBadge?: (answers: Record<number, number>) => string
+  getBars?: (answers: Record<number, number>) => ResultBar[]
+  getSections?: (answers: Record<number, number>) => ResultSection[]
 }
 
 const phq9Questions: Question[] = [

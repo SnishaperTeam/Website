@@ -13,6 +13,11 @@
     :show-answer-review="config.showAnswerReview ?? false"
     :disclaimer-title="config.disclaimerTitle ?? '重要说明'"
     :disclaimer="config.disclaimer"
+    :analysis-title="config.analysisTitle ?? '测试说明'"
+    :dimension-labels="config.dimensionLabels"
+    :get-badge="config.getBadge"
+    :get-bars="config.getBars"
+    :get-sections="config.getSections"
     :dimensions="dimensions"
   />
   <div v-else class="page-head">
