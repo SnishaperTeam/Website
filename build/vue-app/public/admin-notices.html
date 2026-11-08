@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>公告管理 · SniShaper</title>
+<style>
+  :root {
+    --bg: #121010;
+    --panel: #1b1817;
+    --panel-2: #221e1c;
+    --line: #322c29;
+    --text: #f2ede6;
+    --muted: #9a8f86;
+    --accent: #ff8a3d;
+    --accent-dim: #b45f2a;
+    --danger: #e2563f;
+    --ok: #4ea36a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at 82% -10%, rgba(255, 138, 61, 0.14), transparent 60%),
+      radial-gradient(800px 400px at 8% 108%, rgba(255, 138, 61, 0.07), transparent 65%),
+      var(--bg);
+    color: var(--text);
+    font: 14px/1.6 "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    position: relative;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='0.22'/></svg>");
+  }
+  .wrap { position: relative; max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 28px; }
+  h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); font-size: 12px; margin-top: 6px; letter-spacing: 0.02em; }
+  .auth { display: flex; gap: 8px; align-items: center; }
+  input, textarea, select, button { font: inherit; color: inherit; }
+  input, textarea, select {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+    outline: none;
+    transition: border-color 0.18s ease, background 0.18s ease;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent-dim); background: #262120; }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.65; }
+  label { display: block; font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin: 14px 0 6px; }
+  button {
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    border-radius: 8px;
+    padding: 9px 16px;
+    transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease, background 0.18s ease;
+  }
+  button:hover { border-color: var(--accent-dim); transform: translateY(-1px); }
+  button:active { transform: translateY(0); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #1a1410; font-weight: 650; }
+  button.primary:hover { background: #ff9a58; }
+  button.ghost { background: transparent; }
+  button.danger { color: var(--danger); border-color: #4a2b25; }
+  button.danger:hover { border-color: var(--danger); }
+  .grid { display: grid; grid-template-columns: minmax(340px, 0.85fr) 1.15fr; gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .panel {
+    background: linear-gradient(180deg, rgba(34, 30, 28, 0.92), rgba(23, 20, 19, 0.92));
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 24px 60px -40px rgba(0, 0, 0, 0.9);
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 600; }
+  .row { display: flex; gap: 12px; }
+  .row > div { flex: 1; }
+  .actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; max-height: 68vh; overflow-y: auto; padding-right: 4px; }
+  .item {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: rgba(27, 24, 23, 0.85);
+    transition: border-color 0.18s ease, background 0.18s ease;
+  }
+  .item:hover { background: var(--panel-2); border-color: var(--accent-dim); }
+  .item.critical { border-left-color: var(--danger); }
+  .item.important { border-left-color: var(--accent); }
+  .item.info { border-left-color: #4b6a8a; }
+  .item-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .item-title { font-weight: 620; font-size: 14px; }
+  .item-meta { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .item-body { color: #c9c0b8; font-size: 12.5px; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .item-foot { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+  .chip { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .chip.pin { color: var(--accent); border-color: var(--accent-dim); }
+  .chip.expired { color: var(--danger); border-color: #4a2b25; }
+  .spacer { flex: 1; }
+  .hint { font-size: 11.5px; color: var(--muted); margin-top: 10px; line-height: 1.55; }
+  #toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 16px);
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 18px; font-size: 13px; opacity: 0; pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 20px 50px -24px #000; z-index: 50;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #toast.err { border-color: var(--danger); color: #ffb4a4; }
+  #toast.ok { border-color: var(--ok); color: #b9e8c7; }
+  .empty { color: var(--muted); font-size: 12.5px; padding: 28px 0; text-align: center; }
+  .status { font-size: 11px; color: var(--muted); }
+  .status b { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>SniShaper <span>公告管理</span></h1>
+      <div class="sub">发布后立即通过 <code>/api/notices</code> 对外提供服务，客户端主页自动拉取</div>
+    </div>
+    <div class="auth">
+      <input id="token" type="password" placeholder="管理令牌" style="width: 220px" />
+      <button class="ghost" id="saveToken">保存令牌</button>
+      <button class="ghost" id="reload">刷新</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="panel">
+      <h2 id="formTitle">新建公告</h2>
+      <div class="status" id="status">未加载</div>
+      <label for="title">标题（中文，必填）</label>
+      <input id="title" placeholder="例如：1.30.0 版本发布" />
+      <label for="title_en">标题（English）</label>
+      <input id="title_en" />
+      <label for="title_ru">标题（Русский）</label>
+      <input id="title_ru" />
+      <label for="body">正文（中文，必填）</label>
+      <textarea id="body"></textarea>
+      <label for="body_en">正文（English）</label>
+      <textarea id="body_en"></textarea>
+      <label for="body_ru">正文（Русский）</label>
+      <textarea id="body_ru"></textarea>
+      <div class="row">
+        <div>
+          <label for="level">级别</label>
+          <select id="level">
+            <option value="info">info 普通</option>
+            <option value="important">important 重要</option>
+            <option value="critical">critical 紧急</option>
+          </select>
+        </div>
+        <div>
+          <label for="pinned">置顶</label>
+          <select id="pinned">
+            <option value="false">否</option>
+            <option value="true">是</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="published_at">发布时间</label>
+          <input id="published_at" type="datetime-local" />
+        </div>
+        <div>
+          <label for="expires_at">过期时间（可空）</label>
+          <input id="expires_at" type="datetime-local" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="link">外链（可空）</label>
+          <input id="link" placeholder="https://" />
+        </div>
+        <div>
+          <label for="link_text">外链文字</label>
+          <input id="link_text" placeholder="查看详情" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="submit">发布</button>
+        <button class="ghost" id="reset">清空表单</button>
+      </div>
+      <div class="hint">正文支持换行，客户端按段落渲染。英文、俄文留空时回退中文。</div>
+    </section>
+
+    <section class="panel">
+      <h2>全部公告</h2>
+      <div class="status" id="listStatus">加载中…</div>
+      <div class="list" id="list"></div>
+    </section>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+  const api = new URL('/api/notices', location.origin).toString()
+  const el = (id) => document.getElementById(id)
+  const fields = ['title', 'title_en', 'title_ru', 'body', 'body_en', 'body_ru', 'level', 'pinned', 'published_at', 'expires_at', 'link', 'link_text']
+  let editing = null
+  let document_all = []
+
+  function tokenHeaders(extra) {
+    const token = (localStorage.getItem('snishaper_notice_token') || '').trim()
+    const headers = Object.assign({ 'Content-Type': 'application/json' }, extra || {})
+    if (token) headers.Authorization = 'Bearer ' + token
+    return headers
+  }
+
+  function toast(message, kind) {
+    const node = el('toast')
+    node.textContent = message
+    node.className = 'show ' + (kind || '')
+    clearTimeout(node._timer)
+    node._timer = setTimeout(() => { node.className = '' }, 3200)
+  }
+
+  function toLocalInput(iso) {
+    if (!iso) return ''
+    const date = new Date(iso)
+    if (Number.isNaN(date.getTime())) return ''
+    const pad = (n) => String(n).padStart(2, '0')
+    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + 'T' + pad(date.getHours()) + ':' + pad(date.getMinutes())
+  }
+
+  function toISO(value) {
+    if (!value) return ''
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return ''
+    return date.toISOString()
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '—'
+    const date = new Date(iso)
+    if (Number.isNaN(date.getTime())) return iso
+    return date.toLocaleString('zh-CN', { hour12: false })
+  }
+
+  function readForm() {
+    const payload = {}
+    for (const key of fields) {
+      const raw = el(key).value
+      if (key === 'pinned') payload.pinned = raw === 'true'
+      else if (key === 'published_at' || key === 'expires_at') payload[key] = toISO(raw)
+      else payload[key] = raw.trim()
+    }
+    return payload
+  }
+
+  function fillForm(notice) {
+    editing = notice ? notice.id : null
+    el('formTitle').textContent = notice ? '编辑公告 · ' + notice.id : '新建公告'
+    el('submit').textContent = notice ? '保存修改' : '发布'
+    el('title').value = notice?.title || ''
+    el('title_en').value = notice?.title_en || ''
+    el('title_ru').value = notice?.title_ru || ''
+    el('body').value = notice?.body || ''
+    el('body_en').value = notice?.body_en || ''
+    el('body_ru').value = notice?.body_ru || ''
+    el('level').value = notice?.level || 'info'
+    el('pinned').value = notice?.pinned ? 'true' : 'false'
+    el('published_at').value = toLocalInput(notice?.published_at || new Date().toISOString())
+    el('expires_at').value = toLocalInput(notice?.expires_at || '')
+    el('link').value = notice?.link || ''
+    el('link_text').value = notice?.link_text || ''
+  }
+
+  function render() {
+    const host = el('list')
+    host.innerHTML = ''
+    if (!document_all.length) {
+      host.innerHTML = '<div class="empty">还没有公告</div>'
+      return
+    }
+    const now = Date.now()
+    for (const notice of document_all) {
+      const card = document.createElement('div')
+      card.className = 'item ' + (notice.level || 'info')
+      const expired = notice.expires_at && new Date(notice.expires_at).getTime() <= now
+      card.innerHTML =
+        '<div class="item-top"><div class="item-title"></div><div class="item-meta">' + formatTime(notice.published_at) + '</div></div>' +
+        '<div class="item-body"></div>' +
+        '<div class="item-foot">' +
+          '<span class="chip">' + (notice.level || 'info') + '</span>' +
+          (notice.pinned ? '<span class="chip pin">置顶</span>' : '') +
+          (expired ? '<span class="chip expired">已过期</span>' : '') +
+          '<span class="spacer"></span>' +
+          '<button class="ghost" data-act="edit">编辑</button>' +
+          '<button class="danger" data-act="delete">删除</button>' +
+        '</div>'
+      card.querySelector('.item-title').textContent = notice.title || '(无标题)'
+      card.querySelector('.item-body').textContent = notice.body || ''
+      card.querySelector('[data-act="edit"]').addEventListener('click', () => {
+        fillForm(notice)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+      card.querySelector('[data-act="delete"]').addEventListener('click', () => removeNotice(notice))
+      host.appendChild(card)
+    }
+  }
+
+  async function load() {
+    el('listStatus').textContent = '加载中…'
+    try {
+      const response = await fetch(api + '?all=1&fresh=1')
+      const data = await response.json()
+      if (!data.ok) throw new Error(data.error || 'load failed')
+      document_all = data.notices || []
+      el('listStatus').textContent = '共 ' + document_all.length + ' 条 · 版本 v' + data.version + ' · 来源 ' + data.source
+      el('status').textContent = '数据版本 v' + data.version + ' · 更新于 ' + formatTime(data.updated_at)
+      render()
+    } catch (error) {
+      el('listStatus').textContent = '加载失败：' + error.message
+      toast('加载失败：' + error.message, 'err')
+    }
+  }
+
+  async function submit() {
+    const payload = readForm()
+    if (!payload.title || !payload.body) {
+      toast('标题与正文必填', 'err')
+      return
+    }
+    if (!payload.published_at) payload.published_at = new Date().toISOString()
+    try {
+      const isEdit = Boolean(editing)
+      const url = isEdit ? api + '/' + encodeURIComponent(editing) : api
+      const response = await fetch(url, {
+        method: isEdit ? 'PATCH' : 'POST',
+        headers: tokenHeaders(),
+        body: JSON.stringify(payload),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.ok) throw new Error(data.error || 'HTTP ' + response.status)
+      toast(isEdit ? '已保存' : '已发布', 'ok')
+      fillForm(null)
+      await load()
+    } catch (error) {
+      toast('提交失败：' + error.message, 'err')
+    }
+  }
+
+  async function removeNotice(notice) {
+    if (!confirm('删除公告「' + (notice.title || notice.id) + '」？')) return
+    try {
+      const response = await fetch(api + '/' + encodeURIComponent(notice.id), {
+        method: 'DELETE',
+        headers: tokenHeaders(),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.ok) throw new Error(data.error || 'HTTP ' + response.status)
+      toast('已删除', 'ok')
+      if (editing === notice.id) fillForm(null)
+      await load()
+    } catch (error) {
+      toast('删除失败：' + error.message, 'err')
+    }
+  }
+
+  el('token').value = localStorage.getItem('snishaper_notice_token') || ''
+  el('saveToken').addEventListener('click', () => {
+    localStorage.setItem('snishaper_notice_token', el('token').value.trim())
+    toast('令牌已保存到本地', 'ok')
+  })
+  el('reload').addEventListener('click', load)
+  el('submit').addEventListener('click', submit)
+  el('reset').addEventListener('click', () => fillForm(null))
+  fillForm(null)
+  load()
+</script>
+</body>
+</html>

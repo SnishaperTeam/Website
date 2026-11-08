@@ -23,5 +23,9 @@ supabase.exe
 .wrangler/
 .dev.vars
 
+# 公告服务端本地凭据
+.notice-admin-token
+.notice-github-token
+
 # WorkBuddy 本地工具数据
 .workbuddy/
