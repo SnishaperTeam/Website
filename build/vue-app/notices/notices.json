@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "updated_at": "2026-11-08T11:15:25.666Z",
+  "notices": [
+    {
+      "id": "welcome-2026-11",
+      "title": "公告中心已上线",
+      "title_en": "Announcement center is now live",
+      "title_ru": "Центр объявлений запущен",
+      "body": "SniShaper 主页现在会展示官方公告。维护通知、版本更新、订阅源调整等重要信息都会在这里发布，点击主页的公告卡片可以查看全部历史公告。",
+      "body_en": "The SniShaper dashboard now shows official announcements. Maintenance notices, release updates and subscription changes are published here; open the announcement card on the dashboard to browse the full history.",
+      "body_ru": "На главной странице SniShaper теперь отображаются официальные объявления. Здесь публикуются уведомления об обслуживании, обновлениях и изменениях подписок; откройте карточку объявлений, чтобы просмотреть всю историю.",
+      "level": "info",
+      "published_at": "2026-11-08T11:00:00Z",
+      "pinned": true
+    }
+  ]
+}
