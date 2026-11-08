@@ -1,0 +1,1 @@
+import{N as e,m as t,s as n,x as r}from"./runtime-core.esm-bundler-Dkt02xnc.js";import{r as i,t as a}from"./projects-Cfv7SGuF.js";var o=t({__name:`LumineView`,setup(t){return(t,o)=>(r(),n(i,{config:e(a)},null,8,[`config`]))}});export{o as default};

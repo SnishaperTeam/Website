@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --bun vite",
+    "dev:api": "bun scripts/dev-api.js",
     "prebuild": "",
     "build": "bun run generate-rss && bun run --bun vite build && bun run deploy",
     "deploy": "bun scripts/deploy.js && bun -e \"import fs from 'fs'; fs.copyFileSync('dist/index.html', 'dist/404.html')\"",

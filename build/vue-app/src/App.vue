@@ -1,8 +1,17 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useAuth } from './composables/useAuth'
 import { useNoiseOverlay } from './composables/useNoiseOverlay'
+
+const router = useRouter()
+const { user, loading, isAuthenticated, signOut } = useAuth()
+
+const handleSignOut = () => {
+  signOut()
+  router.push('/')
+}
 
 onMounted(() => useNoiseOverlay())
 </script>
@@ -25,6 +34,17 @@ onMounted(() => useNoiseOverlay())
       <a class="nav-icon-btn" href="https://github.com/dongzheyu" target="_blank" title="GitHub">
         <Icon icon="mdi:github" width="16" />
       </a>
+      <template v-if="isAuthenticated && user">
+        <RouterLink :to="`/user/${user.id}`" class="nav-icon-btn" title="个人主页">
+          <Icon icon="mdi:account-circle" width="18" />
+        </RouterLink>
+        <button class="nav-icon-btn" @click="handleSignOut" title="退出登录">
+          <Icon icon="mdi:exit-to-app" width="18" />
+        </button>
+      </template>
+      <RouterLink v-else-if="!loading" to="/auth" class="nav-icon-btn" title="登录">
+        <Icon icon="mdi:login-variant" width="18" />
+      </RouterLink>
     </div>
   </nav>
 

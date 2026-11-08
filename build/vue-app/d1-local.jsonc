@@ -1,0 +1,10 @@
+{
+  "name": "snishaper-web-local",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "snishaper-web",
+      "database_id": "35660f49-87c6-46a3-9215-f2518733ab27"
+    }
+  ]
+}
