@@ -1,3 +1,4 @@
+import { getDb } from './db'
 import { fail, type Env, type UserRow } from './types'
 import { verifyJwt } from './crypto'
 
@@ -13,7 +14,7 @@ export async function requireUser(request: Request, env: Env): Promise<AuthedReq
   if (!token) return fail('未登录', 401)
   const payload = await verifyJwt(token, env.JWT_SECRET)
   if (!payload) return fail('登录已过期，请重新登录', 401)
-  const row = await env.DB.prepare('SELECT * FROM users WHERE id = ?')
+  const row = await getDb(env).prepare('SELECT * FROM users WHERE id = ?')
     .bind(payload.sub)
     .first<UserRow>()
   if (!row) return fail('账号不存在', 401)

@@ -1,4 +1,5 @@
 import { readBody, requireUser, str } from '../../_shared/auth'
+import { getDb } from '../../_shared/db'
 import { fail, json, toPrivateUser, type Env, type UserRow } from '../../_shared/types'
 
 export const onRequestGet = async (context: { request: Request; env: Env }) => {
@@ -39,11 +40,11 @@ export const onRequestPatch = async (context: { request: Request; env: Env }) =>
   updates.push("updated_at = datetime('now')")
   values.push(auth.userId)
 
-  await context.env.DB.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`)
+  await getDb(context.env).prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`)
     .bind(...values)
     .run()
 
-  const row = await context.env.DB.prepare('SELECT * FROM users WHERE id = ?')
+  const row = await getDb(context.env).prepare('SELECT * FROM users WHERE id = ?')
     .bind(auth.userId)
     .first<UserRow>()
   return json({ user: toPrivateUser(row as UserRow) })

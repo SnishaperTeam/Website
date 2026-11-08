@@ -1,5 +1,6 @@
 import { hashPassword, newSalt, signJwt } from '../../_shared/crypto'
 import { readBody, requireUser, str } from '../../_shared/auth'
+import { getDb } from '../../_shared/db'
 import { fail, json, type Env } from '../../_shared/types'
 
 export const onRequestPost = async (context: { request: Request; env: Env }) => {
@@ -21,7 +22,7 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
   const salt = newSalt()
   const passwordHash = await hashPassword(newPassword, salt)
 
-  await context.env.DB.prepare(
+  await getDb(context.env).prepare(
     'UPDATE users SET password_hash = ?, password_salt = ?, updated_at = datetime(\'now\') WHERE id = ?',
   )
     .bind(passwordHash, salt, auth.userId)

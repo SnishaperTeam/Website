@@ -1,10 +1,12 @@
+import { getDb } from './db'
 import type { Env } from './types'
 
 let ensured = false
 
 export async function ensureSchema(env: Env): Promise<void> {
   if (ensured) return
-  await env.DB.prepare(
+  const db = getDb(env)
+  await db.prepare(
     `CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL UNIQUE,
@@ -17,6 +19,6 @@ export async function ensureSchema(env: Env): Promise<void> {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`,
   ).run()
-  await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_users_email ON users (email)').run()
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_users_email ON users (email)').run()
   ensured = true
 }

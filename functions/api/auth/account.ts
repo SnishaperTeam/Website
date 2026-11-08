@@ -1,5 +1,6 @@
 import { hashPassword } from '../../_shared/crypto'
 import { readBody, requireUser, str } from '../../_shared/auth'
+import { getDb } from '../../_shared/db'
 import { fail, json, type Env } from '../../_shared/types'
 
 export const onRequestDelete = async (context: { request: Request; env: Env }) => {
@@ -15,6 +16,6 @@ export const onRequestDelete = async (context: { request: Request; env: Env }) =
   const hash = await hashPassword(password, auth.row.password_salt)
   if (hash !== auth.row.password_hash) return fail('密码错误', 401)
 
-  await context.env.DB.prepare('DELETE FROM users WHERE id = ?').bind(auth.userId).run()
+  await getDb(context.env).prepare('DELETE FROM users WHERE id = ?').bind(auth.userId).run()
   return json({ ok: true })
 }

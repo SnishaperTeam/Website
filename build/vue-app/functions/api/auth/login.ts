@@ -1,5 +1,6 @@
 import { hashPassword, signJwt } from '../../_shared/crypto'
 import { readBody, str } from '../../_shared/auth'
+import { getDb } from '../../_shared/db'
 import { fail, json, toPrivateUser, type Env, type UserRow } from '../../_shared/types'
 
 export const onRequestPost = async (context: { request: Request; env: Env }) => {
@@ -10,7 +11,7 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
   const password = str(body.password)
   if (!email || !password) return fail('请输入邮箱和密码')
 
-  const row = await context.env.DB.prepare('SELECT * FROM users WHERE email = ?')
+  const row = await getDb(context.env).prepare('SELECT * FROM users WHERE email = ?')
     .bind(email)
     .first<UserRow>()
   if (!row) return fail('邮箱或密码错误', 401)
