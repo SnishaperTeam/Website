@@ -20,5 +20,67 @@ export async function ensureSchema(env: Env): Promise<void> {
     )`,
   ).run()
   await db.prepare('CREATE INDEX IF NOT EXISTS idx_users_email ON users (email)').run()
+
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS user_posts (
+      id TEXT PRIMARY KEY,
+      author_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      excerpt TEXT,
+      content TEXT NOT NULL,
+      category TEXT,
+      color TEXT,
+      tags TEXT,
+      published INTEGER NOT NULL DEFAULT 1,
+      views INTEGER NOT NULL DEFAULT 0,
+      likes INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`,
+  ).run()
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_posts_slug ON user_posts (slug)').run()
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_posts_author ON user_posts (author_id)').run()
+
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS comments (
+      id TEXT PRIMARY KEY,
+      post_slug TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`,
+  ).run()
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_comments_slug ON comments (post_slug)').run()
+
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS user_favorites (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      item_id TEXT NOT NULL,
+      item_title TEXT NOT NULL,
+      item_description TEXT,
+      item_icon TEXT,
+      item_color TEXT,
+      item_type TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(user_id, item_id)
+    )`,
+  ).run()
+
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS user_test_history (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      test_id TEXT NOT NULL,
+      test_title TEXT NOT NULL,
+      score INTEGER,
+      max_score INTEGER,
+      level TEXT,
+      completed_at TEXT NOT NULL,
+      UNIQUE(user_id, test_id)
+    )`,
+  ).run()
+
   ensured = true
 }

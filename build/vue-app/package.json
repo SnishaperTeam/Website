@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "bun run --bun vite",
+    "dev": "bun scripts/dev.js",
     "dev:api": "bun scripts/dev-api.js",
     "prebuild": "",
     "build": "bun run generate-rss && bun run --bun vite build && bun run deploy",

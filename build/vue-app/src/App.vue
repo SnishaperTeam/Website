@@ -27,7 +27,6 @@ onMounted(() => useNoiseOverlay())
       <li><RouterLink to="/blog">[博客]</RouterLink></li>
       <li><RouterLink to="/about">[关于]</RouterLink></li>
       <li><RouterLink to="/tests">[测评]</RouterLink></li>
-      <li><RouterLink to="/favorites">[收藏]</RouterLink></li>
       <li><RouterLink to="/emergency">[求助]</RouterLink></li>
     </ul>
     <div class="geek-nav-actions">
