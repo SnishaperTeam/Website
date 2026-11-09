@@ -38,6 +38,21 @@ const md = new MarkdownIt({
   breaks: true,
 })
 
+md.core.ruler.after('inline', 'task-list', (state) => {
+  for (const token of state.tokens) {
+    if (token.type !== 'inline' || !token.children?.length) continue
+    const first = token.children[0]
+    if (first.type !== 'text') continue
+    const match = /^\[([ xX])\]\s+/.exec(first.content)
+    if (!match) continue
+    const checked = match[1].toLowerCase() === 'x'
+    first.content = first.content.slice(match[0].length)
+    const box = new state.Token('html_inline', '', 0)
+    box.content = `<input type="checkbox" class="task-checkbox" disabled${checked ? ' checked' : ''}>`
+    token.children.unshift(box)
+  }
+})
+
 md.renderer.rules.heading_open = (tokens, idx) => {
   const token = tokens[idx]
   const nextToken = tokens[idx + 1]
@@ -102,4 +117,54 @@ onMounted(() => {
 
 <style scoped>
 @import '@/assets/markdown-styles.css';
+
+.markdown-content :deep(h1) {
+  font-size: 2rem;
+  font-weight: 400;
+  margin: 2.5rem 0 1.25rem;
+  color: rgba(255, 255, 255, 0.88);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.7rem;
+}
+
+.markdown-content :deep(h2) {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 2rem 0 1rem;
+  color: rgba(255, 255, 255, 0.82);
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  padding-left: 12px;
+}
+
+.markdown-content :deep(h3) {
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin: 1.6rem 0 0.875rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.markdown-content :deep(ol) {
+  list-style: decimal;
+  padding-left: 1.8rem;
+}
+
+.markdown-content :deep(ol li) {
+  list-style: decimal;
+  display: list-item;
+}
+
+.markdown-content :deep(ol li::marker) {
+  color: var(--color-text-dim);
+  font-family: var(--font-mono);
+}
+
+.markdown-content :deep(.task-checkbox) {
+  margin-right: 0.5rem;
+  accent-color: #ffb347;
+  vertical-align: middle;
+}
+
+.markdown-content :deep(li:has(> .task-checkbox))::before {
+  content: none !important;
+}
 </style>

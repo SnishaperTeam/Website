@@ -47,12 +47,17 @@
           </label>
         </div>
 
+        <div class="draft-line">
+          <span>{{ draftSavedAt ? '草稿已自动保存到本机 · ' + draftSavedAt : '草稿自动保存在本机，只有发布才上云' }}</span>
+          <button v-if="draftSavedAt" class="link-btn" type="button" @click="discardDraft">[清除草稿]</button>
+        </div>
+
         <p v-if="error" class="err">{{ error }}</p>
         <p v-if="msg" class="ok">{{ msg }}</p>
 
         <div class="actions">
           <button class="btn-geek primary" :disabled="busy" @click="save">
-            {{ busy ? '保存中...' : editingId ? '保存修改' : '发布' }}
+            {{ busy ? '保存中...' : editingId ? '保存修改（上云）' : form.published ? '发布到云端' : '保存本地草稿' }}
           </button>
           <button v-if="editingId" class="btn-geek" @click="resetForm">取消编辑</button>
         </div>
@@ -76,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MarkdownEditor from '@/components/MarkdownEditor.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
@@ -105,6 +110,53 @@ const myPosts = ref<DynamicPost[]>([])
 const busy = ref(false)
 const error = ref('')
 const msg = ref('')
+
+const DRAFT_PREFIX = 'post_draft_'
+const draftKey = computed(() => DRAFT_PREFIX + (editingId.value || 'new'))
+const draftSavedAt = ref('')
+let draftTimer: ReturnType<typeof setTimeout> | null = null
+let suppressDraft = false
+
+function saveDraft() {
+  try {
+    localStorage.setItem(draftKey.value, JSON.stringify({ form: form.value, savedAt: Date.now() }))
+    draftSavedAt.value = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  } catch {}
+}
+
+function clearDraft(key = draftKey.value) {
+  try {
+    localStorage.removeItem(key)
+  } catch {}
+  draftSavedAt.value = ''
+}
+
+function restoreDraft(key: string): boolean {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return false
+    const data = JSON.parse(raw)
+    if (!data?.form) return false
+    form.value = { ...emptyForm(), ...data.form }
+    draftSavedAt.value = new Date(data.savedAt || Date.now()).toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
+watch(
+  form,
+  () => {
+    if (suppressDraft) return
+    if (draftTimer) clearTimeout(draftTimer)
+    draftTimer = setTimeout(saveDraft, 600)
+  },
+  { deep: true },
+)
 
 function toSlug(value: string) {
   return value
@@ -151,14 +203,24 @@ async function save() {
     error.value = '正文不能为空'
     return
   }
+
+  if (!editingId.value && !form.value.published) {
+    if (draftTimer) clearTimeout(draftTimer)
+    saveDraft()
+    msg.value = '已存为本地草稿，未上云'
+    return
+  }
+
   busy.value = true
   try {
     if (editingId.value) {
       await updatePost(editingId.value, payload())
-      msg.value = '已保存'
+      clearDraft(DRAFT_PREFIX + editingId.value)
+      msg.value = '修改已同步到云端'
     } else {
       await createPost(payload())
-      msg.value = '已发布'
+      clearDraft(DRAFT_PREFIX + 'new')
+      msg.value = '已发布到云端'
       resetForm()
     }
     await loadMine()
@@ -169,11 +231,23 @@ async function save() {
   }
 }
 
+function discardDraft() {
+  clearDraft()
+  if (editingId.value) {
+    const target = myPosts.value.find((p) => p.id === editingId.value)
+    if (target) editPost(target)
+  } else {
+    form.value = emptyForm()
+  }
+  msg.value = '本地草稿已清除'
+}
+
 function resetForm() {
   editingId.value = ''
   form.value = emptyForm()
   error.value = ''
   msg.value = ''
+  draftSavedAt.value = ''
   router.replace('/blog/new')
 }
 
@@ -209,10 +283,17 @@ async function deletePost(p: DynamicPost) {
 onMounted(async () => {
   await loadMine()
   const id = route.params.id as string
+  suppressDraft = true
   if (id) {
     const target = myPosts.value.find((p) => p.id === id)
-    if (target) editPost(target)
+    if (target) {
+      editPost(target)
+      restoreDraft(DRAFT_PREFIX + target.id)
+    }
+  } else {
+    restoreDraft(DRAFT_PREFIX + 'new')
   }
+  suppressDraft = false
 })
 </script>
 
@@ -323,6 +404,17 @@ select option {
   display: flex;
   gap: 12px;
   margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.draft-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
   flex-wrap: wrap;
 }
 

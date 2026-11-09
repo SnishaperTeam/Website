@@ -127,6 +127,9 @@ function link() {
 }
 
 function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+    if (continueList(event)) return
+  }
   if (!(event.ctrlKey || event.metaKey)) return
   const key = event.key.toLowerCase()
   if (key === 'b') {
@@ -139,6 +142,38 @@ function onKeydown(event: KeyboardEvent) {
     event.preventDefault()
     link()
   }
+}
+
+function continueList(event: KeyboardEvent): boolean {
+  const el = area.value
+  if (!el || el.selectionStart !== el.selectionEnd) return false
+  const value = props.modelValue
+  const pos = el.selectionStart
+  const lineStart = value.lastIndexOf('\n', pos - 1) + 1
+  const line = value.slice(lineStart, pos)
+
+  const patterns: { re: RegExp; next: (m: RegExpExecArray) => string }[] = [
+    { re: /^(\s*)- \[[ xX]\]\s+(.*)$/, next: (m) => `${m[1]}- [ ] ` },
+    { re: /^(\s*)(\d+)\.\s+(.*)$/, next: (m) => `${m[1]}${Number(m[2]) + 1}. ` },
+    { re: /^(\s*)([-*+])\s+(.*)$/, next: (m) => `${m[1]}${m[2]} ` },
+    { re: /^(\s*)>\s+(.*)$/, next: (m) => `${m[1]}> ` },
+  ]
+
+  for (const p of patterns) {
+    const m = p.re.exec(line)
+    if (!m) continue
+    event.preventDefault()
+    const content = m[m.length - 1]
+    if (!content.trim()) {
+      const next = value.slice(0, lineStart) + value.slice(pos)
+      setValue(next, lineStart, lineStart)
+      return true
+    }
+    const addition = '\n' + p.next(m)
+    setValue(value.slice(0, pos) + addition + value.slice(pos), pos + addition.length, pos + addition.length)
+    return true
+  }
+  return false
 }
 
 function pickImage() {
