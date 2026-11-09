@@ -27,9 +27,16 @@
               <div class="profile-name">{{ profile.nickname }}</div>
               <div class="profile-meta">注册于 {{ formatDate(profile.createdAt) }}</div>
               <div v-if="isSelf" class="profile-meta">{{ profile.email }}</div>
-              <RouterLink v-if="isSelf" to="/blog/new" class="btn-geek mt-20" style="font-size:var(--font-size-xs); display:inline-flex;">
-                <Icon icon="mdi:pencil" width="14" /> 写文章
-              </RouterLink>
+              <div v-if="isSelf" class="flex gap-12 mt-20 flex-wrap">
+                <RouterLink to="/blog/new" class="btn-geek" style="font-size:var(--font-size-xs); display:inline-flex;">
+                  <Icon icon="mdi:pencil" width="14" /> 写文章
+                </RouterLink>
+                <button class="btn-geek" style="font-size:var(--font-size-xs);" :disabled="avatarBusy" @click="pickAvatar">
+                  <Icon icon="mdi:camera" width="14" /> {{ avatarBusy ? '上传中...' : '更换头像' }}
+                </button>
+              </div>
+              <input ref="avatarInput" class="hidden-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" @change="onAvatar" />
+              <p v-if="avatarMsg" class="msg mt-20">{{ avatarMsg }}</p>
             </div>
           </div>
         </div>
@@ -181,6 +188,7 @@ import FavoritesList from '@/components/FavoritesList.vue'
 import HistoryList from '@/components/HistoryList.vue'
 import { useAuth, type AuthUser } from '@/composables/useAuth'
 import { useFavorites, useHistory, type FavoriteItem } from '@/composables/useStore'
+import { uploadImage } from '@/composables/useMedia'
 import {
   getOAuthAccounts,
   startOAuthBind,
@@ -216,6 +224,34 @@ const dangerMsg = ref('')
 const dangerBusy = ref(false)
 
 const tab = ref<'favorites' | 'history'>('favorites')
+
+const avatarInput = ref<HTMLInputElement | null>(null)
+const avatarBusy = ref(false)
+const avatarMsg = ref('')
+
+function pickAvatar() {
+  avatarMsg.value = ''
+  avatarInput.value?.click()
+}
+
+async function onAvatar(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  avatarBusy.value = true
+  avatarMsg.value = ''
+  try {
+    const url = await uploadImage(file, 'avatar')
+    await updateProfile({ avatarUrl: url })
+    await loadProfile()
+    avatarMsg.value = '头像已更新'
+  } catch (e) {
+    avatarMsg.value = e instanceof Error ? e.message : '上传失败'
+  } finally {
+    avatarBusy.value = false
+  }
+}
 
 const oauthProviders = [
   { key: 'github', label: 'GitHub', icon: 'simple-icons:github' },
@@ -438,6 +474,10 @@ watch([userId, user], () => {
   color: var(--color-text-secondary);
   margin-top: 0.25rem;
   font-family: var(--font-mono);
+}
+
+.hidden-input {
+  display: none;
 }
 
 .oauth-line {

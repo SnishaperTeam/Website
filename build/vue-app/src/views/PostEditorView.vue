@@ -36,18 +36,15 @@
         <input v-model.trim="form.tags" placeholder="Vue, Cloudflare, 笔记" />
 
         <label>主题色 / COLOR</label>
-        <input v-model.trim="form.color" placeholder="#FFB347" />
+        <ColorPicker v-model="form.color" />
 
         <label>正文 / MARKDOWN</label>
-        <textarea v-model="form.content" rows="14" placeholder="支持 Markdown"></textarea>
+        <MarkdownEditor v-model="form.content" />
 
         <div class="row-line">
           <label class="check">
             <input v-model="form.published" type="checkbox" /> 立即发布
           </label>
-          <button class="btn-geek small" @click="showPreview = !showPreview">
-            {{ showPreview ? '关闭预览' : '预览' }}
-          </button>
         </div>
 
         <p v-if="error" class="err">{{ error }}</p>
@@ -74,12 +71,6 @@
           </div>
         </div>
       </aside>
-
-      <section v-if="showPreview" class="preview-panel">
-        <div class="sec-head">预览</div>
-        <h2 class="preview-title">{{ form.title || '未命名' }}</h2>
-        <MarkdownRenderer :content="form.content || '*暂无内容*'" />
-      </section>
     </div>
   </div>
 </template>
@@ -87,7 +78,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
+import MarkdownEditor from '@/components/MarkdownEditor.vue'
+import ColorPicker from '@/components/ColorPicker.vue'
 import { useAuth } from '@/composables/useAuth'
 import {
   createPost,
@@ -110,7 +102,6 @@ const emptyForm = () => ({
 const form = ref(emptyForm())
 const editingId = ref('')
 const myPosts = ref<DynamicPost[]>([])
-const showPreview = ref(false)
 const busy = ref(false)
 const error = ref('')
 const msg = ref('')
