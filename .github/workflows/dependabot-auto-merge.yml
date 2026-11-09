@@ -1,0 +1,60 @@
+name: dependabot-auto-merge
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dependabot-auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: >-
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for all checks to complete
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sha="${{ github.event.pull_request.head.sha }}"
+          deadline=$((SECONDS + 3600))
+          while [ $SECONDS -lt $deadline ]; do
+            data=$(gh api "repos/${{ github.repository }}/commits/$sha/check-runs" \
+              --jq '[.check_runs[] | {status: .status, conclusion: .conclusion}]' 2>/dev/null || echo '[]')
+            total=$(echo "$data" | jq 'length')
+            pending=$(echo "$data" | jq '[.[] | select(.status != "COMPLETED")] | length')
+            failing=$(echo "$data" | jq '[.[] | select(.status == "COMPLETED" and .conclusion != "SUCCESS" and .conclusion != "NEUTRAL" and .conclusion != "SKIPPED")] | length')
+            echo "check-runs: total=$total pending=$pending failing=$failing"
+            if [ "$total" -gt 0 ] && [ "$pending" -eq 0 ]; then
+              if [ "$failing" -gt 0 ]; then
+                echo "::error::$failing check(s) failed"
+                exit 1
+              fi
+              echo "All checks passed"
+              exit 0
+            fi
+            sleep 60
+          done
+          echo "::error::Timed out waiting for checks"
+          exit 1
+
+      - name: Merge squash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr merge --squash "$PR_URL"
+          echo "Merged: ${{ steps.metadata.outputs.update-type }} (${{ steps.metadata.outputs.package-name }} ${{ steps.metadata.outputs.new-version }})"
