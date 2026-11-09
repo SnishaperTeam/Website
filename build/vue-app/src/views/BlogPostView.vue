@@ -6,7 +6,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
 import CommentsSection from '@/components/CommentsSection.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useFavorites } from '@/composables/useStore'
-import { getDynamicPost, removePost, type DynamicPost } from '@/composables/useSiteData'
+import { getDynamicPost, likePost, removePost, type DynamicPost } from '@/composables/useSiteData'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,6 +19,8 @@ const postTitle = ref('')
 const postDate = ref('')
 const dynamicPost = ref<DynamicPost | null>(null)
 const actionError = ref('')
+const likes = ref(0)
+const liked = ref(false)
 
 const slug = computed(() => route.params.slug as string)
 
@@ -55,6 +57,8 @@ async function loadPost() {
       postTitle.value = post.title
       postDate.value = String(post.createdAt).slice(0, 10)
       postContent.value = post.content
+      likes.value = post.likes
+      liked.value = localStorage.getItem(`post_liked_${slug.value}`) === '1'
       return
     }
   } catch {
@@ -74,6 +78,18 @@ function parseFrontMatter(content: string) {
     return { title: fm.title || '', date: fm.date || '', body: m[2].trim() }
   }
   return { title: '', date: '', body: content.trim() }
+}
+
+async function handleLike() {
+  if (!dynamicPost.value || liked.value) return
+  try {
+    const data = await likePost(slug.value)
+    likes.value = data.likes
+    liked.value = true
+    localStorage.setItem(`post_liked_${slug.value}`, '1')
+  } catch (e) {
+    actionError.value = e instanceof Error ? e.message : '点赞失败'
+  }
 }
 
 async function deleteCurrentPost() {
@@ -112,6 +128,10 @@ async function deleteCurrentPost() {
         <button class="btn-geek" style="font-size:var(--font-size-xs);" @click="toggleFavorite(favItem)">
           <Icon :icon="isFavorite(slug) ? 'mdi:heart' : 'mdi:heart-outline'" width="14" />
           {{ isFavorite(slug) ? '已收藏' : '收藏' }}
+        </button>
+        <button v-if="dynamicPost" class="btn-geek" style="font-size:var(--font-size-xs);" :disabled="liked" @click="handleLike">
+          <Icon :icon="liked ? 'mdi:thumb-up' : 'mdi:thumb-up-outline'" width="14" />
+          {{ liked ? '已赞' : '点赞' }} {{ likes }}
         </button>
         <RouterLink v-if="isAuthor" :to="`/blog/edit/${dynamicPost?.id}`" class="btn-geek" style="font-size:var(--font-size-xs);">
           <Icon icon="mdi:pencil" width="14" /> 编辑

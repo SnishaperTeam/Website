@@ -127,6 +127,12 @@ export async function removePost(id: string) {
   invalidatePosts()
 }
 
+export async function likePost(slug: string) {
+  return apiRequest<{ likes: number }>(`/api/posts/${encodeURIComponent(slug)}/like`, {
+    method: 'POST',
+  })
+}
+
 export interface Comment {
   id: string
   postSlug: string
