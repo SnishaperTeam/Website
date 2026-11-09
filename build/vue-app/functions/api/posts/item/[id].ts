@@ -36,7 +36,10 @@ export const onRequestPatch = async (context: {
   setStr('content', 'content')
   setStr('category', 'category')
   setStr('color', 'color')
-  setStr('tags', 'tags')
+  if (body.tags !== undefined) {
+    updates.push('tags = ?')
+    values.push(Array.isArray(body.tags) ? (body.tags as unknown[]).map((t) => String(t)).join(',') : str(body.tags))
+  }
   if (body.published !== undefined) {
     updates.push('published = ?')
     values.push(body.published ? 1 : 0)

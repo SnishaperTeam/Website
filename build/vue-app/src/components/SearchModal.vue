@@ -103,10 +103,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTags } from '@/composables/useStore'
 import { staticPosts } from '@/data/posts'
+import { dynamicPosts, loadDynamicPosts, toBlogPost } from '@/composables/useSiteData'
 import { Icon } from '@iconify/vue'
 
 const router = useRouter()
@@ -258,11 +259,31 @@ const blogEntries = staticPosts.map((post) => ({
   keywords: post.tags.join(' '),
 }))
 
-const searchEntries = [...staticData.map((item) => ({ ...item, keywords: '' })), ...blogEntries]
+const dynamicBlogEntries = computed(() =>
+  dynamicPosts.value.map((post) => {
+    const p = toBlogPost(post)
+    return {
+      id: p.id,
+      title: p.title,
+      description: p.excerpt,
+      category: p.category,
+      icon: 'mdi:newspaper-variant',
+      color: '#FFB347',
+      path: p.link,
+      keywords: (p.tags || []).join(' ') + ' ' + (post.content || '').slice(0, 500),
+    }
+  }),
+)
+
+const searchEntries = computed(() => [
+  ...staticData.map((item) => ({ ...item, keywords: '' })),
+  ...blogEntries,
+  ...dynamicBlogEntries.value,
+])
 
 const searchStatic = (q: string) => {
   const lowerQ = q.toLowerCase()
-  searchResults.value = searchEntries
+  searchResults.value = searchEntries.value
     .filter((item) => !selectedCategory.value || item.category === selectedCategory.value)
     .filter(
       (item) =>
@@ -312,6 +333,7 @@ const open = () => {
   selectedCategory.value = null
   searchResults.value = []
   loadSearchHistory()
+  loadDynamicPosts()
   nextTick(() => {
     searchInput.value?.focus()
   })

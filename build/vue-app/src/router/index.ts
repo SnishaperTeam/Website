@@ -26,6 +26,16 @@ const router = createRouter({
       component: () => import('../views/BlogView.vue'),
     },
     {
+      path: '/blog/new',
+      name: 'post-editor-new',
+      component: () => import('../views/PostEditorView.vue'),
+    },
+    {
+      path: '/blog/edit/:id',
+      name: 'post-editor-edit',
+      component: () => import('../views/PostEditorView.vue'),
+    },
+    {
       path: '/blog/:slug',
       name: 'blog-post',
       component: () => import('../views/BlogPostView.vue'),

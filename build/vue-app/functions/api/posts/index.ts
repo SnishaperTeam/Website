@@ -4,6 +4,17 @@ import { fail, json, newId, type Env } from '../../_shared/types'
 import { toPost, type PostRow } from '../../_shared/posts'
 
 export const onRequestGet = async (context: { request: Request; env: Env }) => {
+  const url = new URL(context.request.url)
+  if (url.searchParams.get('mine') === '1') {
+    const auth = await requireUser(context.request, context.env)
+    if (auth instanceof Response) return auth
+    const mine = await getDb(context.env)
+      .prepare('SELECT * FROM user_posts WHERE author_id = ? ORDER BY created_at DESC LIMIT 100')
+      .bind(auth.userId)
+      .all<PostRow>()
+    return json({ posts: mine.results.map(toPost) })
+  }
+
   const rows = await getDb(context.env)
     .prepare(
       `SELECT p.*, u.nickname FROM user_posts p LEFT JOIN users u ON u.id = p.author_id

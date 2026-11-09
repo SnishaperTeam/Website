@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import { staticPosts } from '@/data/posts'
+import { apiRequest, dynamicPosts, isLoggedIn } from '@/composables/useSiteData'
 
 const FAVORITES_KEY = 'site_favorites'
 const HISTORY_KEY = 'site_test_history'
@@ -34,20 +35,53 @@ export interface FavoriteItem {
 const favorites = ref<FavoriteItem[]>(readStorage<FavoriteItem[]>(FAVORITES_KEY, []))
 const favoritesLoading = ref(false)
 
+function mergeFavorites(remote: FavoriteItem[], local: FavoriteItem[]) {
+  const map = new Map<string, FavoriteItem>()
+  for (const item of local) map.set(item.id, item)
+  for (const item of remote) map.set(item.id, item)
+  return Array.from(map.values())
+}
+
 export function useFavorites() {
   const isFavorite = (id: string) => favorites.value.some((f) => f.id === id)
 
-  const loadFavorites = () => {
-    favorites.value = readStorage<FavoriteItem[]>(FAVORITES_KEY, [])
+  const loadFavorites = async () => {
+    const local = readStorage<FavoriteItem[]>(FAVORITES_KEY, [])
+    if (!isLoggedIn()) {
+      favorites.value = local
+      return
+    }
+    favoritesLoading.value = true
+    try {
+      const data = await apiRequest<{ favorites: FavoriteItem[] }>('/api/favorites')
+      const remote = data.favorites || []
+      const merged = mergeFavorites(remote, local)
+      favorites.value = merged
+      writeStorage(FAVORITES_KEY, merged)
+      for (const item of merged.filter((i) => !remote.some((r) => r.id === i.id))) {
+        apiRequest('/api/favorites', { method: 'POST', body: JSON.stringify(item) }).catch(() => {})
+      }
+    } catch {
+      favorites.value = local
+    } finally {
+      favoritesLoading.value = false
+    }
   }
 
   const toggleFavorite = (item: FavoriteItem) => {
-    if (isFavorite(item.id)) {
+    const exists = isFavorite(item.id)
+    if (exists) {
       favorites.value = favorites.value.filter((f) => f.id !== item.id)
     } else {
       favorites.value = [item, ...favorites.value]
     }
     writeStorage(FAVORITES_KEY, favorites.value)
+    if (!isLoggedIn()) return
+    if (exists) {
+      apiRequest(`/api/favorites/${encodeURIComponent(item.id)}`, { method: 'DELETE' }).catch(() => {})
+    } else {
+      apiRequest('/api/favorites', { method: 'POST', body: JSON.stringify(item) }).catch(() => {})
+    }
   }
 
   return {
@@ -73,8 +107,32 @@ const history = ref<HistoryItem[]>(readStorage<HistoryItem[]>(HISTORY_KEY, []))
 const historyLoading = ref(false)
 
 export function useHistory() {
-  const loadHistory = () => {
-    history.value = readStorage<HistoryItem[]>(HISTORY_KEY, [])
+  const loadHistory = async () => {
+    const local = readStorage<HistoryItem[]>(HISTORY_KEY, [])
+    if (!isLoggedIn()) {
+      history.value = local
+      return
+    }
+    historyLoading.value = true
+    try {
+      const data = await apiRequest<{ history: HistoryItem[] }>('/api/history')
+      const remote = (data.history || []).map((h) => ({ ...h, testId: h.testId }))
+      const map = new Map<string, HistoryItem>()
+      for (const item of local) map.set(item.testId, item)
+      for (const item of remote) map.set(item.testId, item)
+      const merged = Array.from(map.values()).sort(
+        (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime(),
+      )
+      history.value = merged.slice(0, MAX_HISTORY)
+      writeStorage(HISTORY_KEY, history.value)
+      for (const item of merged.filter((i) => !remote.some((r) => r.testId === i.testId))) {
+        apiRequest('/api/history', { method: 'POST', body: JSON.stringify(item) }).catch(() => {})
+      }
+    } catch {
+      history.value = local
+    } finally {
+      historyLoading.value = false
+    }
   }
 
   const addToHistory = (item: HistoryItem) => {
@@ -82,6 +140,8 @@ export function useHistory() {
     next.unshift(item)
     history.value = next.slice(0, MAX_HISTORY)
     writeStorage(HISTORY_KEY, history.value)
+    if (!isLoggedIn()) return
+    apiRequest('/api/history', { method: 'POST', body: JSON.stringify(item) }).catch(() => {})
   }
 
   const getTestHistory = () => history.value
@@ -89,6 +149,8 @@ export function useHistory() {
   const clearHistory = () => {
     history.value = []
     writeStorage(HISTORY_KEY, [])
+    if (!isLoggedIn()) return
+    apiRequest('/api/history', { method: 'DELETE' }).catch(() => {})
   }
 
   return {
@@ -118,6 +180,11 @@ const allTags = computed<Record<string, number>>(() => {
   const counts: Record<string, number> = {}
   for (const post of staticPosts) {
     for (const tag of post.tags) {
+      counts[tag] = (counts[tag] || 0) + 1
+    }
+  }
+  for (const post of dynamicPosts.value) {
+    for (const tag of post.tags || []) {
       counts[tag] = (counts[tag] || 0) + 1
     }
   }

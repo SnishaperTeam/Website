@@ -27,6 +27,9 @@
               <div class="profile-name">{{ profile.nickname }}</div>
               <div class="profile-meta">注册于 {{ formatDate(profile.createdAt) }}</div>
               <div v-if="isSelf" class="profile-meta">{{ profile.email }}</div>
+              <RouterLink v-if="isSelf" to="/blog/new" class="btn-geek mt-20" style="font-size:var(--font-size-xs); display:inline-flex;">
+                <Icon icon="mdi:pencil" width="14" /> 写文章
+              </RouterLink>
             </div>
           </div>
         </div>
@@ -144,6 +147,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Icon } from '@iconify/vue'
 import FavoritesList from '@/components/FavoritesList.vue'
 import HistoryList from '@/components/HistoryList.vue'
 import { useAuth, type AuthUser } from '@/composables/useAuth'

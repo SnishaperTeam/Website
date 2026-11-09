@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useTags } from '@/composables/useStore'
-import { staticPosts } from '@/data/posts'
 import { Icon } from '@iconify/vue'
 import { useTypewriter } from '@/composables/useTypewriter'
 import { useStaggeredFade } from '@/composables/useStaggeredFade'
+import { allBlogPosts, loadDynamicPosts } from '@/composables/useSiteData'
+import { useAuth } from '@/composables/useAuth'
 import TagCloud from '@/components/TagCloud.vue'
 import RssSubscribe from '@/components/RssSubscribe.vue'
 
 const { allTags } = useTags()
-
+const { isAuthenticated } = useAuth()
 const { display, cursor, done } = useTypewriter('阅读、学习、分享。', 50)
 
 const activeCategory = ref('all')
@@ -21,16 +22,20 @@ const categories = [
   { value: '个人文章', label: '个人', icon: 'mdi:note-text' },
 ]
 
-const allPosts = staticPosts
+const allPosts = computed(() => allBlogPosts.value)
 
 const filteredPosts = computed(() => {
-  if (activeCategory.value === 'all') return allPosts
-  return allPosts.filter((p) => p.category === activeCategory.value)
+  if (activeCategory.value === 'all') return allPosts.value
+  return allPosts.value.filter((p) => p.category === activeCategory.value)
 })
 
-const getCategoryCount = (cat: string) => allPosts.filter((p) => p.category === cat).length
+const getCategoryCount = (cat: string) => allPosts.value.filter((p) => p.category === cat).length
 
 const vis = useStaggeredFade(6, 100)
+
+onMounted(() => {
+  loadDynamicPosts()
+})
 </script>
 
 <template>
@@ -44,7 +49,7 @@ const vis = useStaggeredFade(6, 100)
     </section>
 
     <section class="mb-40">
-      <div class="flex gap-12 flex-wrap" style="padding-left:40px;">
+      <div class="flex gap-12 flex-wrap items-center" style="padding-left:40px;">
         <button v-for="cat in categories" :key="cat.value"
           class="tag-pill" style="cursor:pointer;"
           :style="{
@@ -54,6 +59,10 @@ const vis = useStaggeredFade(6, 100)
           }"
           @click="activeCategory = cat.value"
         >{{ cat.label }} <span v-if="cat.value !== 'all'" style="opacity:0.5;margin-left:4px;">({{ getCategoryCount(cat.value) }})</span></button>
+        <span class="spacer"></span>
+        <RouterLink v-if="isAuthenticated" to="/blog/new" class="btn-geek" style="font-size:var(--font-size-xs);">
+          <Icon icon="mdi:pencil" width="14" /> 写文章
+        </RouterLink>
       </div>
     </section>
 
@@ -90,3 +99,9 @@ const vis = useStaggeredFade(6, 100)
     </section>
   </div>
 </template>
+
+<style scoped>
+.spacer {
+  flex: 1;
+}
+</style>
