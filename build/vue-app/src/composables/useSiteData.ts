@@ -133,6 +133,44 @@ export async function likePost(slug: string) {
   })
 }
 
+export interface OAuthAccount {
+  provider: string
+  email: string | null
+  displayName: string | null
+  avatarUrl: string | null
+  createdAt: string
+}
+
+export async function exchangeOAuthCode(code: string) {
+  return apiRequest<{ token: string; user: { id: string; email: string; nickname: string; avatarUrl: string | null; createdAt: string } }>(
+    '/api/auth/oauth/exchange',
+    { method: 'POST', body: JSON.stringify({ code }) },
+  )
+}
+
+export async function confirmOAuthBind(ticket: string, password: string) {
+  return apiRequest<{ code: string }>('/api/auth/oauth/bind/confirm', {
+    method: 'POST',
+    body: JSON.stringify({ ticket, password }),
+  })
+}
+
+export async function startOAuthBind() {
+  const data = await apiRequest<{ ticket: string }>('/api/auth/oauth/bind/start', {
+    method: 'POST',
+  })
+  return data.ticket
+}
+
+export async function getOAuthAccounts() {
+  const data = await apiRequest<{ accounts: OAuthAccount[] }>('/api/auth/oauth/accounts')
+  return data.accounts || []
+}
+
+export async function unlinkOAuth(provider: string) {
+  return apiRequest(`/api/auth/oauth/accounts/${encodeURIComponent(provider)}`, { method: 'DELETE' })
+}
+
 export interface Comment {
   id: string
   postSlug: string

@@ -46,24 +46,44 @@
           {{ busy ? '处理中...' : mode === 'login' ? '$ 登录' : '$ 注册' }}
         </button>
       </form>
+
+      <div class="oauth-divider">或使用第三方账号</div>
+      <div class="oauth-row">
+        <button v-for="p in providers" :key="p.key" class="oauth-btn" type="button" @click="startOAuth(p.key)">
+          <Icon :icon="p.icon" width="16" /> {{ p.label }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { Icon } from '@iconify/vue'
 import { useAuth } from '@/composables/useAuth'
 
 const emit = defineEmits<{ success: [] }>()
+const route = useRoute()
 
 const { signIn, signUp } = useAuth()
+
+const providers = [
+  { key: 'github', label: 'GitHub', icon: 'simple-icons:github' },
+  { key: 'google', label: 'Google', icon: 'simple-icons:google' },
+  { key: 'microsoft', label: 'Microsoft', icon: 'simple-icons:microsoft' },
+]
+
+function startOAuth(key: string) {
+  window.location.href = `/api/auth/oauth/${key}/start`
+}
 
 const mode = ref<'login' | 'register'>('login')
 const email = ref('')
 const nickname = ref('')
 const password = ref('')
 const confirm = ref('')
-const error = ref('')
+const error = ref(typeof route.query.oauth_error === 'string' ? route.query.oauth_error : '')
 const info = ref('')
 const busy = ref(false)
 
@@ -202,5 +222,52 @@ async function submit() {
 .auth-submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 14px;
+  font-size: 0.75rem;
+  color: var(--color-text-faint);
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.oauth-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.oauth-btn {
+  flex: 1;
+  min-width: 120px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.oauth-btn:hover {
+  color: var(--color-text);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
 }
 </style>

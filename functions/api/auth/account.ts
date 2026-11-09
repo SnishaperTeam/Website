@@ -27,6 +27,7 @@ export const onRequestDelete = async (context: { request: Request; env: Env }) =
   await db.prepare('DELETE FROM user_posts WHERE author_id = ?').bind(auth.userId).run()
   await db.prepare('DELETE FROM user_favorites WHERE user_id = ?').bind(auth.userId).run()
   await db.prepare('DELETE FROM user_test_history WHERE user_id = ?').bind(auth.userId).run()
+  await db.prepare('DELETE FROM oauth_accounts WHERE user_id = ?').bind(auth.userId).run()
   await db.prepare('DELETE FROM users WHERE id = ?').bind(auth.userId).run()
   return json({ ok: true })
 }

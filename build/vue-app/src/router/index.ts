@@ -86,6 +86,16 @@ const router = createRouter({
       component: () => import('../views/AuthView.vue'),
     },
     {
+      path: '/auth/oauth-bind',
+      name: 'oauth-bind',
+      component: () => import('../views/BindAccountView.vue'),
+    },
+    {
+      path: '/auth/oauth-callback',
+      name: 'oauth-callback',
+      component: () => import('../views/OAuthCallbackView.vue'),
+    },
+    {
       path: '/user/:userId',
       name: 'profile',
       component: () => import('../views/ProfileView.vue'),

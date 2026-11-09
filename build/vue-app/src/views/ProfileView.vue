@@ -97,6 +97,35 @@
         </div>
       </section>
 
+      <div class="divider-geek mb-40" style="margin-left:40px;"><span>login methods</span></div>
+
+      <section class="mb-40" style="padding-left:40px; padding-right:40px;">
+        <div class="term-block profile-block">
+          <div class="term-bar">
+            <span class="term-dot"></span>
+            <span class="term-dot"></span>
+            <span class="term-dot"></span>
+            <span class="profile-bar-title">oauth-accounts.json</span>
+          </div>
+          <div class="term-body">
+            <p class="text-dim" style="margin-top:0;">已绑定的第三方登录方式。绑定后可直接用对应账号登录本站。</p>
+            <div v-for="p in oauthProviders" :key="p.key" class="oauth-line">
+              <Icon :icon="p.icon" width="18" />
+              <span class="oauth-name">{{ p.label }}</span>
+              <span v-if="linked(p.key)" class="badge-geek green">已绑定</span>
+              <span v-else class="badge-geek">未绑定</span>
+              <span class="spacer"></span>
+              <button v-if="linked(p.key)" class="btn-geek small danger" @click="unlink(p.key)">[解绑]</button>
+              <button v-else class="btn-geek small" @click="link(p.key)">[绑定]</button>
+            </div>
+            <p v-if="oauthMsg" class="msg mt-20">{{ oauthMsg }}</p>
+            <p class="text-faint mt-20" style="font-size:var(--font-size-xs);">
+              使用第三方登录且未设置密码时，上方「修改密码」的当前密码可留空直接设置。
+            </p>
+          </div>
+        </div>
+      </section>
+
       <div class="divider-geek mb-40" style="margin-left:40px;"><span>local data</span></div>
 
       <section class="mb-40" style="padding-left:40px; padding-right:40px;">
@@ -152,6 +181,12 @@ import FavoritesList from '@/components/FavoritesList.vue'
 import HistoryList from '@/components/HistoryList.vue'
 import { useAuth, type AuthUser } from '@/composables/useAuth'
 import { useFavorites, useHistory, type FavoriteItem } from '@/composables/useStore'
+import {
+  getOAuthAccounts,
+  startOAuthBind,
+  unlinkOAuth,
+  type OAuthAccount,
+} from '@/composables/useSiteData'
 
 const route = useRoute()
 const router = useRouter()
@@ -181,6 +216,44 @@ const dangerMsg = ref('')
 const dangerBusy = ref(false)
 
 const tab = ref<'favorites' | 'history'>('favorites')
+
+const oauthProviders = [
+  { key: 'github', label: 'GitHub', icon: 'simple-icons:github' },
+  { key: 'google', label: 'Google', icon: 'simple-icons:google' },
+  { key: 'microsoft', label: 'Microsoft', icon: 'simple-icons:microsoft' },
+]
+const oauthAccounts = ref<OAuthAccount[]>([])
+const oauthMsg = ref('')
+
+function linked(key: string) {
+  return oauthAccounts.value.some((a) => a.provider === key)
+}
+
+async function loadOAuthAccounts() {
+  if (!isSelf.value) return
+  oauthAccounts.value = await getOAuthAccounts()
+}
+
+async function link(key: string) {
+  oauthMsg.value = ''
+  try {
+    const ticket = await startOAuthBind()
+    window.location.href = `/api/auth/oauth/${key}/start?bind=${encodeURIComponent(ticket)}`
+  } catch (e) {
+    oauthMsg.value = e instanceof Error ? e.message : '发起绑定失败'
+  }
+}
+
+async function unlink(key: string) {
+  oauthMsg.value = ''
+  try {
+    await unlinkOAuth(key)
+    oauthMsg.value = '已解绑'
+    await loadOAuthAccounts()
+  } catch (e) {
+    oauthMsg.value = e instanceof Error ? e.message : '解绑失败'
+  }
+}
 
 const FALLBACK_ICON = 'mdi:bookmark-outline'
 const FALLBACK_COLOR = '#FFB347'
@@ -307,10 +380,12 @@ onMounted(() => {
   loadFavorites()
   loadHistory()
   loadProfile()
+  loadOAuthAccounts()
 })
 
 watch([userId, user], () => {
   loadProfile()
+  loadOAuthAccounts()
 })
 </script>
 
@@ -363,6 +438,25 @@ watch([userId, user], () => {
   color: var(--color-text-secondary);
   margin-top: 0.25rem;
   font-family: var(--font-mono);
+}
+
+.oauth-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.oauth-name {
+  min-width: 110px;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.oauth-line .spacer {
+  flex: 1;
 }
 
 .edit-form {

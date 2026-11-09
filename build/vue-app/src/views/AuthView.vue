@@ -6,7 +6,7 @@
         <span class="typewriter" style="font-size:var(--font-size-lg);">{{ heading }}</span>
       </h1>
       <p class="text-dim" style="margin-top:12px; max-width:520px;">
-        账号数据存储在 Cloudflare D1，仅用于身份识别与资料展示。本站不提供第三方快捷登录。
+        账号数据存储在 Cloudflare D1。支持邮箱密码与 GitHub、Google、Microsoft 快捷登录；快捷登录仅获取邮箱、昵称和头像。
       </p>
     </section>
 

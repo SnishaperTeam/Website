@@ -82,5 +82,41 @@ export async function ensureSchema(env: Env): Promise<void> {
     )`,
   ).run()
 
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS oauth_accounts (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      provider_user_id TEXT NOT NULL,
+      email TEXT,
+      display_name TEXT,
+      avatar_url TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(provider, provider_user_id)
+    )`,
+  ).run()
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_oauth_user ON oauth_accounts (user_id)').run()
+
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS oauth_tickets (
+      id TEXT PRIMARY KEY,
+      provider TEXT NOT NULL,
+      provider_user_id TEXT NOT NULL,
+      email TEXT NOT NULL,
+      display_name TEXT,
+      avatar_url TEXT,
+      expires_at INTEGER NOT NULL,
+      consumed INTEGER NOT NULL DEFAULT 0
+    )`,
+  ).run()
+
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS oauth_codes (
+      code TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      expires_at INTEGER NOT NULL
+    )`,
+  ).run()
+
   ensured = true
 }

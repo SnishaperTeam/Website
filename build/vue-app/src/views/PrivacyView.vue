@@ -35,6 +35,7 @@ const { visible } = useStaggeredFade(items.length, 100)
           <p>当您注册账号时，我们会收集以下信息：</p>
           <ul>
             <li><strong>邮箱地址</strong>：用于创建账号、登录验证</li>
+            <li><strong>第三方登录</strong>：使用 GitHub、Google 或 Microsoft 登录时，我们仅获取其提供的邮箱、昵称与头像，用于身份识别与展示</li>
             <li><strong>昵称</strong>：用于公开展示</li>
             <li><strong>密码</strong>：以 PBKDF2 算法加盐加密后存储，我们不会查看或记录您的明文密码</li>
           </ul>
@@ -106,6 +107,7 @@ const { visible } = useStaggeredFade(items.length, 100)
           <ul>
             <li><strong>Cloudflare</strong>：提供 CDN、托管、数据库（D1）与安全服务，<a href="https://www.cloudflare-cn.com/" target="_blank" class="formal-link">cloudflare-cn.com</a></li>
             <li><strong>域名托管</strong>：DigitalPlat，<a href="https://dash.domain.digitalplat.org/signup?ref=TZRrkCdFjm" target="_blank" class="formal-link">dash.domain.digitalplat.org</a></li>
+            <li><strong>GitHub / Google / Microsoft</strong>：仅在您主动使用快捷登录时提供 OAuth 授权，用于返回邮箱、昵称与头像</li>
           </ul>
           <p class="formal-note">建议您了解这些第三方服务的隐私政策，以做出明智的决定。</p>
         </template>

@@ -85,6 +85,11 @@ function signOut() {
   user.value = null
 }
 
+function applySession(tokenValue: string, nextUser: AuthUser) {
+  setToken(tokenValue)
+  user.value = nextUser
+}
+
 async function updateProfile(payload: { nickname?: string; avatarUrl?: string | null }) {
   const data = await request<{ user: AuthUser }>('/api/auth/me', {
     method: 'PATCH',
@@ -117,6 +122,7 @@ export function useAuth() {
     signIn,
     signUp,
     signOut,
+    applySession,
     updateProfile,
     changePassword,
     deleteAccount,

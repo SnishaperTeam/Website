@@ -150,6 +150,8 @@
             </div>
             <div class="item-foot">
               <span v-if="u.banned" class="badge-geek red">已封禁</span>
+              <span v-for="p in (u.oauthProviders || [])" :key="p" class="badge-geek blue">{{ p }}</span>
+              <span v-if="!u.hasPassword" class="badge-geek yellow">仅第三方登录</span>
               <span class="spacer"></span>
               <button class="btn-geek small" @click="toggleBan(u)">{{ u.banned ? '[解封]' : '[封禁]' }}</button>
               <button class="btn-geek small danger" @click="removeUser(u)">[删除]</button>
