@@ -39,17 +39,20 @@ const md = new MarkdownIt({
 })
 
 md.core.ruler.after('inline', 'task-list', (state) => {
+  let listItem: any = null
   for (const token of state.tokens) {
+    if (token.type === 'list_item_open') listItem = token
     if (token.type !== 'inline' || !token.children?.length) continue
     const first = token.children[0]
     if (first.type !== 'text') continue
-    const match = /^\[([ xX])\]\s+/.exec(first.content)
+    const match = /^\[([ xX])\]\s*/.exec(first.content)
     if (!match) continue
     const checked = match[1].toLowerCase() === 'x'
     first.content = first.content.slice(match[0].length)
     const box = new state.Token('html_inline', '', 0)
     box.content = `<input type="checkbox" class="task-checkbox" disabled${checked ? ' checked' : ''}>`
     token.children.unshift(box)
+    if (listItem) listItem.attrJoin('class', 'task-item')
   }
 })
 
@@ -162,6 +165,15 @@ onMounted(() => {
   margin-right: 0.5rem;
   accent-color: #ffb347;
   vertical-align: middle;
+}
+
+.markdown-content :deep(li.task-item) {
+  list-style: none;
+  margin-left: -1.2rem;
+}
+
+.markdown-content :deep(li.task-item)::before {
+  content: none !important;
 }
 
 .markdown-content :deep(li:has(> .task-checkbox))::before {

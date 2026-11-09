@@ -1,11 +1,22 @@
 <script setup lang="ts">
-import { RouterLink, RouterView, useRouter } from 'vue-router'
-import { onMounted } from 'vue'
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
+import { onMounted, ref, watch, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAuth } from './composables/useAuth'
 import { useNoiseOverlay } from './composables/useNoiseOverlay'
+import { checkAdmin, adminHeaders } from './composables/useAdmin'
+import {
+  applyOverrides,
+  disableEditing,
+  enableEditing,
+  loadEdits,
+  readOverrides,
+  saveEdits,
+} from './composables/useInlineEdit'
+import InlineEditToolbar from './components/InlineEditToolbar.vue'
 
 const router = useRouter()
+const route = useRoute()
 const { user, loading, isAuthenticated, signOut } = useAuth()
 
 const handleSignOut = () => {
@@ -13,7 +24,85 @@ const handleSignOut = () => {
   router.push('/')
 }
 
-onMounted(() => useNoiseOverlay())
+const pageRoot = ref<HTMLElement | null>(null)
+const editMode = ref(false)
+const editSaving = ref(false)
+const editMessage = ref('')
+const editError = ref(false)
+let cachedOverrides: string[] = []
+let observer: MutationObserver | null = null
+let refreshToken = 0
+
+async function refreshPage() {
+  const root = pageRoot.value
+  if (!root) return
+  const token = ++refreshToken
+  const path = route.path
+  const wantEdit = route.query.edit === '1'
+  cachedOverrides = await loadEdits(path)
+  if (token !== refreshToken) return
+  await nextTick()
+  disableEditing(root)
+  applyOverrides(root, cachedOverrides)
+
+  const admin = wantEdit ? await checkAdmin() : false
+  if (token !== refreshToken) return
+  if (wantEdit && !admin) {
+    router.replace({ path, query: {} })
+    return
+  }
+  editMode.value = admin
+  editMessage.value = ''
+  editError.value = false
+  if (editMode.value) enableEditing(root)
+  watchDom()
+}
+
+function watchDom() {
+  observer?.disconnect()
+  const root = pageRoot.value
+  if (!root) return
+  observer = new MutationObserver(() => {
+    const el = pageRoot.value
+    if (!el) return
+    if (editMode.value) enableEditing(el)
+    else applyOverrides(el, cachedOverrides)
+  })
+  observer.observe(root, { childList: true, subtree: true, characterData: true })
+}
+
+async function saveInlineEdits() {
+  const root = pageRoot.value
+  if (!root) return
+  editSaving.value = true
+  editMessage.value = ''
+  editError.value = false
+  try {
+    const overrides = readOverrides(root)
+    await saveEdits(route.path, overrides, adminHeaders())
+    cachedOverrides = overrides
+    editMessage.value = '已保存'
+    router.replace({ path: route.path, query: {} })
+  } catch (e) {
+    editMessage.value = e instanceof Error ? e.message : '保存失败'
+    editError.value = true
+  } finally {
+    editSaving.value = false
+  }
+}
+
+function cancelInlineEdits() {
+  router.replace({ path: route.path, query: {} })
+}
+
+watch(() => route.fullPath, () => {
+  setTimeout(refreshPage, 80)
+})
+
+onMounted(() => {
+  useNoiseOverlay()
+  setTimeout(refreshPage, 150)
+})
 </script>
 
 <template>
@@ -47,13 +136,22 @@ onMounted(() => useNoiseOverlay())
     </div>
   </nav>
 
-  <main>
+  <main ref="pageRoot">
     <RouterView v-slot="{ Component }">
       <transition name="page-fade" appear>
         <component :is="Component" :key="$route.fullPath" />
       </transition>
     </RouterView>
   </main>
+
+  <InlineEditToolbar
+    :active="editMode"
+    :saving="editSaving"
+    :message="editMessage"
+    :is-error="editError"
+    @save="saveInlineEdits"
+    @cancel="cancelInlineEdits"
+  />
 
   <footer class="geek-footer">
     <div class="footer-row">
@@ -88,4 +186,22 @@ onMounted(() => useNoiseOverlay())
 .page-fade-leave-active { transition: opacity 0.2s var(--ease-out-expo); position: absolute; width: 100%; }
 .page-fade-enter-from { opacity: 0; transform: translateY(12px); }
 .page-fade-leave-to { opacity: 0; }
+
+.inline-editable {
+  cursor: text;
+  border-radius: 2px;
+  outline: 1px dashed transparent;
+  outline-offset: 3px;
+  transition: outline-color 0.2s, background 0.2s;
+}
+
+.inline-editable:hover {
+  outline-color: rgba(255, 179, 71, 0.55);
+  background: rgba(255, 179, 71, 0.07);
+}
+
+.inline-editable:focus {
+  outline: 1px solid rgba(255, 179, 71, 0.85);
+  background: rgba(255, 179, 71, 0.1);
+}
 </style>

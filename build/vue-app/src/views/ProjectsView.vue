@@ -108,19 +108,6 @@ function openCreate() {
   showForm.value = true
 }
 
-function openEdit(p: typeof allProjects.value[number]) {
-  editingId.value = p.rawId
-  form.value = {
-    title: p.title,
-    description: p.description,
-    category: p.category,
-    link: p.link,
-    external: p.external,
-  }
-  formError.value = ''
-  showForm.value = true
-}
-
 function closeForm() {
   showForm.value = false
   formError.value = ''
@@ -240,9 +227,14 @@ onMounted(async () => {
             <RouterLink v-else :to="p.link" class="btn-geek" style="font-size:var(--font-size-xs);">
               <Icon icon="mdi:arrow-right" width="14" /> 查看
             </RouterLink>
-            <template v-if="isAdmin && p.managed">
-              <button class="mini-btn" @click="openEdit(p)">[编辑]</button>
-              <button class="mini-btn danger" @click="remove(p)">[删除]</button>
+            <template v-if="isAdmin">
+              <RouterLink
+                v-if="!p.external"
+                :to="p.link + (p.link.includes('?') ? '&' : '?') + 'edit=1'"
+                class="mini-btn"
+                title="在完整页面上直接编辑文字"
+              >[编辑]</RouterLink>
+              <button v-if="p.managed" class="mini-btn danger" @click="remove(p)">[删除]</button>
             </template>
           </div>
         </div>

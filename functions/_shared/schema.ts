@@ -83,6 +83,14 @@ export async function ensureSchema(env: Env): Promise<void> {
   ).run()
 
   await db.prepare(
+    `CREATE TABLE IF NOT EXISTS page_edits (
+      path TEXT PRIMARY KEY,
+      overrides TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`,
+  ).run()
+
+  await db.prepare(
     `CREATE TABLE IF NOT EXISTS projects (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
