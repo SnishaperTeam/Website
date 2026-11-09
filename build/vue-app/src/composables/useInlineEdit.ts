@@ -1,3 +1,5 @@
+export type EditOverrides = Record<string, string>
+
 const CANDIDATE = 'h1,h2,h3,h4,h5,h6,p,li,td,th,blockquote,span,div,strong,em,label,figcaption'
 const SKIP =
   'a,button,input,textarea,select,code,pre,svg,script,style,nav,footer,header,' +
@@ -18,13 +20,34 @@ export function collectEditable(root: HTMLElement): HTMLElement[] {
   return out
 }
 
-export function applyOverrides(root: HTMLElement, overrides: string[]) {
-  const elements = collectEditable(root)
-  elements.forEach((el, index) => {
-    const value = overrides[index]
-    if (typeof value !== 'string') return
-    if (el.textContent !== value) el.textContent = value
-  })
+function stableClass(el: HTMLElement): string {
+  if (typeof el.className !== 'string') return ''
+  const parts = el.className
+    .trim()
+    .split(/\s+/)
+    .filter((c) => c && !c.startsWith('inline-'))
+    .slice(0, 2)
+  return parts.length ? '.' + parts.join('.') : ''
+}
+
+export function keyOf(root: HTMLElement, el: HTMLElement): string {
+  const parts: string[] = []
+  let cur: HTMLElement | null = el
+  while (cur && cur !== root) {
+    const parent = cur.parentElement
+    if (!parent) break
+    const index = Array.from(parent.children).indexOf(cur)
+    parts.unshift(`${cur.tagName.toLowerCase()}${stableClass(cur)}@${index}`)
+    cur = parent
+  }
+  return parts.join('>')
+}
+
+export function applyOverrides(root: HTMLElement, overrides: EditOverrides) {
+  for (const el of collectEditable(root)) {
+    const value = overrides[keyOf(root, el)]
+    if (typeof value === 'string' && el.textContent !== value) el.textContent = value
+  }
 }
 
 export function enableEditing(root: HTMLElement) {
@@ -52,23 +75,29 @@ export function disableEditing(root: HTMLElement) {
   }
 }
 
-export function readOverrides(root: HTMLElement): string[] {
-  return collectEditable(root).map((el) => el.textContent || '')
+export function readOverrides(root: HTMLElement): EditOverrides {
+  const out: EditOverrides = {}
+  for (const el of collectEditable(root)) {
+    out[keyOf(root, el)] = el.textContent || ''
+  }
+  return out
 }
 
-export async function loadEdits(path: string): Promise<string[]> {
+export async function loadEdits(path: string): Promise<EditOverrides> {
   try {
     const res = await fetch(`/api/page-edits?path=${encodeURIComponent(path)}`)
     const data = await res.json()
-    return res.ok && Array.isArray(data.overrides) ? data.overrides : []
+    if (!res.ok || !data.overrides || typeof data.overrides !== 'object') return {}
+    if (Array.isArray(data.overrides)) return {}
+    return data.overrides as EditOverrides
   } catch {
-    return []
+    return {}
   }
 }
 
 export async function saveEdits(
   path: string,
-  overrides: string[],
+  overrides: EditOverrides,
   headers: Record<string, string>,
 ): Promise<void> {
   const res = await fetch('/api/page-edits', {

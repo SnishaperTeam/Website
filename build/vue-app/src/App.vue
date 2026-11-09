@@ -12,6 +12,7 @@ import {
   loadEdits,
   readOverrides,
   saveEdits,
+  type EditOverrides,
 } from './composables/useInlineEdit'
 import InlineEditToolbar from './components/InlineEditToolbar.vue'
 
@@ -29,24 +30,25 @@ const editMode = ref(false)
 const editSaving = ref(false)
 const editMessage = ref('')
 const editError = ref(false)
-let cachedOverrides: string[] = []
+let cached: { path: string; overrides: EditOverrides } = { path: '', overrides: {} }
 let observer: MutationObserver | null = null
 let refreshToken = 0
 
 async function refreshPage() {
-  const root = pageRoot.value
-  if (!root) return
   const token = ++refreshToken
   const path = route.path
   const wantEdit = route.query.edit === '1'
-  cachedOverrides = await loadEdits(path)
-  if (token !== refreshToken) return
+  const overrides = await loadEdits(path)
+  if (token !== refreshToken || route.path !== path) return
   await nextTick()
+  const root = pageRoot.value
+  if (!root || token !== refreshToken || route.path !== path) return
+  cached = { path, overrides }
   disableEditing(root)
-  applyOverrides(root, cachedOverrides)
+  applyOverrides(root, overrides)
 
   const admin = wantEdit ? await checkAdmin() : false
-  if (token !== refreshToken) return
+  if (token !== refreshToken || route.path !== path) return
   if (wantEdit && !admin) {
     router.replace({ path, query: {} })
     return
@@ -62,11 +64,17 @@ function watchDom() {
   observer?.disconnect()
   const root = pageRoot.value
   if (!root) return
+  let pending = false
   observer = new MutationObserver(() => {
-    const el = pageRoot.value
-    if (!el) return
-    if (editMode.value) enableEditing(el)
-    else applyOverrides(el, cachedOverrides)
+    if (pending) return
+    pending = true
+    requestAnimationFrame(() => {
+      pending = false
+      const el = pageRoot.value
+      if (!el || cached.path !== route.path) return
+      if (editMode.value) enableEditing(el)
+      else applyOverrides(el, cached.overrides)
+    })
   })
   observer.observe(root, { childList: true, subtree: true, characterData: true })
 }
@@ -80,9 +88,8 @@ async function saveInlineEdits() {
   try {
     const overrides = readOverrides(root)
     await saveEdits(route.path, overrides, adminHeaders())
-    cachedOverrides = overrides
     editMessage.value = '已保存'
-    router.replace({ path: route.path, query: {} })
+    window.location.assign(route.path)
   } catch (e) {
     editMessage.value = e instanceof Error ? e.message : '保存失败'
     editError.value = true
@@ -92,7 +99,7 @@ async function saveInlineEdits() {
 }
 
 function cancelInlineEdits() {
-  router.replace({ path: route.path, query: {} })
+  window.location.assign(route.path)
 }
 
 watch(() => route.fullPath, () => {

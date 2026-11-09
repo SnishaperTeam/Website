@@ -11,19 +11,20 @@ function normalizePath(value: string): string {
 
 export const onRequestGet = async (context: { request: Request; env: AdminEnv }) => {
   const path = normalizePath(new URL(context.request.url).searchParams.get('path') || '')
-  if (!path) return json({ overrides: [] })
+  if (!path) return json({ overrides: {} })
 
   const row = await getDb(context.env)
     .prepare('SELECT overrides FROM page_edits WHERE path = ?')
     .bind(path)
     .first<{ overrides: string }>()
-  if (!row) return json({ overrides: [] })
+  if (!row) return json({ overrides: {} })
 
   try {
     const data = JSON.parse(row.overrides)
-    return json({ overrides: Array.isArray(data) ? data : [] })
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return json({ overrides: {} })
+    return json({ overrides: data })
   } catch {
-    return json({ overrides: [] })
+    return json({ overrides: {} })
   }
 }
 
@@ -36,10 +37,17 @@ export const onRequestPost = async (context: { request: Request; env: AdminEnv }
 
   const path = normalizePath(str(body.path))
   if (!path) return failJson('path 不能为空', 400)
-  const overrides = Array.isArray(body.overrides)
-    ? (body.overrides as unknown[]).map((v) => (typeof v === 'string' ? v : ''))
-    : []
-  if (overrides.length > 2000) return failJson('内容过多', 400)
+  const raw = body.overrides
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return failJson('overrides 格式错误', 400)
+  }
+  const entries = Object.entries(raw as Record<string, unknown>)
+  if (entries.length > 2000) return failJson('内容过多', 400)
+  const overrides: Record<string, string> = {}
+  for (const [key, value] of entries) {
+    if (key.length > 600 || typeof value !== 'string') continue
+    overrides[key] = value
+  }
 
   await getDb(context.env)
     .prepare(
