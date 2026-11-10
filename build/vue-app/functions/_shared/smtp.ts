@@ -1,6 +1,6 @@
 import { connect } from 'cloudflare:sockets'
 
-const SMTP_HOST = 'smtp.qq.com'
+const SMTP_HOST = 'smtp.yandex.com'
 const SMTP_PORT = 465
 const decoder = new TextDecoder()
 const encoder = new TextEncoder()
