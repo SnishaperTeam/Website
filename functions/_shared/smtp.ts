@@ -53,6 +53,7 @@ export async function sendMail(
   to: string,
   subject: string,
   text: string,
+  html?: string,
 ): Promise<void> {
   const socket = connect(
     { hostname: SMTP_HOST, port: SMTP_PORT },
@@ -66,23 +67,43 @@ export async function sendMail(
     await command(reader, writer, 'EHLO jetcpp.ccwu.cc', 250)
     await socket.startTls()
     await command(reader, writer, 'EHLO jetcpp.ccwu.cc', 250)
-    await command(reader, writer, 'AUTH LOGIN', 334)
-    await command(reader, writer, encodeBase64(authUser), 334)
-    await command(reader, writer, encodeBase64(password), 235)
+    const authPayload = encodeBase64(`\0${authUser}\0${password}`)
+    await command(reader, writer, `AUTH PLAIN ${authPayload}`, 235)
     await command(reader, writer, `MAIL FROM:<${from}>`, 250)
     await command(reader, writer, `RCPT TO:<${to}>`, 250)
     await command(reader, writer, 'DATA', 354)
 
-    const body = [
+    const boundary = `st-${crypto.randomUUID().replace(/-/g, '')}`
+    const headers = [
       `From: SnishaperTeam <${from}>`,
       `To: ${to}`,
       `Subject: ${mime(subject)}`,
       'MIME-Version: 1.0',
-      'Content-Type: text/plain; charset=UTF-8',
-      'Content-Transfer-Encoding: 8bit',
-      '',
-      ...text.split('\n').map((line) => (line.startsWith('.') ? `.${line}` : line)),
-    ].join('\r\n')
+    ]
+    let content: string[]
+    if (html) {
+      headers.push(`Content-Type: multipart/alternative; boundary="${boundary}"`)
+      content = [
+        `--${boundary}`,
+        'Content-Type: text/plain; charset=UTF-8',
+        'Content-Transfer-Encoding: 8bit',
+        '',
+        ...text.split('\n'),
+        `--${boundary}`,
+        'Content-Type: text/html; charset=UTF-8',
+        'Content-Transfer-Encoding: 8bit',
+        '',
+        ...html.split('\n'),
+        `--${boundary}--`,
+        '',
+      ]
+    } else {
+      headers.push('Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: 8bit')
+      content = text.split('\n')
+    }
+    const body = [...headers, '', ...content]
+      .map((line) => (line.startsWith('.') ? `.${line}` : line))
+      .join('\r\n')
     await writer.write(encoder.encode(`${body}\r\n.\r\n`))
     await readResponse(reader).then((response) => checkResponse(response, 250))
     await command(reader, writer, 'QUIT', 221)

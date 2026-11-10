@@ -1,4 +1,5 @@
 import { sendMail } from './smtp'
+import { otpHtml, otpSubject, otpText } from './otpMail'
 import { fail, json, type D1Database, type Env } from './types'
 
 export type OtpPurpose = 'register' | 'password_reset'
@@ -50,8 +51,9 @@ export async function sendOtp(db: D1Database, email: string, purpose: OtpPurpose
       env.SMTP_PASSWORD,
       env.SMTP_FROM || env.SMTP_USER,
       email,
-      'jetcpp.cc 邮箱验证码',
-      `您的验证码是：${code}\n\n10 分钟内有效。若非本人操作，请忽略这封邮件。`,
+      otpSubject(purpose),
+      otpText(code),
+      otpHtml(code, purpose),
     )
   } catch (e) {
     return fail(e instanceof Error ? e.message : '验证码邮件发送失败', 502)
