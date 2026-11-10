@@ -1,7 +1,7 @@
 import { connect } from 'cloudflare:sockets'
 
-const SMTP_HOST = 'smtp.yandex.com'
-const SMTP_PORT = 465
+const SMTP_HOST = 'smtp-relay.brevo.com'
+const SMTP_PORT = 587
 const decoder = new TextDecoder()
 const encoder = new TextEncoder()
 
@@ -49,7 +49,7 @@ function mime(value: string): string {
 export async function sendMail(from: string, password: string, to: string, subject: string, text: string): Promise<void> {
   const socket = connect(
     { hostname: SMTP_HOST, port: SMTP_PORT },
-    { secureTransport: 'on', allowHalfOpen: false },
+    { secureTransport: 'starttls', allowHalfOpen: false },
   )
   const reader = socket.readable.getReader()
   const writer = socket.writable.getWriter()
@@ -57,7 +57,11 @@ export async function sendMail(from: string, password: string, to: string, subje
   try {
     await readResponse(reader)
     await command(reader, writer, 'EHLO jetcpp.ccwu.cc', 250)
-    await command(reader, writer, `AUTH PLAIN ${encodeBase64(`\0${from}\0${password}`)}`, 235)
+    await socket.startTls()
+    await command(reader, writer, 'EHLO jetcpp.ccwu.cc', 250)
+    await command(reader, writer, 'AUTH LOGIN', 334)
+    await command(reader, writer, encodeBase64(from), 334)
+    await command(reader, writer, encodeBase64(password), 235)
     await command(reader, writer, `MAIL FROM:<${from}>`, 250)
     await command(reader, writer, `RCPT TO:<${to}>`, 250)
     await command(reader, writer, 'DATA', 354)
