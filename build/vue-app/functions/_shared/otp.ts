@@ -48,6 +48,7 @@ export async function sendOtp(db: D1Database, email: string, purpose: OtpPurpose
     await sendMail(
       env.SMTP_USER,
       env.SMTP_PASSWORD,
+      env.SMTP_FROM || env.SMTP_USER,
       email,
       'jetcpp.cc 邮箱验证码',
       `您的验证码是：${code}\n\n10 分钟内有效。若非本人操作，请忽略这封邮件。`,

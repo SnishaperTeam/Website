@@ -46,7 +46,14 @@ function mime(value: string): string {
   return `=?UTF-8?B?${btoa(String.fromCharCode(...encoder.encode(value)))}?=`
 }
 
-export async function sendMail(from: string, password: string, to: string, subject: string, text: string): Promise<void> {
+export async function sendMail(
+  authUser: string,
+  password: string,
+  from: string,
+  to: string,
+  subject: string,
+  text: string,
+): Promise<void> {
   const socket = connect(
     { hostname: SMTP_HOST, port: SMTP_PORT },
     { secureTransport: 'starttls', allowHalfOpen: false },
@@ -60,7 +67,7 @@ export async function sendMail(from: string, password: string, to: string, subje
     await socket.startTls()
     await command(reader, writer, 'EHLO jetcpp.ccwu.cc', 250)
     await command(reader, writer, 'AUTH LOGIN', 334)
-    await command(reader, writer, encodeBase64(from), 334)
+    await command(reader, writer, encodeBase64(authUser), 334)
     await command(reader, writer, encodeBase64(password), 235)
     await command(reader, writer, `MAIL FROM:<${from}>`, 250)
     await command(reader, writer, `RCPT TO:<${to}>`, 250)

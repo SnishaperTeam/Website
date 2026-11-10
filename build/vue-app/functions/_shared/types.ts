@@ -15,6 +15,7 @@ export interface Env {
   JWT_SECRET: string
   SMTP_USER: string
   SMTP_PASSWORD: string
+  SMTP_FROM?: string
 }
 
 export interface UserRow {
