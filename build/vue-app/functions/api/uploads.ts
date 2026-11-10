@@ -62,6 +62,7 @@ export const onRequestPost = async (context: { request: Request; env: UploadEnv 
       'x-upsert': 'false',
     },
     body: bytes,
+    signal: AbortSignal.timeout(20000),
   })
   if (!uploadRes.ok) {
     const detail = await uploadRes.text()
