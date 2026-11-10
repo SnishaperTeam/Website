@@ -4,12 +4,15 @@
       <span class="term-dot"></span>
       <span class="term-dot"></span>
       <span class="term-dot"></span>
-      <span class="auth-bar-title">{{ mode === 'login' ? 'auth/login.sh' : 'auth/register.sh' }}</span>
+      <span class="auth-bar-title">{{ mode === 'login' ? 'auth/login.sh' : mode === 'register' ? 'auth/register.sh' : 'auth/reset.sh' }}</span>
     </div>
     <div class="term-body">
       <div class="auth-tabs">
         <button class="auth-tab" :class="{ on: mode === 'login' }" @click="switchMode('login')">登录</button>
         <button class="auth-tab" :class="{ on: mode === 'register' }" @click="switchMode('register')">注册</button>
+        <button class="auth-tab link-tab" type="button" @click="switchMode(mode === 'reset' ? 'login' : 'reset')">
+          {{ mode === 'reset' ? '← 返回登录' : '忘记密码？' }}
+        </button>
       </div>
 
       <form class="auth-form" @submit.prevent="submit">
@@ -18,23 +21,45 @@
           <input v-model.trim="email" type="email" autocomplete="email" placeholder="you@example.com" required />
         </label>
 
+        <label v-if="mode !== 'login'" class="field">
+          <span class="field-label">$ otp</span>
+          <div class="otp-row">
+            <input
+              v-model.trim="otpCode"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              placeholder="6 位邮箱验证码"
+              maxlength="6"
+            />
+            <button
+              class="btn-geek otp-send"
+              type="button"
+              :disabled="otpSending || otpCooldown > 0 || !email"
+              @click="sendOtp"
+            >
+              {{ otpCooldown > 0 ? `${otpCooldown}s` : '发送验证码' }}
+            </button>
+          </div>
+        </label>
+
         <label v-if="mode === 'register'" class="field">
           <span class="field-label">$ nickname</span>
           <input v-model.trim="nickname" type="text" autocomplete="nickname" placeholder="2-24 个字符" maxlength="24" />
         </label>
 
         <label class="field">
-          <span class="field-label">$ password</span>
+          <span class="field-label">{{ mode === 'reset' ? '$ new-password' : '$ password' }}</span>
           <input
             v-model="password"
             type="password"
             :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
-            placeholder="至少 8 位"
+            :placeholder="mode === 'reset' ? '输入新密码，至少 8 位' : '至少 8 位'"
             required
           />
         </label>
 
-        <label v-if="mode === 'register'" class="field">
+        <label v-if="mode !== 'login'" class="field">
           <span class="field-label">$ confirm</span>
           <input v-model="confirm" type="password" autocomplete="new-password" placeholder="再次输入密码" required />
         </label>
@@ -43,7 +68,7 @@
         <p v-if="info" class="auth-info">{{ info }}</p>
 
         <button class="btn-geek auth-submit" type="submit" :disabled="busy">
-          {{ busy ? '处理中...' : mode === 'login' ? '$ 登录' : '$ 注册' }}
+          {{ busy ? '处理中...' : mode === 'login' ? '$ 登录' : mode === 'register' ? '$ 注册' : '$ 重置密码' }}
         </button>
       </form>
 
@@ -66,7 +91,7 @@ import { useAuth } from '@/composables/useAuth'
 const emit = defineEmits<{ success: [] }>()
 const route = useRoute()
 
-const { signIn, signUp } = useAuth()
+const { signIn, signUp, requestOtp, resetPassword } = useAuth()
 
 const providers = [
   { key: 'github', label: 'GitHub', icon: 'simple-icons:github' },
@@ -78,21 +103,48 @@ function startOAuth(key: string) {
   window.location.href = `/api/auth/oauth/${key}/start`
 }
 
-const mode = ref<'login' | 'register'>('login')
+const mode = ref<'login' | 'register' | 'reset'>('login')
 const email = ref('')
 const nickname = ref('')
 const password = ref('')
 const confirm = ref('')
+const otpCode = ref('')
+const otpSending = ref(false)
+const otpCooldown = ref(0)
 const error = ref(typeof route.query.oauth_error === 'string' ? route.query.oauth_error : '')
 const info = ref('')
 const busy = ref(false)
 
-function switchMode(next: 'login' | 'register') {
+function switchMode(next: 'login' | 'register' | 'reset') {
   mode.value = next
   error.value = ''
   info.value = ''
   password.value = ''
   confirm.value = ''
+  otpCode.value = ''
+}
+
+async function sendOtp() {
+  if (!email.value) {
+    error.value = '请输入邮箱'
+    return
+  }
+  error.value = ''
+  info.value = ''
+  otpSending.value = true
+  try {
+    await requestOtp(email.value, mode.value === 'register' ? 'register' : 'password_reset')
+    info.value = '验证码已发送，请查收邮箱（10 分钟内有效）'
+    otpCooldown.value = 60
+    const timer = setInterval(() => {
+      otpCooldown.value -= 1
+      if (otpCooldown.value <= 0) clearInterval(timer)
+    }, 1000)
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : '验证码发送失败'
+  } finally {
+    otpSending.value = false
+  }
 }
 
 async function submit() {
@@ -102,11 +154,15 @@ async function submit() {
     error.value = '请输入邮箱'
     return
   }
+  if (mode.value !== 'login' && !/^\d{6}$/.test(otpCode.value)) {
+    error.value = '请输入 6 位邮箱验证码'
+    return
+  }
   if (password.value.length < 8) {
     error.value = '密码至少 8 位'
     return
   }
-  if (mode.value === 'register' && password.value !== confirm.value) {
+  if (mode.value !== 'login' && password.value !== confirm.value) {
     error.value = '两次输入的密码不一致'
     return
   }
@@ -115,8 +171,13 @@ async function submit() {
   try {
     if (mode.value === 'login') {
       await signIn(email.value, password.value)
+    } else if (mode.value === 'register') {
+      await signUp({ email: email.value, password: password.value, nickname: nickname.value || undefined, otpCode: otpCode.value })
     } else {
-      await signUp({ email: email.value, password: password.value, nickname: nickname.value || undefined })
+      await resetPassword(email.value, otpCode.value, password.value)
+      switchMode('login')
+      info.value = '密码已重置，请使用新密码登录'
+      return
     }
     emit('success')
   } catch (e) {
@@ -162,6 +223,42 @@ async function submit() {
   color: var(--color-text);
   border-color: rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.08);
+}
+
+.link-tab {
+  margin-left: auto;
+  border-color: transparent;
+  color: var(--color-text-faint);
+  font-size: 0.75rem;
+}
+
+.link-tab:hover {
+  color: var(--color-text);
+  border-color: transparent;
+  background: none;
+}
+
+.otp-row {
+  display: flex;
+  gap: 8px;
+}
+
+.otp-row input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em;
+}
+
+.otp-send {
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  padding: 0.55rem 0.8rem;
+}
+
+.otp-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .auth-form {

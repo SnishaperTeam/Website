@@ -10,6 +10,7 @@ import {
   type Env,
   type UserRow,
 } from '../../_shared/types'
+import { verifyOtp } from '../../_shared/otp'
 
 export const onRequestPost = async (context: { request: Request; env: Env }) => {
   const body = await readBody(context.request)
@@ -19,8 +20,10 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
   const email = str(body.email).toLowerCase()
   const password = str(body.password)
   const nickname = str(body.nickname) || email.split('@')[0]
+  const otpCode = str(body.otpCode)
 
   if (!isValidEmail(email)) return fail('邮箱格式不正确')
+  if (!/^\d{6}$/.test(otpCode)) return fail('请输入 6 位邮箱验证码')
   if (password.length < 8) return fail('密码至少 8 位')
   if (nickname.length < 2 || nickname.length > 24) return fail('昵称长度需在 2-24 个字符之间')
 
@@ -28,6 +31,9 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
     .bind(email)
     .first<{ id: string }>()
   if (exists) return fail('该邮箱已注册', 409)
+
+  const otpError = await verifyOtp(db, email, 'register', otpCode, context.env.JWT_SECRET)
+  if (otpError) return otpError
 
   const salt = newSalt()
   const passwordHash = await hashPassword(password, salt)

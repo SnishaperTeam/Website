@@ -139,5 +139,17 @@ export async function ensureSchema(env: Env): Promise<void> {
     )`,
   ).run()
 
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS otp_codes (
+      email TEXT NOT NULL,
+      purpose TEXT NOT NULL,
+      code_hash TEXT NOT NULL,
+      expires_at INTEGER NOT NULL,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL,
+      PRIMARY KEY(email, purpose)
+    )`,
+  ).run()
+
   ensured = true
 }

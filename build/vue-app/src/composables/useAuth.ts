@@ -70,7 +70,7 @@ async function signIn(email: string, password: string) {
   return data.user
 }
 
-async function signUp(payload: { email: string; password: string; nickname?: string }) {
+async function signUp(payload: { email: string; password: string; nickname?: string; otpCode?: string }) {
   const data = await request<{ token: string; user: AuthUser }>('/api/auth/register', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -78,6 +78,20 @@ async function signUp(payload: { email: string; password: string; nickname?: str
   setToken(data.token)
   user.value = data.user
   return data.user
+}
+
+async function requestOtp(email: string, purpose: 'register' | 'password_reset') {
+  await request<{ ok: boolean }>('/api/auth/otp/send', {
+    method: 'POST',
+    body: JSON.stringify({ email, purpose }),
+  })
+}
+
+async function resetPassword(email: string, otpCode: string, password: string) {
+  await request<{ ok: boolean }>('/api/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ email, otpCode, password }),
+  })
 }
 
 function signOut() {
@@ -121,6 +135,8 @@ export function useAuth() {
     loading,
     signIn,
     signUp,
+    requestOtp,
+    resetPassword,
     signOut,
     applySession,
     updateProfile,
