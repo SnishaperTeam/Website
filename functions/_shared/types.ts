@@ -12,10 +12,13 @@ export interface D1Database {
 export interface Env {
   DB: D1Database
   D1_API_TOKEN: string
+  DB_BACKEND?: string
   JWT_SECRET: string
   SMTP_USER: string
   SMTP_PASSWORD: string
   SMTP_FROM?: string
+  SUPABASE_URL?: string
+  SUPABASE_SECRET_KEY?: string
 }
 
 export interface UserRow {
