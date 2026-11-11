@@ -1,45 +1,94 @@
 import { ref } from 'vue'
+import { getToken } from './useAuth'
 
-const SESSION_KEY = 'snishaper_notice_session'
-const isAdmin = ref(false)
+const ADMIN_TOKEN_KEY = 'admin_token'
+
+export const isAdmin = ref(false)
 let checked = false
 
-function readSession(): { token: string; expires_at?: string } | null {
+function readAdminToken(): string {
   try {
-    const raw = localStorage.getItem(SESSION_KEY)
-    if (!raw) return null
-    const s = JSON.parse(raw)
-    if (!s?.token) return null
-    if (s.expires_at && new Date(s.expires_at).getTime() <= Date.now()) return null
-    return s
+    return localStorage.getItem(ADMIN_TOKEN_KEY) || ''
   } catch {
-    return null
+    return ''
   }
 }
 
-export function adminHeaders(): Record<string, string> {
-  const s = readSession()
-  return s ? { Authorization: `Bearer ${s.token}` } : {}
+function writeAdminToken(token: string) {
+  try {
+    if (token) localStorage.setItem(ADMIN_TOKEN_KEY, token)
+    else localStorage.removeItem(ADMIN_TOKEN_KEY)
+  } catch {}
+}
+
+export function currentToken(): string {
+  return readAdminToken() || getToken()
+}
+
+export function adminHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', ...extra }
+  const token = currentToken()
+  if (token) headers.Authorization = `Bearer ${token}`
+  return headers
+}
+
+export async function adminLogin(email: string, password: string): Promise<boolean> {
+  const res = await fetch('/api/admin/session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok || !data.admin) {
+    isAdmin.value = false
+    checked = true
+    if (data.error === 'invalid_credentials') throw new Error('管理员邮箱或密码错误')
+    throw new Error(data.error || `HTTP ${res.status}`)
+  }
+  writeAdminToken(String(data.token || ''))
+  isAdmin.value = true
+  checked = true
+  return true
 }
 
 export async function checkAdmin(force = false): Promise<boolean> {
   if (checked && !force) return isAdmin.value
-  const s = readSession()
-  if (!s) {
-    isAdmin.value = false
-    checked = true
-    return false
+  const adminTok = readAdminToken()
+  const siteTok = getToken()
+
+  const attempt = async (token: string): Promise<boolean> => {
+    const res = await fetch('/api/admin/session', {
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json().catch(() => ({}))
+    return res.ok && !!data.admin
   }
+
+  let ok = false
   try {
-    const res = await fetch('/api/notices/auth', { headers: adminHeaders() })
-    isAdmin.value = res.ok
+    if (adminTok) {
+      ok = await attempt(adminTok)
+      if (!ok) writeAdminToken('')
+    }
+    if (!ok && siteTok) ok = await attempt(siteTok)
   } catch {
-    isAdmin.value = false
+    ok = false
   }
+  isAdmin.value = ok
   checked = true
-  return isAdmin.value
+  return ok
+}
+
+export function invalidateAdmin() {
+  isAdmin.value = false
+  checked = false
+}
+
+export function clearAdminToken() {
+  writeAdminToken('')
+  invalidateAdmin()
 }
 
 export function useAdmin() {
-  return { isAdmin, checkAdmin, adminHeaders }
+  return { isAdmin, checkAdmin, adminLogin, adminHeaders, invalidateAdmin, clearAdminToken }
 }

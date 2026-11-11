@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!session" class="auth-wrap">
+    <div v-if="!isAdmin" class="auth-wrap">
       <div class="auth-card">
         <div class="term-block">
           <div class="term-bar">
@@ -12,16 +12,24 @@
           <div class="term-body">
             <div class="auth-line">admin login</div>
             <div class="auth-title">后台管理 · 身份验证</div>
-            <div class="auth-sub">请先验证管理员邮箱与密码，验证通过后进入后台。</div>
-            <label for="email">邮箱 / EMAIL</label>
-            <input id="email" v-model.trim="email" type="email" autocomplete="username" @keyup.enter="login" />
-            <label for="password">密码 / PASSWORD</label>
-            <input id="password" v-model="password" type="password" autocomplete="current-password" @keyup.enter="login" />
+            <div class="auth-sub">使用管理员账号邮箱与密码登录，服务端按用户表存储的密码哈希校验。</div>
+            <label>管理员邮箱</label>
+            <input v-model="loginEmail" type="email" autocomplete="username" placeholder="you@example.com" />
+            <label>密码</label>
+            <input
+              v-model="loginPassword"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              @keyup.enter="submitLogin"
+            />
             <div class="auth-actions">
-              <button class="btn-geek primary" :disabled="loginBusy" @click="login">
-                {{ loginBusy ? '验证中...' : '[登录]' }}
+              <button class="btn-geek primary" :disabled="loggingIn" @click="submitLogin">
+                {{ loggingIn ? '[验证中…]' : '[登录后台]' }}
               </button>
+              <RouterLink to="/auth" class="btn-geek">[站点登录]</RouterLink>
             </div>
+            <div class="status" style="margin-top: 14px">{{ loginMsg }}</div>
           </div>
         </div>
       </div>
@@ -212,14 +220,41 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { adminHeaders, adminLogin, checkAdmin, clearAdminToken, isAdmin } from '@/composables/useAdmin'
 
-const SESSION_KEY = 'snishaper_notice_session'
+const router = useRouter()
 
-const email = ref('')
-const password = ref('')
-const loginBusy = ref(false)
-const session = ref<{ token: string; expires_at?: string } | null>(loadSession())
+const loginEmail = ref('')
+const loginPassword = ref('')
+const loginMsg = ref('')
+const loggingIn = ref(false)
+
+const session = computed(() => isAdmin.value)
+
+onMounted(() => {
+  checkAdmin(true)
+})
+
+async function submitLogin() {
+  if (loggingIn.value) return
+  loginMsg.value = ''
+  if (!loginEmail.value.trim() || !loginPassword.value) {
+    loginMsg.value = '请输入管理员邮箱与密码'
+    return
+  }
+  loggingIn.value = true
+  try {
+    await adminLogin(loginEmail.value.trim(), loginPassword.value)
+    loginPassword.value = ''
+    await loadNotices()
+  } catch (e) {
+    loginMsg.value = '登录失败：' + (e instanceof Error ? e.message : '')
+  } finally {
+    loggingIn.value = false
+  }
+}
 
 const tab = ref<'notices' | 'users' | 'posts' | 'comments' | 'stats'>('notices')
 const tabs = [
@@ -241,32 +276,16 @@ function toast(message: string, kind: 'ok' | 'err' = 'ok') {
   toastTimer = setTimeout(() => { toastMsg.value = '' }, 3200)
 }
 
-function loadSession(): { token: string; expires_at?: string } | null {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY)
-    if (!raw) return null
-    const s = JSON.parse(raw)
-    if (!s || !s.token) return null
-    if (s.expires_at && new Date(s.expires_at).getTime() <= Date.now()) return null
-    return s
-  } catch {
-    return null
-  }
-}
-
 function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json', ...extra }
-  if (session.value?.token) headers.Authorization = 'Bearer ' + session.value.token
-  return headers
+  return adminHeaders(extra)
 }
 
 async function call(path: string, init: RequestInit = {}) {
-  const res = await fetch(path, init)
+  const res = await fetch(path, { ...init, headers: { ...authHeaders(), ...(init.headers || {}) } })
   const data = await res.json().catch(() => ({}))
   if (res.status === 401) {
-    session.value = null
-    localStorage.removeItem(SESSION_KEY)
-    toast('登录已过期，请重新验证', 'err')
+    clearAdminToken()
+    toast('无管理员权限或登录已过期', 'err')
     throw new Error('unauthorized')
   }
   if (!res.ok || data.ok === false) throw new Error(data.error || 'HTTP ' + res.status)
@@ -293,41 +312,9 @@ function toISO(value: string) {
   return Number.isNaN(d.getTime()) ? '' : d.toISOString()
 }
 
-async function login() {
-  if (!email.value || !password.value) {
-    toast('请输入邮箱与密码', 'err')
-    return
-  }
-  loginBusy.value = true
-  try {
-    const res = await fetch('/api/notices/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, password: password.value }),
-    })
-    const data = await res.json()
-    if (!res.ok || !data.ok) {
-      if (res.status === 429) toast(`尝试次数过多，请 ${data.retry_after || 60} 秒后再试`, 'err')
-      else if (res.status === 503) toast('管理端未配置凭据', 'err')
-      else toast('邮箱或密码错误', 'err')
-      return
-    }
-    session.value = { token: data.token, expires_at: data.expires_at }
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session.value))
-    password.value = ''
-    toast('验证通过', 'ok')
-    switchTab('notices')
-  } catch (e) {
-    toast('登录失败：' + (e instanceof Error ? e.message : ''), 'err')
-  } finally {
-    loginBusy.value = false
-  }
-}
-
 function logout() {
-  session.value = null
-  localStorage.removeItem(SESSION_KEY)
-  toast('已登出', 'ok')
+  clearAdminToken()
+  router.push('/auth')
 }
 
 const notices = ref<any[]>([])
@@ -516,7 +503,9 @@ function switchTab(key: typeof tab.value) {
   else if (key === 'stats') loadStats()
 }
 
-if (session.value) loadNotices()
+watch(isAdmin, async () => {
+  if (session.value) await loadNotices()
+})
 </script>
 
 <style scoped>

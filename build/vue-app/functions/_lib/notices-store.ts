@@ -1,3 +1,5 @@
+import { resolveAdmin, type AdminEnv } from '../_shared/adminAuth'
+
 export interface NoticeRecord {
   id: string
   title: string
@@ -290,23 +292,8 @@ export function recordLoginSuccess(ip: string): void {
 }
 
 export async function requireAdmin(request: Request, env: StoreEnv): Promise<Response | null> {
-  const expected = (env.NOTICE_ADMIN_TOKEN || '').trim()
-  if (!expected) {
-    return jsonResponse({ ok: false, error: 'admin_token_not_configured' }, 503)
-  }
-  const header = request.headers.get('Authorization') || ''
-  const bearer = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : ''
-  const alternate = (request.headers.get('X-Admin-Token') || '').trim()
-  const credential = bearer || alternate
-  if (!credential) {
-    return jsonResponse({ ok: false, error: 'unauthorized' }, 401)
-  }
-  if (timingSafeEq(credential, expected)) {
-    return null
-  }
-  if (await verifySessionToken(credential, expected)) {
-    return null
-  }
+  const row = await resolveAdmin(request, env as unknown as AdminEnv)
+  if (row) return null
   return jsonResponse({ ok: false, error: 'unauthorized' }, 401)
 }
 

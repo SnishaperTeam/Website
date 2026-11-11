@@ -13,7 +13,7 @@ const TOKEN_KEY = 'auth_token'
 const user = ref<AuthUser | null>(null)
 const loading = ref(true)
 
-function getToken(): string {
+export function getToken(): string {
   try {
     return localStorage.getItem(TOKEN_KEY) || ''
   } catch {
@@ -133,6 +133,7 @@ export function useAuth() {
   return {
     user,
     loading,
+    getToken,
     signIn,
     signUp,
     requestOtp,
