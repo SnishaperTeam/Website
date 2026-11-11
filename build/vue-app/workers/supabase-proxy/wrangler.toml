@@ -1,0 +1,7 @@
+name = "supabase-proxy"
+main = "worker.js"
+compatibility_date = "2026-01-15"
+workers_dev = false
+routes = [
+  { pattern = "supabase.jetcpp.ccwu.cc", custom_domain = true }
+]

@@ -3,6 +3,8 @@ import { apiRequest } from '@/composables/useSiteData'
 export const MAX_IMAGE_BYTES = 3 * 1024 * 1024
 const ALLOWED = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif']
 const UPLOAD_TIMEOUT = 45000
+const SUPABASE_PROXY = String(import.meta.env.VITE_SUPABASE_PROXY || 'https://supabase.jetcpp.ccwu.cc').replace(/\/$/, '')
+const APP_CLIENT_KEY = String(import.meta.env.VITE_APP_CLIENT_KEY || '')
 
 function readAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -70,7 +72,8 @@ export async function uploadImage(file: File, kind: 'post' | 'avatar' = 'post'):
       body: JSON.stringify({ data, filename: source.name, kind }),
       signal: controller.signal,
     })
-    return result.url
+    const key = result.url.split('/storage/v1/object/public/')[1] || ''
+    return `${SUPABASE_PROXY}/storage/v1/object/public/${key}?k=${APP_CLIENT_KEY}`
   } catch (e) {
     if (e instanceof Error && e.name === 'AbortError') {
       throw new Error('上传超时，请重试或换更小的图片')
