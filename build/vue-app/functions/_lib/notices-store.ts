@@ -24,9 +24,7 @@ export interface NoticeDocument {
 
 export interface StoreEnv {
   GITHUB_NOTICE_TOKEN?: string
-  NOTICE_ADMIN_TOKEN?: string
   NOTICE_ADMIN_EMAIL?: string
-  NOTICE_ADMIN_PASSWORD?: string
   NOTICE_REPO?: string
   NOTICE_FILE?: string
   NOTICE_BRANCH?: string

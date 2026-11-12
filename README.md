@@ -1,12 +1,12 @@
 # SnishaperTeam
 
-[![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?style=flat&logo=vuedotjs&logoColor=white)](https://vuejs.org/) [![TypeScript](https://img.shields.io/badge/语言-TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Vite](https://img.shields.io/badge/构建-Vite%208-646CFF?style=flat&logo=vite&logoColor=white)](https://vite.dev/) [![Bun](https://img.shields.io/badge/运行时-Bun-000?style=flat&logo=bun&logoColor=white)](https://bun.sh/) [![Cloudflare D1](https://img.shields.io/badge/数据库-Cloudflare%20D1-F38020?style=flat&logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/d1/) [![Cloudflare Pages](https://img.shields.io/badge/部署-Cloudflare%20Pages-F38020?style=flat&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com/) [![License](https://img.shields.io/badge/许可证-MIT-blue?style=flat&logo=open-source-initiative)](LICENSE) [![GitHub last commit](https://img.shields.io/github/last-commit/SnishaperTeam/Website?style=flat&logo=git&label=最后提交)](https://github.com/SnishaperTeam/Website/commits/main) [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/SnishaperTeam/Website/weekly-deploy.yml?style=flat&logo=githubactions&label=部署流水线)](https://github.com/SnishaperTeam/Website/actions)
+[![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?style=flat&logo=vuedotjs&logoColor=white)](https://vuejs.org/) [![TypeScript](https://img.shields.io/badge/语言-TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Vite](https://img.shields.io/badge/构建-Vite%208-646CFF?style=flat&logo=vite&logoColor=white)](https://vite.dev/) [![Bun](https://img.shields.io/badge/运行时-Bun-000?style=flat&logo=bun&logoColor=white)](https://bun.sh/) [![Supabase](https://img.shields.io/badge/数据库-Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.com/) [![Cloudflare Pages](https://img.shields.io/badge/部署-Cloudflare%20Pages-F38020?style=flat&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com/) [![License](https://img.shields.io/badge/许可证-MIT-blue?style=flat&logo=open-source-initiative)](LICENSE) [![GitHub last commit](https://img.shields.io/github/last-commit/SnishaperTeam/Website?style=flat&logo=git&label=最后提交)](https://github.com/SnishaperTeam/Website/commits/main) [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/SnishaperTeam/Website/weekly-deploy.yml?style=flat&logo=githubactions&label=部署流水线)](https://github.com/SnishaperTeam/Website/actions)
 
 本仓库是 **[SnishaperTeam](https://github.com/SnishaperTeam)** 组织的官方网站与软件发布入口，站点地址为 <https://jetcpp.ccwu.cc>。
 
 站点承载三条主线：开源项目的版本发布与下载、编程技术博客与用户创作、心理测评工具。全站采用终端窗口风格的单色设计系统，不依赖任何 UI 组件库。
 
-本仓库是网站的唯一源码仓库：前端基于 **Vue 3 + TypeScript + Vite** 构建，后端由 **Cloudflare Pages Functions + D1** 提供（48 个服务端端点），媒体文件存储于 **Supabase Storage**，部署于 **Cloudflare Pages**。
+本仓库是网站的唯一源码仓库：前端基于 **Vue 3 + TypeScript + Vite** 构建，后端由 **Cloudflare Pages Functions** 提供（约 40 个函数模块）；业务数据主存于 **Supabase Postgres**（通过 `exec_sql` RPC 访问），**Cloudflare D1** 作为未配置 Supabase 时的回退层；媒体文件经自建 **supabase-proxy Worker** 中转存入 **Supabase Storage**，站点整体部署于 **Cloudflare Pages**。
 
 > 组织旗下产品的源码与发布信息请参见 [SnishaperTeam](https://github.com/SnishaperTeam) 组织主页。
 
@@ -15,15 +15,14 @@
 ## 特性
 
 - **软件发布与下载**：项目详情与产品落地页直接展示版本号、更新日志与分平台下载入口，版本信息运行时从 GitHub Releases 拉取，不在构建期静态嵌入。
-- **边缘代理**：自建 Cloudflare Worker（`workers/release-proxy.js`）代理 GitHub Releases API，将响应裁剪为精简结构后返回前端，附带跨域与缓存策略。
+- **边缘代理**：自建 Cloudflare Worker（`workers/release-proxy.js`）代理 GitHub Releases API，将响应裁剪为精简结构后返回前端，附带跨域与缓存策略；另设 `supabase-proxy` Worker 反代 Supabase（国内可达），以客户端密钥（`x-app-key` / `?k=`）做校验。
 - **技术博客**：内置 C++、C#、XAML 长篇教程；登录用户可在站内撰写、编辑、发布文章。写作端提供 Markdown 编辑器（工具栏、快捷键、分栏实时预览）、图片上传、主题色选色器，草稿自动保存在浏览器本地，只有发布才写入云端。
 - **心理测评**：MBTI、抑郁/焦虑自评等量表工具，答题进度本地暂存，测评历史登录后云同步。
 - **用户系统**：邮箱密码（PBKDF2 + JWT）与 GitHub、Google、Microsoft 三方 OAuth（PKCE + 签名状态，同邮箱已有密码账号需密码确认绑定）；个人主页管理已绑定的登录方式；账户注销时自动清理关联数据。
 - **云端数据**：收藏与测评历史登录后自动云同步，未登录时使用本地存储，首次登录自动合并两份数据。
 - **评论系统**：文章级评论，登录用户可发表与删除自己的评论。
-- **管理后台**：`/admin` 提供统一控制台——用户封禁、文章与评论管理、公告管理、项目管理与站点统计。
-- **页面内联编辑**：管理员在任意渲染完成的页面上直接修改文字（悬停高亮、点击编辑），保存后对所有访客生效，改动按结构路径存于 D1。
-- **人机校验**：注册、登录与评论流程接入 Cloudflare Turnstile，服务端二次校验。
+- **管理后台**：`/admin` 提供统一控制台——用户封禁、文章与评论管理、公告管理、项目管理与站点统计。管理员身份由 `users` 表中邮箱白名单（`NOTICE_ADMIN_EMAIL`）+ 该账号真实密码（PBKDF2 哈希比对）判定，不再使用独立的管理员令牌或密码。
+- **页面内联编辑**：管理员在任意渲染完成的页面上直接修改文字（悬停高亮、点击编辑），保存后对所有访客生效，改动按结构路径存入数据库。
 - **终端风格设计系统**：纯 CSS 自定义属性驱动，含终端窗口框架、等宽字体排版、运行时注入的噪点纹理与统一指数缓出的过渡曲线。
 - **自动化运维**：三平台 CI 构建校验、周度自动部署、Supabase 实例每日两次保活、Dependabot 分组更新并在检查通过后自动合并。
 
@@ -36,7 +35,7 @@
 | 工具 | 版本要求 | 用途 |
 | --- | --- | --- |
 | [Bun](https://bun.sh/) | ≥ 1.2 | 包管理、脚本执行与构建 |
-| [Cloudflare](https://developers.cloudflare.com/) | 免费套餐即可 | Pages 托管、Functions、D1 数据库 |
+| [Cloudflare](https://developers.cloudflare.com/) | 免费套餐即可 | Pages 托管、Functions、D1 数据库；supabase-proxy 另用 Workers |
 
 ### 克隆与安装
 
@@ -59,10 +58,14 @@ bun run dev
 | 变量 | 说明 |
 | --- | --- |
 | `JWT_SECRET` | 会话令牌签名密钥 |
-| `D1_API_TOKEN` | Cloudflare API 令牌，D1 通过 REST 通道读写 |
-| `TURNSTILE_SECRET` | Turnstile 服务端校验密钥 |
-| `NOTICE_ADMIN_TOKEN` / `NOTICE_ADMIN_EMAIL` / `NOTICE_ADMIN_PASSWORD` | 管理后台凭据 |
-| `SUPABASE_URL` / `SUPABASE_SECRET_KEY` / `SUPABASE_STORAGE_BUCKET` | 媒体上传目标 |
+| `DB_BACKEND` | 设为 `supabase` 走 Postgres；留空则回退 D1 |
+| `SUPABASE_URL` / `SUPABASE_SECRET_KEY` / `SUPABASE_STORAGE_BUCKET` | 主数据库与媒体存储目标（service role 密钥） |
+| `NOTICE_ADMIN_EMAIL` | 管理员邮箱白名单，逗号分隔 |
+| `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | Brevo SMTP 发信凭据 |
+| `GITHUB_NOTICE_TOKEN` | 公告 JSON 提交令牌 |
+| `D1_API_TOKEN` | D1 REST 回退通道令牌 |
+| `GITHUB_CLIENT_ID` / `*_SECRET`、`GOOGLE_*`、`MICROSOFT_*` | 三方 OAuth 凭据（启用 SSO 时需要） |
+| `VITE_SUPABASE_PROXY` / `VITE_APP_CLIENT_KEY` | 前端反代地址与客户端校验密钥（缺省使用公开值，可省略） |
 
 ### 构建生产版本
 
@@ -92,16 +95,16 @@ bun run build
 | --- | --- | --- |
 | 框架 | Vue 3 | Composition API + `<script setup>` |
 | 语言 | TypeScript | 全量类型标注 |
-| 路由 | Vue Router 5 | 23 条路由，详情页与工具页按需懒加载 |
+| 路由 | Vue Router 5 | 20+ 条路由，详情页与工具页按需懒加载 |
 | 构建 | Vite 8 | ESM 开发服务器，Rolldown 生产构建 |
 | 图标 | Iconify | MDI 与 Simple Icons 两套集合，按需加载 |
 | 渲染 | markdown-it | 博客、文档与任务列表渲染 |
 | 样式 | 原生 CSS | 自定义属性驱动，叠加 Bootstrap 5.3 栅格 |
-| 服务端 | Cloudflare Pages Functions | 48 个端点，覆盖鉴权、内容、评论与后台管理 |
-| 数据库 | Cloudflare D1 | 通过 REST 双通道读写，启动时自动执行建表迁移 |
-| 媒体存储 | Supabase Storage | 文章插图与用户头像，服务端中转上传 |
+| 服务端 | Cloudflare Pages Functions | 约 40 个函数模块，覆盖鉴权、内容、评论与后台管理 |
+| 数据库 | Supabase Postgres（主） / Cloudflare D1（回退） | 经 `exec_sql` RPC 访问；未配置 Supabase 时回退 D1（binding 或 REST） |
+| 媒体存储 | Supabase Storage | 文章插图与用户头像，经 supabase-proxy Worker 中转上传 |
 | 公告存储 | GitHub 仓库文件 | 公告以 JSON 形式提交至仓库，带版本历史 |
-| 边缘计算 | Cloudflare Workers | Releases API 代理与结构裁剪 |
+| 边缘计算 | Cloudflare Workers | Releases API 代理与 Supabase 反代 |
 | 部署 | Cloudflare Pages | 全球 CDN，项目名 `jetcpppages` |
 | 运行时 | Bun | 包管理、脚本执行与构建驱动 |
 
@@ -122,15 +125,19 @@ bun run build
 │   │   ├── router/                   # 路由配置
 │   │   ├── utils/                    # 工具函数
 │   │   └── views/                    # 22 个页面视图
-│   ├── functions/                    # Pages Functions（48 个服务端端点）
+│   ├── functions/                    # Pages Functions（约 40 个服务端模块）
+│   │   ├── _shared/                  # db / auth / crypto / adminAuth / smtp / otp
+│   │   ├── _lib/                     # notices-store 等共享逻辑
+│   │   └── api/                      # 按模块划分的端点
 │   ├── scripts/                      # dev、deploy、RSS 生成等脚本
 │   ├── docs/                         # 项目文档（架构、设计、验收）
 │   ├── public/                       # 静态资源与静态页面
+│   ├── workers/
+│   │   ├── release-proxy.js          # GitHub Releases 代理 Worker
+│   │   └── supabase-proxy/           # Supabase 反代 Worker（含 wrangler.toml）
 │   ├── wrangler.toml                 # Pages 项目配置
 │   └── vite.config.ts                # 构建配置（别名 @ → src，端口 5174）
 ├── functions/                        # 构建产物中的 Functions（由 deploy 脚本同步）
-├── workers/
-│   └── release-proxy.js              # GitHub Releases 代理 Worker
 ├── .github/
 │   ├── dependabot.yml                # 分组依赖更新配置
 │   └── workflows/                    # 四个自动化工作流
@@ -171,11 +178,11 @@ bun run build
 
 ## 服务端 API
 
-Functions 按模块划分于 `build/vue-app/functions/api/`，数据库通过 D1 REST 双通道访问（有 binding 时直连，否则走 Cloudflare API），建表迁移在启动时自动执行：
+Functions 按模块划分于 `build/vue-app/functions/api/`。数据库默认走 Supabase Postgres（`DB_BACKEND=supabase` 时经 `exec_sql` RPC 访问），未配置时回退到 Cloudflare D1（有 `DB` binding 时直连，否则走 D1 REST）。`functions/_shared/schema.ts` 的 `ensureSchema()` 为占位空操作，表结构在 Supabase 侧维护。
 
 | 模块 | 端点前缀 | 职责 |
 | --- | --- | --- |
-| 鉴权 | `/api/auth/*` | 注册、登录、改密、注销、会话信息 |
+| 鉴权 | `/api/auth/*` | 注册、登录、改密、注销、会话信息、OTP 发送 |
 | OAuth | `/api/auth/oauth/*` | GitHub / Google / Microsoft 的 PKCE 流程、绑定确认、绑定列表管理 |
 | 内容 | `/api/posts/*` | 文章列表、详情、撰写、编辑、删除、点赞，支持 `?mine=1` 拉取含草稿 |
 | 评论 | `/api/comments/*` | 按文章读写评论、删除自己的评论 |
@@ -183,8 +190,8 @@ Functions 按模块划分于 `build/vue-app/functions/api/`，数据库通过 D1
 | 用户 | `/api/users/:id` | 公开资料查询 |
 | 上传 | `/api/uploads` | 图片与头像，服务端中转至 Supabase Storage |
 | 页面改写 | `/api/page-edits` | 管理员内联编辑的文本覆盖读写 |
-| 管理 | `/api/admin/*` | 统计、用户封禁、文章与评论管理 |
-| 公告 | `/api/notices/*` | 公告读写与管理登录（存储于 GitHub 仓库文件） |
+| 管理 | `/api/admin/*` | 会话签发、统计、用户封禁、文章与评论管理 |
+| 公告 | `/api/notices/*` | 公告读写；管理登录走 `/api/notices/auth`，由 `users` 表邮箱+密码哈希校验 |
 
 ---
 
@@ -216,16 +223,32 @@ Actions Secrets（Settings → Secrets and variables → Actions）：
 | `SUPABASE_URLS` | 保活任务使用的实例地址列表 |
 | `SUPABASE_KEYS` | 与上一项一一对应的密钥列表 |
 
-Pages Secrets（项目环境变量）：
+Pages 环境变量（项目环境变量）：
 
-| Secret | 说明 |
+| 变量 | 说明 |
 | --- | --- |
 | `JWT_SECRET` | 会话令牌签名密钥 |
-| `D1_API_TOKEN` | D1 REST 通道令牌 |
-| `TURNSTILE_SECRET` | Turnstile 校验密钥 |
-| `NOTICE_ADMIN_TOKEN` / `NOTICE_ADMIN_EMAIL` / `NOTICE_ADMIN_PASSWORD` | 管理后台凭据 |
-| `SUPABASE_URL` / `SUPABASE_SECRET_KEY` / `SUPABASE_STORAGE_BUCKET` | 媒体上传目标 |
-| `GITHUB_NOTICE_TOKEN` | 公告文件提交令牌 |
+| `DB_BACKEND` | 设为 `supabase` 启用 Postgres 主库 |
+| `SUPABASE_URL` / `SUPABASE_SECRET_KEY` / `SUPABASE_STORAGE_BUCKET` | 主数据库与媒体存储（service role 密钥） |
+| `NOTICE_ADMIN_EMAIL` | 管理员邮箱白名单，逗号分隔 |
+| `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | Brevo SMTP 发信凭据 |
+| `GITHUB_NOTICE_TOKEN` | 公告 JSON 提交令牌 |
+| `D1_API_TOKEN` | D1 REST 回退通道令牌 |
+| `GITHUB_CLIENT_ID` / `*_SECRET`、`GOOGLE_*`、`MICROSOFT_*` | 三方 OAuth 凭据 |
+| `VITE_SUPABASE_PROXY` / `VITE_APP_CLIENT_KEY` | 前端反代地址与客户端校验密钥（构建期注入） |
+
+以下变量已被清理（不再被任何代码读取，可从环境变量中删除）：`NOTICE_ADMIN_TOKEN`、`NOTICE_ADMIN_PASSWORD`、`TURNSTILE_SECRET`、`VITE_SUPABASE_ANON_KEY`、`VITE_SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`。
+
+### supabase-proxy Worker
+
+独立的 Cloudflare Worker 项目（`workers/supabase-proxy/`），自定义域名 `supabase.jetcpp.ccwu.cc`，解决 `supabase.co` 在部分网络下不可达的问题。
+
+| 变量 | 说明 |
+| --- | --- |
+| `APP_CLIENT_KEY` | 客户端校验密钥，与前端 `VITE_APP_CLIENT_KEY` 一致 |
+| `SUPABASE_SECRET_KEY` | Supabase service role 密钥，用于代理上传 |
+
+公共读请求（`/storage/v1/object/public/`）免校验；其余请求需携带 `x-app-key` 头或 `?k=` 查询参数。`supabase.co` 被墙的环境下，用户仍可通过该反代正常使用媒体上传与读取。
 
 ### 自定义域名
 
@@ -248,7 +271,7 @@ Dependabot 通过 `.github/dependabot.yml` 以分组模式更新 Bun 依赖与 G
 
 ## 数据库
 
-数据层由 Cloudflare D1 承载，所有业务表在应用启动时由 `functions/_shared/schema.ts` 自动创建，无需手工迁移。
+数据层默认由 **Supabase Postgres** 承载，所有 SQL 经由服务端 `exec_sql` 安全定义函数（`SECURITY DEFINER`，仅授权 service_role）执行；当未设置 `DB_BACKEND=supabase` 或 Supabase 不可用时，回退到 **Cloudflare D1**（有 `DB` binding 时直连，否则走 D1 REST）。表结构在 Supabase 侧维护，`functions/_shared/schema.ts` 的 `ensureSchema()` 仅为占位空操作。
 
 | 表 | 用途 |
 | --- | --- |
@@ -289,8 +312,8 @@ Dependabot 通过 `.github/dependabot.yml` 以分组模式更新 Bun 依赖与 G
 本站点的基础设施与工具支持来自以下项目与平台：
 
 - [DNSHE](https://my.dnshe.com/go.php?code=pPuY9hh0Iw) — 域名服务
-- [Cloudflare](https://www.cloudflare-cn.com/) — Pages 托管、Functions、D1 数据库与 Turnstile 人机校验
-- [Supabase](https://supabase.com/) — 对象存储
+- [Cloudflare](https://www.cloudflare-cn.com/) — Pages 托管、Functions、D1 数据库
+- [Supabase](https://supabase.com/) — 数据库与对象存储
 - [Vue](https://vuejs.org/) / [Vite](https://vite.dev/) — 前端框架与构建工具
 - [Bun](https://bun.sh/) — 包管理器与运行时
 - [Iconify](https://iconify.design/) — 图标集合
