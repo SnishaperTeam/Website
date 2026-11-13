@@ -19,7 +19,8 @@ export const onRequestGet = async (context: any): Promise<Response> => {
     if (!notice) return jsonResponse({ ok: false, error: 'not_found' }, 404)
     return jsonResponse({ ok: true, version: document.version, notice: publicNotice(notice) })
   } catch (error) {
-    return jsonResponse({ ok: false, error: String((error as Error)?.message || error) }, 502)
+    console.error('notice operation failed', error)
+    return jsonResponse({ ok: false, error: 'internal_error' }, 502)
   }
 }
 
@@ -54,7 +55,8 @@ export const onRequestPatch = async (context: any): Promise<Response> => {
     await writeDocument(env, next, sha, `notice: update ${id}`)
     return jsonResponse({ ok: true, version: next.version, notice })
   } catch (error) {
-    return jsonResponse({ ok: false, error: String((error as Error)?.message || error) }, 502)
+    console.error('notice operation failed', error)
+    return jsonResponse({ ok: false, error: 'internal_error' }, 502)
   }
 }
 
@@ -78,6 +80,7 @@ export const onRequestDelete = async (context: any): Promise<Response> => {
     await writeDocument(env, next, sha, `notice: delete ${id}`)
     return jsonResponse({ ok: true, version: next.version, removed: id })
   } catch (error) {
-    return jsonResponse({ ok: false, error: String((error as Error)?.message || error) }, 502)
+    console.error('notice operation failed', error)
+    return jsonResponse({ ok: false, error: 'internal_error' }, 502)
   }
 }

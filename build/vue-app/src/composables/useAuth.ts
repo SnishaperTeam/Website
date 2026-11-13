@@ -9,23 +9,80 @@ export interface AuthUser {
 }
 
 const TOKEN_KEY = 'auth_token'
+const KEY_KEY = 'auth_cipher_key'
+const CIPHER_PREFIX = 'v1:'
 
 const user = ref<AuthUser | null>(null)
 const loading = ref(true)
+let sessionToken = ''
+
+function toBase64(bytes: Uint8Array): string {
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return btoa(binary)
+}
+
+function fromBase64(value: string): Uint8Array<ArrayBuffer> {
+  const binary = atob(value)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return bytes
+}
+
+async function cipherKey(): Promise<CryptoKey> {
+  const stored = sessionStorage.getItem(KEY_KEY)
+  if (stored) {
+    return crypto.subtle.importKey('jwk', JSON.parse(stored), { name: 'AES-GCM' }, false, [
+      'encrypt',
+      'decrypt',
+    ])
+  }
+  const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, [
+    'encrypt',
+    'decrypt',
+  ])
+  sessionStorage.setItem(KEY_KEY, JSON.stringify(await crypto.subtle.exportKey('jwk', key)))
+  return key
+}
+
+async function encryptToken(token: string): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const cipher = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    await cipherKey(),
+    new TextEncoder().encode(token),
+  )
+  return `${CIPHER_PREFIX}${toBase64(iv)}.${toBase64(new Uint8Array(cipher))}`
+}
+
+async function decryptToken(stored: string): Promise<string> {
+  if (!stored.startsWith(CIPHER_PREFIX)) return ''
+  const [iv, cipher] = stored.slice(CIPHER_PREFIX.length).split('.')
+  const plain = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: fromBase64(iv) },
+    await cipherKey(),
+    fromBase64(cipher),
+  )
+  return new TextDecoder().decode(plain)
+}
 
 export function getToken(): string {
-  try {
-    return localStorage.getItem(TOKEN_KEY) || ''
-  } catch {
-    return ''
-  }
+  return sessionToken
 }
 
 function setToken(token: string) {
+  sessionToken = token
   try {
-    if (token) localStorage.setItem(TOKEN_KEY, token)
-    else localStorage.removeItem(TOKEN_KEY)
-  } catch {}
+    if (!token) {
+      sessionStorage.removeItem(TOKEN_KEY)
+      return
+    }
+    void encryptToken(token)
+      .then((encrypted) => sessionStorage.setItem(TOKEN_KEY, encrypted))
+      .catch(() => sessionStorage.removeItem(TOKEN_KEY))
+  } catch {
+    sessionStorage.removeItem(TOKEN_KEY)
+  }
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -42,6 +99,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 async function initAuth() {
   loading.value = true
+  try {
+    localStorage.removeItem(TOKEN_KEY)
+    sessionToken = await decryptToken(sessionStorage.getItem(TOKEN_KEY) || '')
+  } catch {
+    sessionToken = ''
+  }
   if (!getToken()) {
     user.value = null
     loading.value = false
@@ -58,7 +121,7 @@ async function initAuth() {
   }
 }
 
-initAuth()
+export const authReady = initAuth()
 
 async function signIn(email: string, password: string) {
   const data = await request<{ token: string; user: AuthUser }>('/api/auth/login', {

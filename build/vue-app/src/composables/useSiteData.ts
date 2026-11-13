@@ -1,8 +1,7 @@
 import { computed, ref } from 'vue'
 import type { BlogPost } from '@/data/posts'
 import { staticPosts } from '@/data/posts'
-
-const TOKEN_KEY = 'auth_token'
+import { authReady, getToken } from './useAuth'
 
 export interface DynamicPost {
   id: string
@@ -22,19 +21,12 @@ export interface DynamicPost {
   updatedAt: string
 }
 
-function getToken() {
-  try {
-    return localStorage.getItem(TOKEN_KEY) || ''
-  } catch {
-    return ''
-  }
-}
-
 export function isLoggedIn() {
   return !!getToken()
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  await authReady
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   Object.assign(headers, (options.headers || {}) as Record<string, string>)
   const token = getToken()

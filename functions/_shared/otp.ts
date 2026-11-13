@@ -13,6 +13,20 @@ function sha256Hex(input: string): Promise<string> {
   )
 }
 
+const DIGIT_TABLE = Array.from({ length: 256 }, (_, byte) =>
+  byte < 250 ? String(Math.floor(byte / 25)) : '',
+)
+
+function generateCode(): string {
+  const buffer = new Uint8Array(1)
+  let code = ''
+  while (code.length < 6) {
+    crypto.getRandomValues(buffer)
+    code += DIGIT_TABLE[buffer[0]]
+  }
+  return code
+}
+
 async function codeHash(code: string, email: string, purpose: OtpPurpose, secret: string): Promise<string> {
   return sha256Hex(`${secret}:${purpose}:${email}:${code}`)
 }
@@ -28,7 +42,7 @@ export async function sendOtp(db: D1Database, email: string, purpose: OtpPurpose
     return fail('发送过于频繁，请稍后再试', 429)
   }
 
-  const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0')
+  const code = generateCode()
   const hash = await codeHash(code, email, purpose, env.JWT_SECRET)
   const expiresAt = now + CODE_TTL
 
@@ -56,7 +70,8 @@ export async function sendOtp(db: D1Database, email: string, purpose: OtpPurpose
       otpHtml(code, purpose),
     )
   } catch (e) {
-    return fail(e instanceof Error ? e.message : '验证码邮件发送失败', 502)
+    console.error('otp mail failed', e)
+    return fail('验证码邮件发送失败', 502)
   }
 
   return json({ ok: true })

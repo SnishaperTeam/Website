@@ -8,8 +8,9 @@ export const onRequest = async (
     await ensureSchema(context.env)
     return await context.next()
   } catch (e) {
+    console.error('schema middleware failed', e)
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : String(e) }),
+      JSON.stringify({ error: 'internal_error' }),
       { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } },
     )
   }

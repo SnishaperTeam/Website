@@ -47,7 +47,8 @@ export const onRequestGet = async (context: {
       redirectUri: callbackUri(flow.redirectBase, provider),
     })
   } catch (e) {
-    return failRedirect(e instanceof Error ? e.message : '授权失败')
+    console.error('oauth profile fetch failed', e)
+    return failRedirect('授权失败')
   }
 
   const db = getDb(context.env)

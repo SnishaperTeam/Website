@@ -40,7 +40,8 @@ export const onRequestGet = async (context: any): Promise<Response> => {
       ETag: `"v${document.version}"`,
     })
   } catch (error) {
-    return jsonResponse({ ok: false, error: String((error as Error)?.message || error) }, 502)
+    console.error('notice operation failed', error)
+    return jsonResponse({ ok: false, error: 'internal_error' }, 502)
   }
 }
 
@@ -59,7 +60,8 @@ export const onRequestPost = async (context: any): Promise<Response> => {
   try {
     notice = sanitizeNotice(body)
   } catch (error) {
-    return jsonResponse({ ok: false, error: String((error as Error)?.message || error) }, 400)
+    console.error('notice payload rejected', error)
+    return jsonResponse({ ok: false, error: 'invalid_notice' }, 400)
   }
   try {
     const { document, sha } = await readDocument(env, { bypassCache: true })
@@ -78,6 +80,7 @@ export const onRequestPost = async (context: any): Promise<Response> => {
     await writeDocument(env, next, sha, `notice: publish ${notice.id}`)
     return jsonResponse({ ok: true, replaced: existing >= 0, version: next.version, notice }, existing >= 0 ? 200 : 201)
   } catch (error) {
-    return jsonResponse({ ok: false, error: String((error as Error)?.message || error) }, 502)
+    console.error('notice operation failed', error)
+    return jsonResponse({ ok: false, error: 'internal_error' }, 502)
   }
 }

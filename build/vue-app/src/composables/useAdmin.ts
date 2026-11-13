@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { getToken } from './useAuth'
+import { authReady, getToken } from './useAuth'
 
 const ADMIN_TOKEN_KEY = 'admin_token'
 
@@ -52,6 +52,7 @@ export async function adminLogin(email: string, password: string): Promise<boole
 }
 
 export async function checkAdmin(force = false): Promise<boolean> {
+  await authReady
   if (checked && !force) return isAdmin.value
   const adminTok = readAdminToken()
   const siteTok = getToken()

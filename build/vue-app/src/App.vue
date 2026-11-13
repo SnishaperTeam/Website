@@ -79,6 +79,11 @@ function watchDom() {
   observer.observe(root, { childList: true, subtree: true, characterData: true })
 }
 
+async function reloadCurrentPath() {
+  await router.replace({ path: route.path, query: {} })
+  window.location.reload()
+}
+
 async function saveInlineEdits() {
   const root = pageRoot.value
   if (!root) return
@@ -89,7 +94,7 @@ async function saveInlineEdits() {
     const overrides = readOverrides(root)
     await saveEdits(route.path, overrides, adminHeaders())
     editMessage.value = '已保存'
-    window.location.assign(route.path)
+    await reloadCurrentPath()
   } catch (e) {
     editMessage.value = e instanceof Error ? e.message : '保存失败'
     editError.value = true
@@ -98,8 +103,8 @@ async function saveInlineEdits() {
   }
 }
 
-function cancelInlineEdits() {
-  window.location.assign(route.path)
+async function cancelInlineEdits() {
+  await reloadCurrentPath()
 }
 
 watch(() => route.fullPath, () => {
