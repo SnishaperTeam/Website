@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "updated_at": "2026-11-14T11:28:02.732Z",
+  "version": 6,
+  "updated_at": "2026-11-14T11:59:16.517Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -19,11 +19,11 @@
       "title": "SniShaper v1.30.3 发布",
       "title_en": "SniShaper v1.30.3 released",
       "title_ru": "Выпущен SniShaper v1.30.3",
-      "body": "SniShaper 更新了升级模块，实现了更高效和可靠的软件更新。系统代理模块也得到了增强，能够更好地管理网络流量。同时，修复了更新过程中的一个 bug，确保更新过程更加顺畅。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
-      "body_en": "SniShaper has updated its updater module to feature a more efficient and reliable software update process. The sysproxy module has also been enhanced to better manage network traffic. Additionally, a bug in the update process has been fixed to ensure smoother updates.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
-      "body_ru": "SniShaper обновил модуль обновления,实现овав более эффективный и надежный процесс обновления программного обеспечения. Модуль sysproxy также был улучшен для лучшего управления сетевым трафиком. Кроме того, была исправлена ошибка в процессе обновления, обеспечивающая более гладкий процесс обновления.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
+      "body": "SniShaper 更新了升级模块，支持无缝升级和保留用户设置。系统代理模块也得到了增强，能够更好地路由应用程序的出站请求。同时，修复了更新机制中的几个问题，提高了更新的可靠性。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
+      "body_en": "SniShaper has updated its updater module to support seamless updates while preserving user settings. The sysproxy module has also been enhanced to better route outbound requests from applications. Additionally, several issues in the update mechanism have been fixed, making updates more reliable.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
+      "body_ru": "SniShaper обновил модуль обновления, теперь он поддерживает бесшовные обновления и сохраняет настройки пользователей. Модуль sysproxy также был улучшен, он лучше маршрутизирует исходящие запросы из приложений. Кроме того, были исправлены несколько проблем в механизме обновления, что сделало обновления более надежными.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
       "level": "important",
-      "published_at": "2026-11-14T11:28:01Z",
+      "published_at": "2026-11-14T11:59:15Z",
       "link": "https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
       "link_text": "查看本次发版说明",
       "pinned": false
