@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "updated_at": "2026-11-13T14:24:04.206Z",
+  "version": 5,
+  "updated_at": "2026-11-14T11:28:02.732Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -13,6 +13,20 @@
       "level": "info",
       "published_at": "2026-11-08T11:00:00Z",
       "pinned": true
+    },
+    {
+      "id": "release-v1.30.3",
+      "title": "SniShaper v1.30.3 发布",
+      "title_en": "SniShaper v1.30.3 released",
+      "title_ru": "Выпущен SniShaper v1.30.3",
+      "body": "SniShaper 更新了升级模块，实现了更高效和可靠的软件更新。系统代理模块也得到了增强，能够更好地管理网络流量。同时，修复了更新过程中的一个 bug，确保更新过程更加顺畅。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
+      "body_en": "SniShaper has updated its updater module to feature a more efficient and reliable software update process. The sysproxy module has also been enhanced to better manage network traffic. Additionally, a bug in the update process has been fixed to ensure smoother updates.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
+      "body_ru": "SniShaper обновил модуль обновления,实现овав более эффективный и надежный процесс обновления программного обеспечения. Модуль sysproxy также был улучшен для лучшего управления сетевым трафиком. Кроме того, была исправлена ошибка в процессе обновления, обеспечивающая более гладкий процесс обновления.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
+      "level": "important",
+      "published_at": "2026-11-14T11:28:01Z",
+      "link": "https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3",
+      "link_text": "查看本次发版说明",
+      "pinned": false
     },
     {
       "id": "release-v1.30.2",
