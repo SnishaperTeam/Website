@@ -1,6 +1,6 @@
 {
-  "version": 6,
-  "updated_at": "2026-11-14T11:59:16.517Z",
+  "version": 7,
+  "updated_at": "2026-11-14T12:47:03.168Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -13,6 +13,20 @@
       "level": "info",
       "published_at": "2026-11-08T11:00:00Z",
       "pinned": true
+    },
+    {
+      "id": "release-v1.30.3.1",
+      "title": "SniShaper v1.30.3.1 发布",
+      "title_en": "SniShaper v1.30.3.1 released",
+      "title_ru": "Выпущен SniShaper v1.30.3.1",
+      "body": "SniShaper 更新了代理核心版本，解决了 Man-In-The-Middle 上游 SNI 问题，并修复了 New York Times token SNI 的规则问题。该版本还改进了发布流程，支持四部分热修复版本。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.1",
+      "body_en": "SniShaper has updated its proxy core to resolve a Man-In-The-Middle upstream SNI issue and fixed a rules problem related to the New York Times token SNI. The release process has also been improved to support four-part hotfix versions.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.1",
+      "body_ru": "SniShaper обновил ядро прокси, решив проблему Man-In-The-Middle с SNI и исправив правило SNI для токена New York Times. Кроме того, процесс выпуска был улучшен для поддержки четырехчастных исправлений.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.1",
+      "level": "important",
+      "published_at": "2026-11-14T12:47:02Z",
+      "link": "https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.1",
+      "link_text": "查看本次发版说明",
+      "pinned": false
     },
     {
       "id": "release-v1.30.3",
