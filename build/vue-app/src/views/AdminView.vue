@@ -333,11 +333,12 @@ const noticeStatus = ref('')
 const noticeListStatus = ref('')
 const editing = ref<string | null>(null)
 
-type NoticeProduct = 'snishaper' | 'flowweaver'
+type NoticeProduct = 'snishaper' | 'flowweaver' | 'SnishaperDroid'
 const noticeProduct = ref<NoticeProduct>('snishaper')
 const noticeProducts = [
   { key: 'snishaper', label: 'SniShaper' },
   { key: 'flowweaver', label: 'FlowWeaver' },
+  { key: 'SnishaperDroid', label: 'Snishaper Droid' },
 ] as const
 const noticeQuery = computed(() => `product=${noticeProduct.value}`)
 

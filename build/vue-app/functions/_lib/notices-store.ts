@@ -42,6 +42,7 @@ export const SESSION_TTL_MS = 12 * 60 * 60 * 1000
 const DEFAULT_REPO = 'SnishaperTeam/Website'
 const DEFAULT_FILE = 'build/vue-app/notices/notices.json'
 const FW_FILE = 'build/vue-app/notices/flowweaver.json'
+const DROID_FILE = 'build/vue-app/notices/SnishaperDroid.json'
 const DEFAULT_BRANCH = 'main'
 const LEVELS = ['info', 'important', 'critical']
 const USER_AGENT = 'snishaper-notice-service'
@@ -60,12 +61,20 @@ export const FW_TARGET: StoreTarget = {
   cacheKey: 'https://notices.jetcpp.ccwu.cc/api/notices?product=flowweaver',
 }
 
+export const DROID_TARGET: StoreTarget = {
+  repo: DEFAULT_REPO,
+  file: DROID_FILE,
+  branch: DEFAULT_BRANCH,
+  cacheKey: 'https://notices.jetcpp.ccwu.cc/api/notices?product=SnishaperDroid',
+}
+
 export const CACHE_KEY = DEFAULT_TARGET.cacheKey
 export const CACHE_TTL = 60
 
 export function targetFromProduct(product: string | null): StoreTarget | null {
   if (product === 'snishaper') return DEFAULT_TARGET
   if (product === 'flowweaver') return FW_TARGET
+  if (product === 'SnishaperDroid') return DROID_TARGET
   return null
 }
 
