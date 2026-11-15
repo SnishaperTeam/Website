@@ -5,6 +5,7 @@ import {
   readDocument,
   requireAdmin,
   sanitizeNotice,
+  targetFromProduct,
   writeDocument,
   type NoticeRecord,
   type StoreEnv,
@@ -16,12 +17,15 @@ export const onRequestGet = async (context: any): Promise<Response> => {
   const request = context.request as Request
   const env = context.env as StoreEnv
   const url = new URL(request.url)
+  const target = targetFromProduct(url.searchParams.get('product'))
+  if (!target) return jsonResponse({ ok: false, error: 'invalid_product' }, 400)
   const includeExpired = ['1', 'true', 'yes'].includes((url.searchParams.get('all') || '').toLowerCase())
   const limitRaw = Number(url.searchParams.get('limit') || '0')
   const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 200) : 0
   try {
     const { document, source } = await readDocument(env, {
       bypassCache: url.searchParams.get('fresh') === '1',
+      target,
     })
     const now = Date.now()
     let notices = document.notices.filter((item) => includeExpired || !isExpired(item, now))
@@ -50,6 +54,9 @@ export const onRequestPost = async (context: any): Promise<Response> => {
   const env = context.env as StoreEnv
   const denied = await requireAdmin(request, env)
   if (denied) return denied
+  const url = new URL(request.url)
+  const target = targetFromProduct(url.searchParams.get('product'))
+  if (!target) return jsonResponse({ ok: false, error: 'product_required' }, 400)
   let body: unknown
   try {
     body = await request.json()
@@ -64,7 +71,7 @@ export const onRequestPost = async (context: any): Promise<Response> => {
     return jsonResponse({ ok: false, error: 'invalid_notice' }, 400)
   }
   try {
-    const { document, sha } = await readDocument(env, { bypassCache: true })
+    const { document, sha } = await readDocument(env, { bypassCache: true, target })
     const existing = document.notices.findIndex((item) => item.id === notice.id)
     const notices = document.notices.filter((item) => item.id !== notice.id)
     notices.unshift(notice)
@@ -77,7 +84,7 @@ export const onRequestPost = async (context: any): Promise<Response> => {
       updated_at: new Date().toISOString(),
       notices: notices.map(publicNotice),
     }
-    await writeDocument(env, next, sha, `notice: publish ${notice.id}`)
+    await writeDocument(env, next, sha, `notice: publish ${notice.id}`, target)
     return jsonResponse({ ok: true, replaced: existing >= 0, version: next.version, notice }, existing >= 0 ? 200 : 201)
   } catch (error) {
     console.error('notice operation failed', error)

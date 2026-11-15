@@ -22,6 +22,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
+      # 1.5 同步 functions 镜像（wrangler 按 pages_build_output_dir 相对路径打包 build/vue-app/functions）
+      - name: Sync functions mirror
+        run: rsync -a --delete functions/ build/vue-app/functions/
+
       # 2. 安装 Bun
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2

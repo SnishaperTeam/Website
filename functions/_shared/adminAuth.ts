@@ -1,62 +1,57 @@
-import type { Env } from './types'
-
-function bytesToHex(buffer: ArrayBuffer): string {
-  return [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, '0')).join('')
-}
-
-function fromB64url(text: string): string {
-  return atob(text.replace(/-/g, '+').replace(/_/g, '/'))
-}
-
-function timingSafeEq(a: string, b: string): boolean {
-  const left = new TextEncoder().encode(a)
-  const right = new TextEncoder().encode(b)
-  if (left.length !== right.length) return false
-  let diff = 0
-  for (let i = 0; i < left.length; i++) diff |= left[i] ^ right[i]
-  return diff === 0
-}
-
-async function hmac(secret: string, data: string): Promise<string> {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  )
-  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data))
-  return bytesToHex(signature)
-}
-
-export async function verifyAdminToken(token: string, secret: string): Promise<boolean> {
-  if (!secret) return false
-  if (timingSafeEq(token, secret)) return true
-  const dot = token.indexOf('.')
-  if (dot <= 0 || dot === token.length - 1) return false
-  let expiry = 0
-  try {
-    expiry = Number(fromB64url(token.slice(0, dot)))
-  } catch {
-    return false
-  }
-  if (!Number.isFinite(expiry) || expiry <= Date.now()) return false
-  const signature = await hmac(secret, `notice-session.${expiry}`)
-  return timingSafeEq(token.slice(dot + 1), signature)
-}
+import { hashPassword, verifyJwt } from './crypto'
+import { getDb } from './db'
+import type { Env, UserRow } from './types'
 
 export interface AdminEnv extends Env {
-  NOTICE_ADMIN_TOKEN?: string
+  NOTICE_ADMIN_EMAIL?: string
+}
+
+export function adminEmailList(env: AdminEnv): string[] {
+  return (env.NOTICE_ADMIN_EMAIL || '')
+    .toLowerCase()
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
+
+export function isAdminEmail(email: string, env: AdminEnv): boolean {
+  return adminEmailList(env).includes(email.toLowerCase())
+}
+
+export async function verifyAdminCredentials(
+  email: string,
+  password: string,
+  env: AdminEnv,
+): Promise<UserRow | null> {
+  if (!email || !password) return null
+  const row = await getDb(env)
+    .prepare('SELECT * FROM users WHERE email = ?')
+    .bind(email.toLowerCase())
+    .first<UserRow>()
+  if (!row || row.banned || !row.password_hash) return null
+  if (!isAdminEmail(row.email, env)) return null
+  const hash = await hashPassword(password, row.password_salt)
+  if (hash !== row.password_hash) return null
+  return row
+}
+
+export async function resolveAdmin(request: Request, env: AdminEnv): Promise<UserRow | null> {
+  const header = request.headers.get('Authorization') || ''
+  const bearer = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : ''
+  if (!bearer) return null
+  const payload = await verifyJwt(bearer, env.JWT_SECRET)
+  if (!payload?.sub) return null
+  const row = await getDb(env)
+    .prepare('SELECT * FROM users WHERE id = ?')
+    .bind(payload.sub)
+    .first<UserRow>()
+  if (!row || row.banned) return null
+  if (!isAdminEmail(row.email, env)) return null
+  return row
 }
 
 export async function requireAdmin(request: Request, env: AdminEnv): Promise<Response | null> {
-  const secret = (env.NOTICE_ADMIN_TOKEN || '').trim()
-  if (!secret) return failJson('admin_token_not_configured', 503)
-  const header = request.headers.get('Authorization') || ''
-  const bearer = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : ''
-  const credential = bearer || (request.headers.get('X-Admin-Token') || '').trim()
-  if (!credential) return failJson('unauthorized', 401)
-  if (await verifyAdminToken(credential, secret)) return null
+  if (await resolveAdmin(request, env)) return null
   return failJson('unauthorized', 401)
 }
 
