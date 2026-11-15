@@ -30,27 +30,55 @@ export interface StoreEnv {
   NOTICE_BRANCH?: string
 }
 
-export const SESSION_TTL_MS = 12 * 60 * 60 * 1000
+export interface StoreTarget {
+  repo: string
+  file: string
+  branch: string
+  cacheKey: string
+}
 
-export const CACHE_KEY = 'https://notices.jetcpp.ccwu.cc/api/notices'
-export const CACHE_TTL = 60
+export const SESSION_TTL_MS = 12 * 60 * 60 * 1000
 
 const DEFAULT_REPO = 'SnishaperTeam/Website'
 const DEFAULT_FILE = 'build/vue-app/notices/notices.json'
+const FW_FILE = 'build/vue-app/notices/flowweaver.json'
 const DEFAULT_BRANCH = 'main'
 const LEVELS = ['info', 'important', 'critical']
 const USER_AGENT = 'snishaper-notice-service'
 
-export function repoOf(env: StoreEnv): string {
-  return (env.NOTICE_REPO || DEFAULT_REPO).trim()
+export const DEFAULT_TARGET: StoreTarget = {
+  repo: DEFAULT_REPO,
+  file: DEFAULT_FILE,
+  branch: DEFAULT_BRANCH,
+  cacheKey: 'https://notices.jetcpp.ccwu.cc/api/notices',
 }
 
-export function fileOf(env: StoreEnv): string {
-  return (env.NOTICE_FILE || DEFAULT_FILE).trim()
+export const FW_TARGET: StoreTarget = {
+  repo: DEFAULT_REPO,
+  file: FW_FILE,
+  branch: DEFAULT_BRANCH,
+  cacheKey: 'https://notices.jetcpp.ccwu.cc/api/notices?product=flowweaver',
 }
 
-export function branchOf(env: StoreEnv): string {
-  return (env.NOTICE_BRANCH || DEFAULT_BRANCH).trim()
+export const CACHE_KEY = DEFAULT_TARGET.cacheKey
+export const CACHE_TTL = 60
+
+export function targetFromProduct(product: string | null): StoreTarget | null {
+  if (product === 'snishaper') return DEFAULT_TARGET
+  if (product === 'flowweaver') return FW_TARGET
+  return null
+}
+
+export function repoOf(env: StoreEnv, target: StoreTarget = DEFAULT_TARGET): string {
+  return (env.NOTICE_REPO || target.repo).trim()
+}
+
+export function fileOf(env: StoreEnv, target: StoreTarget = DEFAULT_TARGET): string {
+  return (env.NOTICE_FILE || target.file).trim()
+}
+
+export function branchOf(env: StoreEnv, target: StoreTarget = DEFAULT_TARGET): string {
+  return (env.NOTICE_BRANCH || target.branch).trim()
 }
 
 export function toBase64(text: string): string {
@@ -67,8 +95,8 @@ export function fromBase64(input: string): string {
   return new TextDecoder().decode(bytes)
 }
 
-function contentsURL(env: StoreEnv): string {
-  return `https://api.github.com/repos/${repoOf(env)}/contents/${fileOf(env)}`
+function contentsURL(env: StoreEnv, target: StoreTarget): string {
+  return `https://api.github.com/repos/${repoOf(env, target)}/contents/${fileOf(env, target)}`
 }
 
 function githubHeaders(env: StoreEnv): Record<string, string> {
@@ -134,11 +162,12 @@ export function isExpired(notice: NoticeRecord, now: number): boolean {
 
 export async function readDocument(
   env: StoreEnv,
-  options: { bypassCache?: boolean } = {},
+  options: { bypassCache?: boolean; target?: StoreTarget } = {},
 ): Promise<{ document: NoticeDocument; sha: string | null; source: string; stale?: boolean }> {
+  const target = options.target || DEFAULT_TARGET
   const cacheAvailable = typeof caches !== 'undefined' && options.bypassCache !== true
   if (cacheAvailable) {
-    const hit = await caches.default.match(CACHE_KEY)
+    const hit = await caches.default.match(target.cacheKey)
     if (hit) {
       try {
         const payload = (await hit.json()) as { document: NoticeDocument; sha: string | null }
@@ -149,7 +178,7 @@ export async function readDocument(
     }
   }
 
-  const url = `${contentsURL(env)}?ref=${encodeURIComponent(branchOf(env))}`
+  const url = `${contentsURL(env, target)}?ref=${encodeURIComponent(branchOf(env, target))}`
   const response = await fetch(url, { headers: githubHeaders(env) })
   if (response.status === 404) {
     return { document: emptyDocument(), sha: null, source: 'empty' }
@@ -169,7 +198,7 @@ export async function readDocument(
     const cached = new Response(body, {
       headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${CACHE_TTL}` },
     })
-    await caches.default.put(CACHE_KEY, cached)
+    await caches.default.put(target.cacheKey, cached)
   }
   return { document, sha, source: 'github' }
 }
@@ -179,6 +208,7 @@ export async function writeDocument(
   document: NoticeDocument,
   sha: string | null,
   message: string,
+  target: StoreTarget = DEFAULT_TARGET,
 ): Promise<string | null> {
   const token = (env.GITHUB_NOTICE_TOKEN || '').trim()
   if (!token) {
@@ -187,10 +217,10 @@ export async function writeDocument(
   const body: Record<string, string> = {
     message,
     content: toBase64(`${JSON.stringify(document, null, 2)}\n`),
-    branch: branchOf(env),
+    branch: branchOf(env, target),
   }
   if (sha) body.sha = sha
-  const response = await fetch(contentsURL(env), {
+  const response = await fetch(contentsURL(env, target), {
     method: 'PUT',
     headers: { ...githubHeaders(env), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -200,7 +230,7 @@ export async function writeDocument(
     throw new Error(`github write failed: HTTP ${response.status} ${detail.slice(0, 240)}`)
   }
   const payload = (await response.json()) as { content?: { sha?: string } }
-  await caches.default.delete(CACHE_KEY)
+  await caches.default.delete(target.cacheKey)
   return payload.content?.sha ?? null
 }
 

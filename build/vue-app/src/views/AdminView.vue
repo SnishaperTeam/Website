@@ -60,7 +60,7 @@
       <section v-else-if="tab === 'notices'" class="grid">
         <div class="card-geek">
           <div class="panel-head">
-            <h2>{{ editing ? '编辑公告' : '新建公告' }}</h2>
+            <h2>{{ editing ? '编辑公告' : '新建公告' }}<span class="product-tag">{{ noticeProduct === 'flowweaver' ? 'FlowWeaver' : 'SniShaper' }}</span></h2>
             <div class="status">{{ noticeStatus }}</div>
           </div>
           <label>标题（中文，必填）</label>
@@ -121,7 +121,18 @@
         <div class="card-geek">
           <div class="panel-head">
             <h2>全部公告</h2>
-            <button class="btn-geek small" @click="loadNotices">[刷新]</button>
+            <div class="product-switch">
+              <button
+                v-for="p in noticeProducts"
+                :key="p.key"
+                class="tab-btn small"
+                :class="{ on: noticeProduct === p.key }"
+                @click="switchNoticeProduct(p.key)"
+              >
+                {{ p.label }}
+              </button>
+              <button class="btn-geek small" @click="loadNotices">[刷新]</button>
+            </div>
           </div>
           <div class="status">{{ noticeListStatus }}</div>
           <div class="list">
@@ -322,6 +333,21 @@ const noticeStatus = ref('')
 const noticeListStatus = ref('')
 const editing = ref<string | null>(null)
 
+type NoticeProduct = 'snishaper' | 'flowweaver'
+const noticeProduct = ref<NoticeProduct>('snishaper')
+const noticeProducts = [
+  { key: 'snishaper', label: 'SniShaper' },
+  { key: 'flowweaver', label: 'FlowWeaver' },
+] as const
+const noticeQuery = computed(() => `product=${noticeProduct.value}`)
+
+function switchNoticeProduct(key: NoticeProduct) {
+  if (noticeProduct.value === key) return
+  noticeProduct.value = key
+  resetNoticeForm()
+  loadNotices()
+}
+
 const emptyForm = () => ({
   title: '', title_en: '', title_ru: '', body: '', body_en: '', body_ru: '',
   level: 'info', pinned: false, published_at: toLocalInput(new Date().toISOString()),
@@ -332,7 +358,7 @@ const form = ref(emptyForm())
 async function loadNotices() {
   noticeListStatus.value = '加载中…'
   try {
-    const data = await call('/api/notices?all=1&fresh=1')
+    const data = await call(`/api/notices?all=1&fresh=1&${noticeQuery.value}`)
     notices.value = data.notices || []
     noticeListStatus.value = `共 ${notices.value.length} 条 · 版本 v${data.version}`
   } catch (e) {
@@ -373,7 +399,7 @@ async function submitNotice() {
   }
   try {
     const isEdit = Boolean(editing.value)
-    await call(isEdit ? '/api/notices/' + encodeURIComponent(editing.value!) : '/api/notices', {
+    await call(isEdit ? '/api/notices/' + encodeURIComponent(editing.value!) + '?' + noticeQuery.value : '/api/notices?' + noticeQuery.value, {
       method: isEdit ? 'PATCH' : 'POST',
       headers: authHeaders(),
       body: JSON.stringify(payload),
@@ -389,7 +415,7 @@ async function submitNotice() {
 async function removeNotice(n: any) {
   if (!confirm(`删除公告「${n.title || n.id}」？`)) return
   try {
-    await call('/api/notices/' + encodeURIComponent(n.id), { method: 'DELETE', headers: authHeaders() })
+    await call('/api/notices/' + encodeURIComponent(n.id) + '?' + noticeQuery.value, { method: 'DELETE', headers: authHeaders() })
     toast('已删除', 'ok')
     if (editing.value === n.id) resetNoticeForm()
     await loadNotices()
@@ -615,6 +641,26 @@ select option {
   color: var(--color-white);
   border-color: rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.06);
+}
+
+.tab-btn.small {
+  padding: 3px 12px;
+  font-size: var(--font-size-xs);
+}
+
+.product-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.product-tag {
+  margin-left: 10px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-faint);
+  letter-spacing: 0.08em;
+  text-transform: none;
 }
 
 .spacer {
