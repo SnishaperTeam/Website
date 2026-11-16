@@ -17,22 +17,22 @@
   },
   "dependencies": {
     "@iconify-json/mdi": "^1.2.3",
-    "@iconify-json/simple-icons": "^1.2.101",
+    "@iconify-json/simple-icons": "^1.2.102",
     "@iconify/vue": "^5.0.5",
-    "bootstrap": "^5.3.8",
+    "bootstrap": "^5.3.9",
     "markdown-it": "^15.0.3",
     "vue": "^3.5.45",
-    "vue-router": "^5.4.0"
+    "vue-router": "^5.5.0"
   },
   "devDependencies": {
-    "@tsconfig/node22": "^22.0.6",
+    "@tsconfig/node22": "^22.0.7",
     "@types/markdown-it": "^14.2.0",
     "@types/node": "^26.6.6",
-    "@vitejs/plugin-vue": "^6.0.10",
+    "@vitejs/plugin-vue": "^6.0.11",
     "@vue/tsconfig": "^0.9.1",
     "esbuild": "^0.28.2",
-    "prettier": "^3.9.10",
-    "vite": "^8.3.6",
+    "prettier": "^3.10.1",
+    "vite": "^8.3.8",
     "tsx": "^4.23.15"
   }
 }
