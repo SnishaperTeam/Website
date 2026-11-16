@@ -1,6 +1,6 @@
 {
-  "version": 7,
-  "updated_at": "2026-11-14T12:47:03.168Z",
+  "version": 8,
+  "updated_at": "2026-11-16T13:55:20.279Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -13,6 +13,20 @@
       "level": "info",
       "published_at": "2026-11-08T11:00:00Z",
       "pinned": true
+    },
+    {
+      "id": "release-v1.30.3.2",
+      "title": "SniShaper v1.30.3.2 发布",
+      "title_en": "SniShaper v1.30.3.2 released",
+      "title_ru": "Выпущен SniShaper v1.30.3.2",
+      "body": "SniShaper 的新版本发布了，增加了可选择的服务和注册表自动启动方法，提高了通知的相关性和准确性。同时，修复了自动启动功能的fallback问题，改进了会话管理，提高了构建过程的稳定性和安全性。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.2",
+      "body_en": "A new version of SniShaper has been released, featuring selectable service and registry autostart methods, and enhanced notification relevance and accuracy. The update also fixes the autostart fallback issue, improves session management, and enhances the build process stability and security.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.2",
+      "body_ru": "Выпущена новая версия SniShaper, в которой добавлены методы автозапуска с помощью служб и реестра, а также улучшена актуальность и точность уведомлений. Кроме того, исправлена проблема с fallback автозапуска, улучшено управление сеансами и повышена стабильность и безопасность процесса сборки.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.2",
+      "level": "important",
+      "published_at": "2026-11-16T13:55:19Z",
+      "link": "https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.2",
+      "link_text": "查看本次发版说明",
+      "pinned": false
     },
     {
       "id": "release-v1.30.3.1",
