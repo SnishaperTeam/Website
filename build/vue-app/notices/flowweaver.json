@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "updated_at": "2026-11-15T10:13:45.619Z",
+  "version": 3,
+  "updated_at": "2026-11-16T14:14:55.120Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -13,6 +13,20 @@
       "level": "info",
       "published_at": "2026-11-15T00:00:00Z",
       "pinned": true
+    },
+    {
+      "id": "release-v1.30.3.2",
+      "title": "FlowWeaver v1.30.3.2 发布",
+      "title_en": "FlowWeaver v1.30.3.2 released",
+      "title_ru": "Выпущен FlowWeaver v1.30.3.2",
+      "body": "FlowWeaver 的新版本增加了可选择的服务和注册表自动启动方法，提高了用户对应用程序启动的管理灵活性。同时，自动启动功能现在会等待交互式桌面环境，然后才会fallback到命令行界面，解决了过早fallback的问题。会话管理也得到了改进，使用了更可靠的WTSQuerySessionInformation来查询会话信息。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/FlowWeaver/releases/tag/v1.30.3.2",
+      "body_en": "The new version of FlowWeaver introduces selectable service and registry autostart methods, providing users with more flexibility in managing how the application starts up. The autostart feature now waits for an interactive desktop before falling back to the command-line interface, addressing issues related to premature fallbacks. Session management has also been improved by replacing OpenInputDesktop with WTSQuerySessionInformation, which is more reliable for querying session information.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/FlowWeaver/releases/tag/v1.30.3.2",
+      "body_ru": "Новая версия FlowWeaver добавила возможность выбора методов автозапуска служб и реестра, что дает пользователям больше гибкости в управлении запуском приложения. Функция автозапуска теперь ожидает интерактивное рабочее окружение, прежде чем перейти к командной строке, решая проблемы с преждевременным переходом. Управление сеансами также было улучшено путем замены OpenInputDesktop на WTSQuerySessionInformation, что более надежно для запроса информации о сеансе.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/FlowWeaver/releases/tag/v1.30.3.2",
+      "level": "important",
+      "published_at": "2026-11-16T14:14:53Z",
+      "link": "https://github.com/SnishaperTeam/FlowWeaver/releases/tag/v1.30.3.2",
+      "link_text": "查看本次发版说明",
+      "pinned": false
     },
     {
       "id": "release-v1.30.3.1",
