@@ -35,17 +35,24 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AuthForm from '@/components/AuthForm.vue'
 import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const route = useRoute()
 const { user, isAuthenticated, signOut } = useAuth()
 
 const heading = computed(() => (isAuthenticated.value ? '会话已建立' : '登录或创建账号'))
 
 function onSuccess() {
-  router.push(`/user/${user.value?.id ?? ''}`)
+  // 支持 ?redirect=/device 等站内回跳（仅允许站内路径，防开放重定向）
+  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
+  if (redirect.startsWith('/') && !redirect.startsWith('//')) {
+    router.push(redirect)
+  } else {
+    router.push(`/user/${user.value?.id ?? ''}`)
+  }
 }
 
 function handleSignOut() {

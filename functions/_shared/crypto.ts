@@ -47,9 +47,15 @@ export function newSalt(): string {
   return randomHex(16)
 }
 
+export async function sha256Hex(input: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', enc.encode(input))
+  return bufToHex(digest)
+}
+
 export interface JwtPayload {
   sub: string
   email: string
+  jti?: string
   iat: number
   exp: number
 }
@@ -61,7 +67,7 @@ async function hmacKey(secret: string, usage: KeyUsage): Promise<CryptoKey> {
 }
 
 export async function signJwt(
-  payload: { sub: string; email: string },
+  payload: { sub: string; email: string; jti?: string },
   secret: string,
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000)

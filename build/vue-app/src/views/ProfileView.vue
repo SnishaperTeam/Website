@@ -133,6 +133,34 @@
         </div>
       </section>
 
+      <div class="divider-geek mb-40" style="margin-left:40px;"><span>devices</span></div>
+
+      <section class="mb-40" style="padding-left:40px; padding-right:40px;">
+        <div class="term-block profile-block">
+          <div class="term-bar">
+            <span class="term-dot"></span>
+            <span class="term-dot"></span>
+            <span class="term-dot"></span>
+            <span class="profile-bar-title">devices.json</span>
+          </div>
+          <div class="term-body">
+            <p class="text-dim" style="margin-top:0;">
+              已授权的桌面设备（English Listen）。吊销后该设备需重新登录；
+              也可前往 <RouterLink to="/device" style="text-decoration:underline;">/device</RouterLink> 生成新的设备登录码。
+            </p>
+            <div v-for="d in devices" :key="d.id" class="oauth-line">
+              <Icon icon="mdi:desktop-classic" width="18" />
+              <span class="oauth-name">{{ d.device_name || '未知设备' }}</span>
+              <span class="profile-meta">授权于 {{ formatDate(d.created_at) }}</span>
+              <span class="spacer"></span>
+              <button class="btn-geek small danger" @click="revokeDevice(d.id)">[吊销]</button>
+            </div>
+            <p v-if="devices.length === 0" class="text-dim">暂无已授权设备。</p>
+            <p v-if="deviceMsg" class="msg mt-20">{{ deviceMsg }}</p>
+          </div>
+        </div>
+      </section>
+
       <div class="divider-geek mb-40" style="margin-left:40px;"><span>local data</span></div>
 
       <section class="mb-40" style="padding-left:40px; padding-right:40px;">
@@ -198,7 +226,7 @@ import {
 
 const route = useRoute()
 const router = useRouter()
-const { user, updateProfile, changePassword, deleteAccount, signOut } = useAuth()
+const { user, updateProfile, changePassword, deleteAccount, signOut, getToken } = useAuth()
 const { favorites, toggleFavorite, loadFavorites } = useFavorites()
 const { history, loadHistory, clearHistory } = useHistory()
 
@@ -260,6 +288,44 @@ const oauthProviders = [
 ]
 const oauthAccounts = ref<OAuthAccount[]>([])
 const oauthMsg = ref('')
+
+interface DeviceItem {
+  id: string
+  device_name: string
+  created_at: string
+}
+const devices = ref<DeviceItem[]>([])
+const deviceMsg = ref('')
+
+async function loadDevices() {
+  if (!isSelf.value) return
+  try {
+    const res = await fetch('/api/devices', {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    })
+    const data = (await res.json().catch(() => ({}))) as { devices?: DeviceItem[]; error?: string }
+    if (!res.ok) throw new Error(data.error || '加载失败')
+    devices.value = data.devices || []
+  } catch {
+    devices.value = []
+  }
+}
+
+async function revokeDevice(id: string) {
+  deviceMsg.value = ''
+  try {
+    const res = await fetch(`/api/devices/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${getToken()}` },
+    })
+    const data = (await res.json().catch(() => ({}))) as { error?: string }
+    if (!res.ok) throw new Error(data.error || '吊销失败')
+    devices.value = devices.value.filter((d) => d.id !== id)
+    deviceMsg.value = '已吊销，该设备需重新登录'
+  } catch (e) {
+    deviceMsg.value = e instanceof Error ? e.message : '吊销失败'
+  }
+}
 
 function linked(key: string) {
   return oauthAccounts.value.some((a) => a.provider === key)

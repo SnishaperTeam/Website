@@ -14,6 +14,13 @@ export async function requireUser(request: Request, env: Env): Promise<AuthedReq
   if (!token) return fail('未登录', 401)
   const payload = await verifyJwt(token, env.JWT_SECRET)
   if (!payload) return fail('登录已过期，请重新登录', 401)
+  // 设备登录凭证（带 jti）：设备被吊销即失效；网页登录 JWT 无 jti，行为不变
+  if (payload.jti) {
+    const device = await getDb(env).prepare('SELECT id FROM devices WHERE id = ? AND user_id = ?')
+      .bind(payload.jti, payload.sub)
+      .first()
+    if (!device) return fail('设备登录已失效，请重新登录', 401)
+  }
   const row = await getDb(env).prepare('SELECT * FROM users WHERE id = ?')
     .bind(payload.sub)
     .first<UserRow>()

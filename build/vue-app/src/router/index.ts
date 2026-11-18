@@ -86,6 +86,11 @@ const router = createRouter({
       component: () => import('../views/AuthView.vue'),
     },
     {
+      path: '/device',
+      name: 'device',
+      component: () => import('../views/DeviceView.vue'),
+    },
+    {
       path: '/auth/oauth-bind',
       name: 'oauth-bind',
       component: () => import('../views/BindAccountView.vue'),
