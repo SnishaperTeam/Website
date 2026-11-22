@@ -1,6 +1,6 @@
 {
-  "version": 3,
-  "updated_at": "2026-11-16T14:14:55.120Z",
+  "version": 4,
+  "updated_at": "2026-11-22T05:36:42.279Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -13,6 +13,20 @@
       "level": "info",
       "published_at": "2026-11-15T00:00:00Z",
       "pinned": true
+    },
+    {
+      "id": "release-v1.31.0-alpha.1",
+      "title": "FlowWeaver v1.31.0-alpha.1 发布",
+      "title_en": "FlowWeaver v1.31.0-alpha.1 released",
+      "title_ru": "Выпущен FlowWeaver v1.31.0-alpha.1",
+      "body": "FlowWeaver 的新版本增加了可配置的监听地址，允许用户指定代理监听的地址，提供了更大的灵活性和控制。同时，配置设置的输入类型也得到了修复，减少了错误的风险。另外，实现了可移植的 Linux 数据目录，方便用户备份和迁移数据。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/FlowWeaver/releases/tag/v1.31.0-alpha.1",
+      "body_en": "The new version of FlowWeaver introduces a configurable listen address, allowing users to specify the address on which the proxy listens, providing greater flexibility and control. Additionally, the configuration setting typing has been fixed, reducing the risk of errors. A portable Linux data directory has also been implemented, making it easier for users to backup and migrate data.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/FlowWeaver/releases/tag/v1.31.0-alpha.1",
+      "body_ru": "Новая версия FlowWeaver включает в себя настраиваемый адрес прослушивания, который позволяет пользователям указывать адрес, на котором прокси слушает, предоставляя большую гибкость и контроль. Кроме того, исправлена настройка ввода конфигурации, что снижает риск ошибок. Также реализована портативная директория данных Linux, что облегчает пользователям резервное копирование и перенос данных.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/FlowWeaver/releases/tag/v1.31.0-alpha.1",
+      "level": "info",
+      "published_at": "2026-11-22T05:36:41Z",
+      "link": "https://github.com/SnishaperTeam/FlowWeaver/releases/tag/v1.31.0-alpha.1",
+      "link_text": "查看本次发版说明",
+      "pinned": false
     },
     {
       "id": "release-v1.30.3.2",
