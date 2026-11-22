@@ -1,6 +1,6 @@
 {
-  "version": 8,
-  "updated_at": "2026-11-16T13:55:20.279Z",
+  "version": 9,
+  "updated_at": "2026-11-22T05:39:00.645Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -13,6 +13,20 @@
       "level": "info",
       "published_at": "2026-11-08T11:00:00Z",
       "pinned": true
+    },
+    {
+      "id": "release-v1.31.0-alpha.1",
+      "title": "SniShaper v1.31.0-alpha.1 发布",
+      "title_en": "SniShaper v1.31.0-alpha.1 released",
+      "title_ru": "Выпущен SniShaper v1.31.0-alpha.1",
+      "body": "SniShaper 的新版本发布了，增加了监听地址配置功能，允许用户指定代理服务器监听的 IP 地址，提高了网络配置的灵活性。同时，配置设置也得到了改进，确保用户提供的设置被正确验证。另外，实现了 Linux 数据目录的可移植性，方便用户在不同 Linux 系统之间移动应用程序的数据。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.31.0-alpha.1",
+      "body_en": "A new version of SniShaper has been released, adding a configurable listen address feature that allows users to specify the IP address on which the proxy server listens, providing greater flexibility in network configuration. The configuration setting has also been improved to ensure proper validation of user-provided settings. Additionally, a portable Linux data directory has been implemented, enabling users to easily move the application's data between different Linux systems.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.31.0-alpha.1",
+      "body_ru": "Выпущена новая версия SniShaper, в которой добавлена функция настройки адреса прослушивания, позволяющая пользователям указывать IP-адрес, на котором прослушивает прокси-сервер, что обеспечивает большую гибкость в настройке сети. Также улучшена настройка конфигурации, чтобы обеспечить правильную проверку настроек, предоставляемых пользователем. Кроме того, реализована портативность директории данных Linux, что позволяет пользователям легко перемещать данные приложения между разными системами Linux.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.31.0-alpha.1",
+      "level": "info",
+      "published_at": "2026-11-22T05:38:59Z",
+      "link": "https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.31.0-alpha.1",
+      "link_text": "查看本次发版说明",
+      "pinned": false
     },
     {
       "id": "release-v1.30.3.2",
