@@ -1,6 +1,6 @@
 {
-  "version": 9,
-  "updated_at": "2026-11-22T05:39:00.645Z",
+  "version": 10,
+  "updated_at": "2026-11-25T14:10:02.019Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -13,6 +13,20 @@
       "level": "info",
       "published_at": "2026-11-08T11:00:00Z",
       "pinned": true
+    },
+    {
+      "id": "release-v1.31.0-alpha.2",
+      "title": "SniShaper v1.31.0-alpha.2 发布",
+      "title_en": "SniShaper v1.31.0-alpha.2 released",
+      "title_ru": "Выпущен SniShaper v1.31.0-alpha.2",
+      "body": "SniShaper 的新版本增加了 Alibaba Cloud ESA、Deflect 和 DiamWall ECH 提供商，扩大了代理选项。QUIC 重写开关已添加到规则表单中，提供了更多的代理设置控制。TUN 模块现在重写 QUIC Initials 按照站点规则，改善了代理体验。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.31.0-alpha.2",
+      "body_en": "The new version of SniShaper adds Alibaba Cloud ESA, Deflect, and DiamWall ECH providers, expanding proxy options. QUIC rewrite switches have been added to the rule form, providing more control over proxy settings. The TUN module now rewrites QUIC Initials per site rules, improving the proxy experience.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.31.0-alpha.2",
+      "body_ru": "Новая версия SniShaper добавляет провайдеров Alibaba Cloud ESA, Deflect и DiamWall ECH, расширяя возможности прокси. Переключатели переписывания QUIC добавлены в форму правил, предоставляя больше контроля над настройками прокси. Модуль TUN теперь переписывает QUIC Initials в соответствии с правилами сайта, улучшая опыт прокси.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.31.0-alpha.2",
+      "level": "info",
+      "published_at": "2026-11-25T14:09:53Z",
+      "link": "https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.31.0-alpha.2",
+      "link_text": "查看本次发版说明",
+      "pinned": false
     },
     {
       "id": "release-v1.31.0-alpha.1",
