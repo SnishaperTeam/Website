@@ -1,6 +1,6 @@
 {
-  "version": 10,
-  "updated_at": "2026-11-25T14:10:02.019Z",
+  "version": 11,
+  "updated_at": "2026-11-26T15:17:56.130Z",
   "notices": [
     {
       "id": "welcome-2026-11",
@@ -13,6 +13,20 @@
       "level": "info",
       "published_at": "2026-11-08T11:00:00Z",
       "pinned": true
+    },
+    {
+      "id": "release-v1.30.3.3",
+      "title": "SniShaper v1.30.3.3 发布",
+      "title_en": "SniShaper v1.30.3.3 released",
+      "title_ru": "Выпущен SniShaper v1.30.3.3",
+      "body": "SniShaper 的最新版本已经发布，主要改进了 CI/CD 流水线的安全性和可靠性。Linux 部署下载现在使用 SHA256 验证以确保完整性和安全性。版本号已更新为 1.30.3.3。\n\n完整更新日志与下载资产见本次发版页面：https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.3",
+      "body_en": "The latest version of SniShaper has been released, with improvements to the security and reliability of the CI/CD pipeline. The Linux deploy download now uses SHA256 verification to ensure integrity and security. The version number has been updated to 1.30.3.3.\n\nFull release notes and downloadable assets: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.3",
+      "body_ru": "Вышла новая версия SniShaper, в которой улучшена безопасность и надежность конвейера CI/CD. Загрузка Linux теперь использует проверку SHA256 для обеспечения целостности и безопасности. Номер версии обновлен до 1.30.3.3.\n\nПолные примечания и файлы выпуска: https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.3",
+      "level": "important",
+      "published_at": "2026-11-26T15:17:55Z",
+      "link": "https://github.com/SnishaperTeam/SniShaper/releases/tag/v1.30.3.3",
+      "link_text": "查看本次发版说明",
+      "pinned": false
     },
     {
       "id": "release-v1.31.0-alpha.2",
