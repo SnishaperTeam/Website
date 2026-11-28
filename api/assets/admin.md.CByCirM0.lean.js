@@ -1,0 +1,1 @@
+import{_ as i,o as a,c as t,ae as e}from"./chunks/framework.CeAk9g0f.js";const E=JSON.parse('{"title":"admin — 管理接口","description":"","frontmatter":{},"headers":[],"relativePath":"admin.md","filePath":"admin.md"}'),n={name:"admin.md"};function p(h,s,l,k,o,d){return a(),t("div",null,[...s[0]||(s[0]=[e("",29)])])}const u=i(n,[["render",p]]);export{E as __pageData,u as default};

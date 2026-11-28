@@ -9,6 +9,7 @@ coverage
 
 # VitePress API 文档构建产物（由 build:api 生成）
 public/project
+public/api
 
 # Editor directories and files
 .vscode/*

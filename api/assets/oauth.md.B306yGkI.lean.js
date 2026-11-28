@@ -1,0 +1,1 @@
+import{_ as s,o as t,c as i,ae as e}from"./chunks/framework.CeAk9g0f.js";const r=JSON.parse('{"title":"oauth — 第三方登录","description":"","frontmatter":{},"headers":[],"relativePath":"oauth.md","filePath":"oauth.md"}'),h={name:"oauth.md"};function o(n,a,l,p,d,k){return t(),i("div",null,[...a[0]||(a[0]=[e("",29)])])}const u=s(h,[["render",o]]);export{r as __pageData,u as default};

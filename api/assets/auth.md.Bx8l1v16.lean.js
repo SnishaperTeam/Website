@@ -1,0 +1,1 @@
+import{_ as i,o as a,c as t,ae as e}from"./chunks/framework.CeAk9g0f.js";const u=JSON.parse('{"title":"auth — 邮箱账号","description":"","frontmatter":{},"headers":[],"relativePath":"auth.md","filePath":"auth.md"}'),h={name:"auth.md"};function l(n,s,p,o,d,k){return a(),t("div",null,[...s[0]||(s[0]=[e("",38)])])}const c=i(h,[["render",l]]);export{u as __pageData,c as default};
