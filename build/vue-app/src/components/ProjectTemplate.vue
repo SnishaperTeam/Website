@@ -99,8 +99,9 @@ const navItems = computed(() => Object.keys(props.config.navLabels))
 
 const navLabel = (key: string) => props.config.navLabels[key] || key
 
-const handleHeroClick = (btn: { action: 'modal' | 'scroll'; target?: string }) => {
+const handleHeroClick = (btn: { action: 'modal' | 'scroll' | 'link'; target?: string }) => {
   if (btn.action === 'modal') toggleModal()
+  else if (btn.action === 'link' && btn.target) window.location.href = btn.target
   else if (btn.target) scrollTo(btn.target)
 }
 

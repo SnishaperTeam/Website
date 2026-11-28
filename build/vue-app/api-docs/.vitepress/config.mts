@@ -3,8 +3,8 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'snishaper-core',
   description: 'SnishaperTeam snishaper-core Go 库 API 文档',
-  base: '/api/',
-  outDir: '../public/api',
+  base: '/project/snishaper-core/api/',
+  outDir: '../public/project/snishaper-core/api',
   themeConfig: {
     nav: [
       { text: '主站', link: 'https://jetcpp.ccwu.cc' },

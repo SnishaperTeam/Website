@@ -71,7 +71,7 @@ export interface ProjectTerminal {
 export interface ProjectButton {
   icon: string
   label: string
-  action: 'modal' | 'scroll'
+  action: 'modal' | 'scroll' | 'link'
   target?: string
 }
 
@@ -451,7 +451,7 @@ export const coreConfig: SoftwareProjectConfig = {
   gradientClass: 'snip-gradient',
   versionTag: 'Go 核心库',
   showStars: true,
-  fallbackVersion: 'v0.4.0',
+  fallbackVersion: '0.8.14',
   title: 'snishaper-core',
   headline: '一套引擎，驱动全家产品',
   subtitle: 'SniShaper / Lumine 共用的 Go 核心库：代理引擎、规则演化、TUN、证书管理、订阅解析，开箱即用。',
@@ -479,7 +479,7 @@ export const coreConfig: SoftwareProjectConfig = {
     download: '获取',
   },
   heroButtons: [
-    { icon: 'mdi:book-open-variant', label: '查看 API 文档', action: 'scroll', target: 'quickstart' },
+    { icon: 'mdi:book-open-variant', label: '查看 API 文档', action: 'link', target: '/project/snishaper-core/api/' },
     { icon: 'mdi:cube-outline', label: '了解包结构', action: 'scroll', target: 'tech' },
   ],
   features: [
@@ -517,7 +517,7 @@ export const coreConfig: SoftwareProjectConfig = {
     },
     {
       q: '哪里有完整的 API 说明？',
-      a: '本站提供全量中文 API 文档（/api/ 路径，按包分页），仓库内 docs/api/ 目录同步维护一份。GoDoc/pkg.go.dev 也可直接浏览。'
+      a: '本站提供全量中文 API 文档（/project/snishaper-core/api/ 路径，按包分页），仓库内 docs/api/ 目录同步维护一份。GoDoc/pkg.go.dev 也可直接浏览。'
     },
   ],
   steps: [
@@ -543,7 +543,7 @@ export const coreConfig: SoftwareProjectConfig = {
   tips: [
     '内部包（internal/）不对外导出，文档仅供贡献者参考',
     '所有引擎实例都是进程内对象，可随应用生命周期启停',
-    'API 文档按包分页：/api/proxy、/api/evolution、/api/singtun …',
+    'API 文档按包分页：/project/snishaper-core/api/proxy、/project/snishaper-core/api/evolution …',
     '遇到行为差异先对齐 core 版本，SniShaper 与 Lumine 共用同一份引擎',
   ],
   stackDesc: 'snishaper-core 是标准 Go module：proxy 作为数据面核心，evolution 驱动规则进化，certmanager/cfpool/dohresolver/singtun/subscription 提供周边能力，全部以库的形式嵌入宿主应用。',
@@ -583,7 +583,7 @@ export const coreConfig: SoftwareProjectConfig = {
     },
   ],
   extraLinks: [
-    { icon: 'mdi:book-open-variant', label: 'API 文档', kind: 'static', url: '/api/' },
+    { icon: 'mdi:book-open-variant', label: 'API 文档', kind: 'static', url: '/project/snishaper-core/api/' },
     { icon: 'mdi:file-document-outline', label: '设计文档', kind: 'static', url: 'https://github.com/SnishaperTeam/snishaper-core/blob/main/docs/DESIGN.md' },
   ],
 }

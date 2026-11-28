@@ -1,1 +1,0 @@
-import{_ as i,o as a,c as t,a0 as h}from"./chunks/framework.15V4YFZl.js";const o=JSON.parse('{"title":"log 包","description":"","frontmatter":{},"headers":[],"relativePath":"log.md","filePath":"log.md"}'),n={name:"log.md"};function e(l,s,p,k,r,g){return a(),t("div",null,[...s[0]||(s[0]=[h("",19)])])}const E=i(n,[["render",e]]);export{o as __pageData,E as default};

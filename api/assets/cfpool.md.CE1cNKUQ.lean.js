@@ -1,1 +1,0 @@
-import{_ as i,o as a,c as t,a0 as h}from"./chunks/framework.15V4YFZl.js";const g=JSON.parse('{"title":"cfpool 包","description":"","frontmatter":{},"headers":[],"relativePath":"cfpool.md","filePath":"cfpool.md"}'),l={name:"cfpool.md"};function n(k,s,p,e,d,r){return a(),t("div",null,[...s[0]||(s[0]=[h("",42)])])}const o=i(l,[["render",n]]);export{g as __pageData,o as default};
