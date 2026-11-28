@@ -1,0 +1,1 @@
+import{_ as i,o as a,c as t,a0 as h}from"./chunks/framework.15V4YFZl.js";const g=JSON.parse('{"title":"gfwlist 包","description":"","frontmatter":{},"headers":[],"relativePath":"gfwlist.md","filePath":"gfwlist.md"}'),e={name:"gfwlist.md"};function l(n,s,k,p,d,r){return a(),t("div",null,[...s[0]||(s[0]=[h("",27)])])}const E=i(e,[["render",l]]);export{g as __pageData,E as default};

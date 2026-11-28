@@ -97,7 +97,7 @@ async function deleteCurrentPost() {
   if (!confirm(`删除文章「${dynamicPost.value.title}」？`)) return
   try {
     await removePost(dynamicPost.value.id)
-    router.push('/blog')
+    router.push('/blogs')
   } catch (e) {
     actionError.value = e instanceof Error ? e.message : '删除失败'
   }
@@ -147,7 +147,7 @@ async function deleteCurrentPost() {
       <CommentsSection :slug="slug" />
 
       <footer class="mt-40" style="padding-top:24px; border-top:1px solid var(--color-border);">
-        <RouterLink to="/blog" class="btn-geek" style="font-size:var(--font-size-xs);">
+        <RouterLink to="/blogs" class="btn-geek" style="font-size:var(--font-size-xs);">
           <Icon icon="mdi:arrow-left" width="14" /> 返回博客
         </RouterLink>
       </footer>
@@ -157,7 +157,7 @@ async function deleteCurrentPost() {
       <Icon icon="mdi:file-remove" width="48" style="color:var(--color-text-faint); margin-bottom:16px;" />
       <h2 style="font-size:var(--font-size-lg);">未找到</h2>
       <p class="text-dim">这篇文章不存在或已被移除。</p>
-      <RouterLink to="/blog" class="btn-geek mt-20">返回博客</RouterLink>
+      <RouterLink to="/blogs" class="btn-geek mt-20">返回博客</RouterLink>
     </div>
   </div>
 </template>

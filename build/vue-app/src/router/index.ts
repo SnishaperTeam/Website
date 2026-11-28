@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { coreConfig } from '../data/projects'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -21,10 +22,12 @@ const router = createRouter({
       component: () => import('../views/ProjectDetailView.vue'),
     },
     {
-      path: '/blog',
-      name: 'blog',
+      path: '/blogs',
+      name: 'blogs',
       component: () => import('../views/BlogView.vue'),
     },
+    // 旧博客列表路由，保留重定向
+    { path: '/blog', redirect: '/blogs' },
     {
       path: '/blog/new',
       name: 'post-editor-new',
@@ -45,16 +48,26 @@ const router = createRouter({
       name: 'about',
       component: () => import('../views/AboutView.vue'),
     },
+    // 项目详情页统一挂在 /project/<project> 下，静态路由需放在 /project/:slug 之前
     {
-      path: '/snishaper',
-      name: 'snishaper',
+      path: '/project/snishaper',
+      name: 'project-snishaper',
       component: () => import('../views/SniShaperView.vue'),
     },
     {
-      path: '/lumine',
-      name: 'lumine',
+      path: '/project/lumine',
+      name: 'project-lumine',
       component: () => import('../views/LumineView.vue'),
     },
+    {
+      path: '/project/snishaper-core',
+      name: 'project-snishaper-core',
+      component: () => import('../components/ProjectTemplate.vue'),
+      props: { config: coreConfig },
+    },
+    // 旧项目路由重定向
+    { path: '/snishaper', redirect: '/project/snishaper' },
+    { path: '/lumine', redirect: '/project/lumine' },
     {
       path: '/tests',
       name: 'tests',

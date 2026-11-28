@@ -1,0 +1,1 @@
+import{N as e,m as t,s as n,x as r}from"./runtime-core.esm-bundler-7NFZEprJ.js";import{t as i}from"./ProjectTemplate-CkQwheZX.js";import{n as a}from"./index-DcKq2XkJ.js";var o=t({__name:`SniShaperView`,setup(t){return(t,o)=>(r(),n(i,{config:e(a)},null,8,[`config`]))}});export{o as default};

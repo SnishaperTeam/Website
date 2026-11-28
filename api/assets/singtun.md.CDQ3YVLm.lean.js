@@ -1,0 +1,1 @@
+import{_ as i,o as a,c as t,a0 as e}from"./chunks/framework.15V4YFZl.js";const g=JSON.parse('{"title":"singtun 包","description":"","frontmatter":{},"headers":[],"relativePath":"singtun.md","filePath":"singtun.md"}'),n={name:"singtun.md"};function h(l,s,k,p,d,r){return a(),t("div",null,[...s[0]||(s[0]=[e("",73)])])}const E=i(n,[["render",h]]);export{g as __pageData,E as default};

@@ -466,7 +466,7 @@ async function removeAccount() {
 
 function openFavorite(item: FavoriteItem) {
   if (item.type === 'test') router.push(`/tests/${item.id}`)
-  else router.push('/blog')
+  else router.push('/blogs')
 }
 
 function removeFavorite(id: string) {

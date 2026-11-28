@@ -7,6 +7,9 @@ dist-ssr
 coverage
 *.local
 
+# VitePress API 文档构建产物（由 build:api 生成）
+public/api
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -8,7 +8,8 @@
     "dev": "bun scripts/dev.js",
     "dev:api": "bun scripts/dev-api.js",
     "prebuild": "",
-    "build": "bun run generate-rss && bun run --bun vite build && bun run deploy",
+    "build": "bun run generate-rss && bun run build:api && bun run --bun vite build && bun run deploy",
+    "build:api": "vitepress build api-docs",
     "deploy": "bun scripts/deploy.js && bun -e \"import fs from 'fs'; fs.copyFileSync('dist/index.html', 'dist/404.html')\"",
     "preview": "bun run --bun vite preview",
     "generate-rss": "bun scripts/generate-rss.js",
@@ -17,12 +18,12 @@
   },
   "dependencies": {
     "@iconify-json/mdi": "^1.2.3",
-    "@iconify-json/simple-icons": "^1.2.102",
+    "@iconify-json/simple-icons": "^1.2.104",
     "@iconify/vue": "^5.0.5",
     "bootstrap": "^5.3.9",
     "markdown-it": "^15.0.3",
-    "vue": "^3.5.45",
-    "vue-router": "^5.5.0"
+    "vue": "^3.5.46",
+    "vue-router": "^5.5.1"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.7",
@@ -33,6 +34,7 @@
     "esbuild": "^0.28.2",
     "prettier": "^3.10.1",
     "vite": "^8.3.8",
+    "vitepress": "^1.6.3",
     "tsx": "^4.23.15"
   }
 }

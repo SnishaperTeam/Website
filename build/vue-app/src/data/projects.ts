@@ -444,3 +444,146 @@ export const lumineConfig: SoftwareProjectConfig = {
     { icon: 'mdi:code-tags', label: '查看源码', kind: 'static', url: 'https://github.com/SniShaper/lumine-for-android' },
   ],
 }
+
+export const coreConfig: SoftwareProjectConfig = {
+  id: 'snishaper-core',
+  rootClass: 'snishaper-page',
+  gradientClass: 'snip-gradient',
+  versionTag: 'Go 核心库',
+  showStars: true,
+  fallbackVersion: 'v0.4.0',
+  title: 'snishaper-core',
+  headline: '一套引擎，驱动全家产品',
+  subtitle: 'SniShaper / Lumine 共用的 Go 核心库：代理引擎、规则演化、TUN、证书管理、订阅解析，开箱即用。',
+  divider: '// snishaper-core',
+  repo: 'SnishaperTeam/snishaper-core',
+  workerBase: 'https://dongle.dpdns.org',
+  releasesUrl: 'https://github.com/SnishaperTeam/snishaper-core/releases',
+  terminal: {
+    barTitle: 'go get',
+    command: 'go get github.com/SnishaperTeam/snishaper-core',
+    status: '模块就绪：17 个导出包可用',
+    stats: [
+      { label: '语言', value: 'Go' },
+      { label: '许可证', value: 'AGPL-3.0' },
+      { label: '引擎', value: 'proxy' },
+      { label: '版本', value: '', version: true },
+    ],
+  },
+  navLabels: {
+    features: '功能特性',
+    tech: '包结构',
+    faq: '常见问题',
+    quickstart: '快速接入',
+    changelog: '更新日志',
+    download: '获取',
+  },
+  heroButtons: [
+    { icon: 'mdi:book-open-variant', label: '查看 API 文档', action: 'scroll', target: 'quickstart' },
+    { icon: 'mdi:cube-outline', label: '了解包结构', action: 'scroll', target: 'tech' },
+  ],
+  features: [
+    { icon: 'mdi:engine-outline', title: 'proxy 引擎', desc: 'MITM/SOCKS5 代理服务器、TLS 分片、QUIC 重建、规则匹配一条龙，RuleManager 域名索引毫秒级命中。' },
+    { icon: 'mdi:dna-variant', title: 'evolution 规则演化', desc: '对站点规则做自动化 A/B 测试，从真实连通性数据里进化出最优分流策略。' },
+    { icon: 'mdi:certificate-outline', title: 'certmanager', desc: 'MITM CA 证书生成与安装向导，签发流程全部内置。' },
+    { icon: 'mdi:cloud-outline', title: 'cfpool 优选 IP', desc: 'Cloudflare IP 池拉取与延迟测速，自动挑出最快节点。' },
+    { icon: 'mdi:dns-outline', title: 'dohresolver', desc: 'DoH（DNS over HTTPS）解析器，加密域名解析。' },
+    { icon: 'mdi:lan-connect', title: 'singtun / TUN', desc: '基于 sing-tun 的虚拟网卡接入，全局流量接管。' },
+    { icon: 'mdi:rss', title: 'subscription', desc: '订阅链接抓取与解析，统一转换为内部节点格式。' },
+    { icon: 'mdi:layers-outline', title: 'tlsfrag / quicrewrite', desc: 'TLS 记录分片与 QUIC 重写底层件，可独立使用。' },
+  ],
+  techCards: [
+    { badge: 'proxy', tag: '核心引擎', desc: '代理服务器 + 规则引擎 + 流量改写，SniShaper 与 Lumine 共用同一数据面，行为一致。' },
+    { badge: 'evolution', tag: '规则演化', desc: 'tester / generator / analyzer 三件套：用真实请求结果反馈规则生成，闭环进化。' },
+    { badge: 'internal', tag: '质量内建', desc: '零全局可变状态、log.Logger 注入、functional options，可嵌入任意应用进程。' },
+  ],
+  highlight: {
+    icon: 'mdi:source-branch',
+    title: '同源引擎',
+    desc: '桌面版 SniShaper、Android 版 Lumine 的核心都从这里来——一次修复，全线受益。',
+  },
+  faqs: [
+    {
+      q: '如何引入 snishaper-core？',
+      a: '在项目目录执行 go get github.com/SnishaperTeam/snishaper-core，然后按需导入子包，例如 import "github.com/SnishaperTeam/snishaper-core/proxy"。Go 模块系统会自动解析依赖。'
+    },
+    {
+      q: '它和 SniShaper 主程序是什么关系？',
+      a: 'snishaper-core 是纯 Go 库，不含 GUI 和应用层逻辑。SniShaper 桌面版、Lumine Android 版都把它作为引擎依赖：应用进程通过 functional options 注入配置和日志，直接调用库内 API。'
+    },
+    {
+      q: '许可证是什么？可以商用吗？',
+      a: 'AGPL-3.0。你可以自由使用、修改和分发，但基于它构建并对外提供网络服务的应用必须同样开源。内部自用没有额外义务。'
+    },
+    {
+      q: '哪里有完整的 API 说明？',
+      a: '本站提供全量中文 API 文档（/api/ 路径，按包分页），仓库内 docs/api/ 目录同步维护一份。GoDoc/pkg.go.dev 也可直接浏览。'
+    },
+  ],
+  steps: [
+    {
+      num: '1',
+      title: '安装模块',
+      desc: '在 Go 项目根目录执行 go get，模块会加入 go.mod 依赖。',
+      note: { type: 'mono', text: 'go get github.com/SnishaperTeam/snishaper-core' },
+    },
+    {
+      num: '2',
+      title: '导入子包',
+      desc: '按需导入 proxy、certmanager、singtun 等子包，不要导入整个模块根路径。',
+      note: { type: 'mono', text: 'import "…/snishaper-core/proxy"' },
+    },
+    {
+      num: '3',
+      title: '注入并启动',
+      desc: '用 functional options 构造引擎实例，注入 log.Logger，调用 Start 即可。',
+      note: { type: 'dot', text: '详见 /api/proxy 文档' },
+    },
+  ],
+  tips: [
+    '内部包（internal/）不对外导出，文档仅供贡献者参考',
+    '所有引擎实例都是进程内对象，可随应用生命周期启停',
+    'API 文档按包分页：/api/proxy、/api/evolution、/api/singtun …',
+    '遇到行为差异先对齐 core 版本，SniShaper 与 Lumine 共用同一份引擎',
+  ],
+  stackDesc: 'snishaper-core 是标准 Go module：proxy 作为数据面核心，evolution 驱动规则进化，certmanager/cfpool/dohresolver/singtun/subscription 提供周边能力，全部以库的形式嵌入宿主应用。',
+  stackItems: [
+    { label: 'Go', text: '标准 module，无 CGO 依赖' },
+    { label: 'AGPL-3.0', text: '开源许可证' },
+    { label: 'proxy', text: '核心引擎包' },
+    { label: '17 包', text: '全部有中文 API 文档' },
+  ],
+  stackTermRows: [
+    { label: '应用层', badge: 'SniShaper / Lumine / CLI' },
+    { label: 'snishaper-core', badge: 'proxy · evolution · singtun …', badgeClass: '' },
+    { label: '', badge: '网络层' },
+    { label: '目标站点', badge: '可达', badgeClass: 'ok' },
+  ],
+  downloadTitle: '把引擎装进你的项目',
+  downloadDesc: '一条 go get 引入全部能力。AGPL-3.0 开源，接受社区贡献。',
+  downloadCta: '获取源码',
+  downloadFooter: ['Go 1.22+', 'AGPL-3.0', '语义化版本'],
+  modalTitle: '选择获取方式',
+  downloadCards: [
+    {
+      icon: 'mdi:github',
+      title: '源码仓库',
+      buttons: [
+        { icon: 'mdi:github', label: 'GitHub 克隆', kind: 'static', url: 'https://github.com/SnishaperTeam/snishaper-core' },
+        { icon: 'mdi:flash', label: '加速站克隆', kind: 'static', url: 'https://v6.gh-proxy.org/https://github.com/SnishaperTeam/snishaper-core' },
+      ],
+    },
+    {
+      icon: 'mdi:package-variant-closed',
+      title: '模块依赖',
+      buttons: [
+        { icon: 'mdi:language-go', label: 'pkg.go.dev', kind: 'static', url: 'https://pkg.go.dev/github.com/SnishaperTeam/snishaper-core' },
+        { icon: 'mdi:tag-outline', label: '版本发布', kind: 'static', url: 'https://github.com/SnishaperTeam/snishaper-core/releases' },
+      ],
+    },
+  ],
+  extraLinks: [
+    { icon: 'mdi:book-open-variant', label: 'API 文档', kind: 'static', url: '/api/' },
+    { icon: 'mdi:file-document-outline', label: '设计文档', kind: 'static', url: 'https://github.com/SnishaperTeam/snishaper-core/blob/main/docs/DESIGN.md' },
+  ],
+}

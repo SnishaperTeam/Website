@@ -136,7 +136,17 @@ const staticData = [
     category: '编程教程',
     icon: 'mdi:shield-check',
     color: '#00ADD8',
-    path: '/snishaper',
+    path: '/project/snishaper',
+    content: '',
+  },
+  {
+    id: 'static-1b',
+    title: 'snishaper-core',
+    description: 'SnishaperTeam 全系产品共用的 Go 核心库：代理引擎、规则演化、TUN',
+    category: '编程教程',
+    icon: 'mdi:cube-outline',
+    color: '#00ADD8',
+    path: '/project/snishaper-core',
     content: '',
   },
   {
@@ -206,7 +216,7 @@ const staticData = [
     category: '技术分享',
     icon: 'mdi:newspaper-variant',
     color: '#f48c06',
-    path: '/blog',
+    path: '/blogs',
     content: '',
   },
 ]

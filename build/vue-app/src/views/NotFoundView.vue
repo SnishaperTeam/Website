@@ -44,7 +44,7 @@
             <RouterLink to="/projects" class="btn-geek" style="font-size:var(--font-size-xs);">
               <Icon icon="mdi:folder" width="14" /> 项目展示
             </RouterLink>
-            <RouterLink to="/blog" class="btn-geek" style="font-size:var(--font-size-xs);">
+            <RouterLink to="/blogs" class="btn-geek" style="font-size:var(--font-size-xs);">
               <Icon icon="mdi:newspaper-variant" width="14" /> 技术博客
             </RouterLink>
             <RouterLink to="/tests" class="btn-geek" style="font-size:var(--font-size-xs);">
